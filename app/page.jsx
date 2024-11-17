@@ -1,13 +1,17 @@
-import Hero from "./ui/Hero";
+import ActionTableWrapper from "./ui/FileReaderWrapper";
+import Title from "./ui/Title";
 
-const title = "Tools untuk semua kebutuhan pabean.";
-const subtitle =
-  "Serahkan pekerjaan repetitif pada komputer. Sumber daya manusia harusnya fokus pada tugas yang lebih strategis.";
-
-export default function Home() {
+// make it simple
+const Home = () => {
   return (
-    <>
-      <Hero title={title} subtitle={subtitle} />
-    </>
+    <div className='container'>
+      <Title
+        title='Solusi otomatis untuk mengambil data pajak dari situs INSW berdasarkan kumpulan HS Code dari Invoice. 
+      Dengan INSScan, Anda bisa memproses banyak data sekaligus dan mendapatkan hasil dalam format Excel tanpa repot. Hemat waktu, tingkatkan produktivitas!'
+      />
+      <ActionTableWrapper />
+    </div>
   );
-}
+};
+
+export default Home;

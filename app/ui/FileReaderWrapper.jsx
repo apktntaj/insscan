@@ -22,7 +22,7 @@ export default function ActionTableWrapper() {
 
     // fetch parsedHsCode to localhost:3000/cek-tarif
     try {
-      const response = await fetch("http://localhost:3000/cek-tarif/api", {
+      const response = await fetch("http://localhost:3000/api", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
