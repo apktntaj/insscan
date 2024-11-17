@@ -1,7 +1,6 @@
 import ActionTableWrapper from "./ui/FileReaderWrapper";
 import Title from "./ui/Title";
 
-// make it simple
 const Home = () => {
   return (
     <div className='container'>
