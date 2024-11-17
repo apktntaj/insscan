@@ -46,7 +46,7 @@ const Navbar = ({ links }) => {
         <div>
           <div>
             <Link
-              className='flex items-center space-x-2 text-2xl tracking-wider'
+              className='flex items-center space-x-2 text-3xl tracking-wider'
               href={"/"}
             >
               <Image
@@ -56,7 +56,9 @@ const Navbar = ({ links }) => {
                 alt='Logo Rayefy'
                 className='rounded-full'
               />
-              <span className='text-gray-600 font-extrabold'>INSScan</span>
+              <span className='bg-gradient-to-r from-purple-400 via-emerald-500 to-sky-400 bg-clip-text text-transparent font-extrabold'>
+                INSScan
+              </span>
             </Link>
           </div>
         </div>
