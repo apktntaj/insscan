@@ -10,6 +10,7 @@ export default function Input({ setHsCodes }) {
 
     if (ext !== "xls" && ext !== "xlsx") {
       alert("File yang kamu masukkan bukan file excel");
+      e.target.value = "";
       return;
     }
 
