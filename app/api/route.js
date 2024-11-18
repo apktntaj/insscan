@@ -37,7 +37,7 @@ export async function POST(req) {
         };
       }
     });
-    console.table(toPrint);
+    console.table(JSON.stringify(toPrint));
   });
   return new Response("result");
 }
