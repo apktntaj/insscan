@@ -15,7 +15,7 @@ export default function Input({ setHsCodes }) {
   return (
     <input
       type='file'
-      accept='.xlsx, .xls'
+      accept='.xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
       onChange={handleChange}
       className='file-input file-input-bordered w-full lg:max-w-xs max-w-sm'
     />
