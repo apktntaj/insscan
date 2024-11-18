@@ -7,39 +7,43 @@ export async function POST(req) {
   const body = await req.json();
   const hsCodes = body.map((item) => item["hs_code"]);
 
-  fetchAll([...new Set(hsCodes)]).then((items) => {
-    const cleanResult = items.filter((item) => item !== undefined);
-    const toPrint = hsCodes.map((hs) => {
-      const foundItem = cleanResult.find((item) => item["HS Code"] === hs);
-      if (foundItem) {
-        return {
-          "HS Code": hs,
-          BM: foundItem["BM"],
-          PPN: foundItem["PPN"],
-          PPH: foundItem["PPH"],
-          "PPH NON API": foundItem["PPH-NON-API"],
-          "LARTAS IMPORT": foundItem["lartas_import"],
-          "LARTAS BORDER": foundItem["lartas_border"],
-          "LARTAS POST BORDER": foundItem["lartas_post_border"],
-          "LARTAS EXPORT": foundItem["lartas_export"],
-        };
-      } else {
-        return {
-          "HS Code": hs,
-          BM: "tidak ada data",
-          PPN: "tidak ada data",
-          PPH: "tidak ada data",
-          "PPH NON API": "tidak ada data",
-          "LARTAS IMPORT": "tidak ada data",
-          "LARTAS BORDER": "tidak ada data",
-          "LARTAS POST BORDER": "tidak ada data",
-          "LARTAS EXPORT": "tidak ada data",
-        };
-      }
-    });
-    console.table(JSON.stringify(toPrint));
+  const items = await fetchAll([...new Set(hsCodes)]);
+  const cleanResult = items.filter((item) => item !== undefined);
+  const toPrint = hsCodes.map((hs) => {
+    const foundItem = cleanResult.find((item) => item["HS Code"] === hs);
+    if (foundItem) {
+      return {
+        "HS Code": hs,
+        BM: foundItem["BM"],
+        PPN: foundItem["PPN"],
+        PPH: foundItem["PPH"],
+        "PPH NON API": foundItem["PPH-NON-API"],
+        "LARTAS IMPORT": foundItem["lartas_import"],
+        "LARTAS BORDER": foundItem["lartas_border"],
+        "LARTAS POST BORDER": foundItem["laratas_post_border"],
+        "LARTAS EXPORT": foundItem["lartas_export"],
+      };
+    } else {
+      return {
+        "HS Code": hs,
+        BM: "tidak ada data",
+        PPN: "tidak ada data",
+        PPH: "tidak ada data",
+        "PPH NON API": "tidak ada data",
+        "LARTAS IMPORT": "tidak ada data",
+        "LARTAS BORDER": "tidak ada data",
+        "LARTAS POST BORDER": "tidak ada data",
+        "LARTAS EXPORT": "tidak ada data",
+      };
+    }
   });
-  return new Response("result");
+  const jsonToPrint = JSON.stringify(toPrint);
+
+  return new Response(jsonToPrint, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
 }
 
 async function fetchAll(arr) {

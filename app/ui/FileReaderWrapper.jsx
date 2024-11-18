@@ -31,12 +31,12 @@ export default function ActionTableWrapper() {
       });
 
       const data = await response.json();
-      console.log(data);
+      makeExcel(data);
+      setHsCodes(null);
+      setStatus("Disabled");
     } catch (error) {
       console.error("Error", error);
     }
-
-    console.log(parsedHsCode);
   };
 
   return (

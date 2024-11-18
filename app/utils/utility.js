@@ -145,10 +145,10 @@ export function makeExcel(data) {
 
   const ws = XLSX.utils.json_to_sheet(cleanedData);
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+  XLSX.utils.book_append_sheet(wb, ws, "INSSCAN");
   XLSX.utils.sheet_add_aoa(ws, [column], { origin: "A1" });
 
-  const filePath = "hasil-cek-tarif.xlsx";
+  const filePath = "INSSCAN.xlsx";
   XLSX.writeFile(wb, filePath);
 
   return filePath;
