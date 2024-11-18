@@ -2,7 +2,7 @@ import React from "react";
 
 export default function Title() {
   return (
-    <div>
+    <div className='container px-4'>
       <h1 className='text-4xl font-extrabold drop-shadow-md tracking-wider text-gray-600 text-center my-3'>
         INSScan
       </h1>

@@ -7,7 +7,7 @@ import { navLinks } from "./utils/nav-links";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "Invoicer | Home Page",
+  title: "INSScan | Home Page",
   description: "Upload and done.",
 };
 

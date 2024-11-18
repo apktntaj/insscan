@@ -4,9 +4,7 @@ import React, { useState } from "react";
 
 import Actions from "./Actions";
 import Table from "./Table";
-import { inswData } from "../utils/excel";
 import { isValidFormat, makeExcel } from "../utils/utility";
-import Stats from "./Stats";
 
 export default function ActionTableWrapper() {
   const [hsCodes, setHsCodes] = useState(null);
@@ -22,13 +20,19 @@ export default function ActionTableWrapper() {
 
     // fetch parsedHsCode to localhost:3000/cek-tarif
     try {
-      const response = await fetch("http://localhost:3000/api", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(parsedHsCode),
-      });
+      setStatus("Loading...");
+      const response = await fetch(
+        process.env.NODE_ENV === "production"
+          ? "https://insscan-alamasyaries-projects.vercel.app/api"
+          : "http://localhost:3000/api",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(parsedHsCode),
+        }
+      );
 
       const data = await response.json();
       makeExcel(data);
