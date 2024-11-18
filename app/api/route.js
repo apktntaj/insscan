@@ -1,5 +1,6 @@
 // Route js save data to excel file and serve it to the client
 
+const XLSX = require("xlsx");
 const axios = require("axios");
 
 export async function POST(req) {
@@ -16,6 +17,11 @@ export async function POST(req) {
           BM: foundItem["BM"],
           PPN: foundItem["PPN"],
           PPH: foundItem["PPH"],
+          "PPH NON API": foundItem["PPH-NON-API"],
+          "LARTAS IMPORT": foundItem["lartas_import"],
+          "LARTAS BORDER": foundItem["lartas_border"],
+          "LARTAS POST BORDER": foundItem["lartas_post_border"],
+          "LARTAS EXPORT": foundItem["lartas_export"],
         };
       } else {
         return {
@@ -23,13 +29,17 @@ export async function POST(req) {
           BM: "tidak ada data",
           PPN: "tidak ada data",
           PPH: "tidak ada data",
+          "PPH NON API": "tidak ada data",
+          "LARTAS IMPORT": "tidak ada data",
+          "LARTAS BORDER": "tidak ada data",
+          "LARTAS POST BORDER": "tidak ada data",
+          "LARTAS EXPORT": "tidak ada data",
         };
       }
     });
     console.table(toPrint);
   });
-
-  return new Response("selesai");
+  return new Response("result");
 }
 
 async function fetchAll(arr) {
@@ -73,14 +83,15 @@ async function dataINTR(hsCode) {
     res["BM"] = data["new_mfn"][0]["bm"][0]["bm"];
     res["PPN"] = data["new_mfn"][0]["ppn"][0]["ppn"];
     res["PPH"] = data["new_mfn"][0]["pph"][0]["pph"];
+    res["PPH-NON-API"] = data["new_mfn"][0]["pph"][1]["pph"];
 
     // LARTAS
-    res["lartas_import"] = data.import_regulation.length ? "1" : "0";
-    res["lartas_border"] = data.import_regulation_border.length ? "1" : "0";
+    res["lartas_import"] = data.import_regulation.length ? "Ada" : "-";
+    res["lartas_border"] = data.import_regulation_border.length ? "Ada" : "-";
     res["lartas_post_border"] = data.import_regulation_post_border.length
-      ? "1"
-      : "0";
-    res["lartas_export"] = data.export_regulation.length ? "1" : "0";
+      ? "Ada"
+      : "-";
+    res["lartas_export"] = data.export_regulation.length ? "Ada" : "-";
 
     return res;
   } catch (error) {

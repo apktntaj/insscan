@@ -23,7 +23,7 @@ export default function Table({ data, setButtonStatus }) {
     ));
 
   return (
-    <div className='overflow-x-auto max-h-20'>
+    <div className='overflow-x-auto max-h-80'>
       <table className='table'>
         <thead></thead>
         <tbody>
