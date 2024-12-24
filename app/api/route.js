@@ -62,7 +62,7 @@ async function dataINTR(hsCode) {
           accept: "application/json, text/plain, */*",
           "accept-language": "en-US,en;q=0.9",
           authorization: "Basic aW5zd18yOmJhYzJiYXM2",
-          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Origin": "https://insscan.vercel.app",
           "sec-ch-ua":
             '"Not/A)Brand";v="99", "Microsoft Edge";v="115", "Chromium";v="115"',
           "sec-ch-ua-mobile": "?0",
