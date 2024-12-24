@@ -3,7 +3,13 @@
 const XLSX = require("xlsx");
 const axios = require("axios");
 
-export async function POST(req) {
+export async function POST(req, res) {
+  res.setHeader("Access-Control-Allow-Origin", "https://yourdomain.com");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS"
+  );
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   const body = await req.json();
   const hsCodes = body.map((item) => item["hs_code"]);
 
@@ -63,6 +69,8 @@ async function dataINTR(hsCode) {
           "accept-language": "en-US,en;q=0.9",
           authorization: "Basic aW5zd18yOmJhYzJiYXM2",
           "Access-Control-Allow-Origin": "https://insscan.vercel.app",
+          "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type, Authorization",
           "sec-ch-ua":
             '"Not/A)Brand";v="99", "Microsoft Edge";v="115", "Chromium";v="115"',
           "sec-ch-ua-mobile": "?0",
