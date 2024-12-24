@@ -4,10 +4,7 @@ import Title from "./ui/Title";
 const Home = () => {
   return (
     <div className='container'>
-      <Title
-        title='Solusi otomatis untuk mengambil data pajak dari situs INSW berdasarkan kumpulan HS Code dari Invoice. 
-      Dengan INSScan, Anda bisa memproses banyak data sekaligus dan mendapatkan hasil dalam format Excel tanpa repot. Hemat waktu, tingkatkan produktivitas!'
-      />
+      <Title />
       <ActionTableWrapper />
     </div>
   );
