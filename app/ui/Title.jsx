@@ -9,7 +9,7 @@ export default function Title() {
       <div className='text-center text-gray-600 text-lg'>
         <p>AI-powered invoice scanner for instant HS code lookup and</p>
         <p className='mb-5'>
-          retrieve realtime tax & restrictions goods regulation from Indonesia
+          retrieve realtime tax & restriction goods regulation from Indonesia
           National Single Window (INSW) site.
         </p>
       </div>

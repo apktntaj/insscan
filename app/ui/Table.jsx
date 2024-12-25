@@ -6,12 +6,10 @@ import Alert from "./Alert";
 import Row from "./Row";
 import { isValidFormat } from "../utils/utility";
 
-export default function Table({ data, setButtonStatus }) {
-  if (!data) return <Alert message='Belum ada data' />;
+export default function Table({ fileData }) {
+  if (!fileData) return <Alert message='Masukkan file terlebih dahulu' />;
 
-  setButtonStatus("Cari Data Pajak Di INTR");
-
-  const rows = data
+  const rows = fileData
     .filter((row) => row.length !== 0)
     .map((row) => row.filter((cell) => isValidFormat(cell)))
     .reduce((arr1, arr2) => arr1.concat(arr2))
