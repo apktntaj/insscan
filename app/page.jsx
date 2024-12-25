@@ -11,3 +11,5 @@ const Home = () => {
 };
 
 export default Home;
+
+// TODO: take a rest for a while
