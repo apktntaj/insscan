@@ -3,24 +3,7 @@
 import React from "react";
 import { arrayBuffer, convertBufferToJson } from "../utils/utility";
 
-export default function Input({ setFileData }) {
-  const handleChange = (e) => {
-    const path = e.target.files[0]?.name;
-    const ext = path?.split(".").pop();
-
-    if (ext !== "xls" && ext !== "xlsx") {
-      alert("File yang kamu masukkan bukan file excel");
-      e.target.value = "";
-      return;
-    }
-
-    const bufferedFile = arrayBuffer(e.target.files[0]);
-    bufferedFile.then((buffer) => {
-      const jsonData = convertBufferToJson(buffer);
-      setFileData(jsonData);
-    });
-  };
-
+export default function Input({ handleChange }) {
   return (
     <input
       type='file'

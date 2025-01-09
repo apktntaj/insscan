@@ -57,7 +57,7 @@ const Navbar = ({ links }) => {
                 className='rounded-full'
               />
               <span className='bg-gradient-to-r from-purple-400 via-emerald-500 to-sky-400 bg-clip-text text-transparent font-extrabold'>
-                INSScan
+                Semestaku
               </span>
             </Link>
           </div>
