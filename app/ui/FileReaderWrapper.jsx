@@ -11,6 +11,7 @@ import Button from "./Button";
 
 export default function ActionTableWrapper() {
   const [fileData, setFileData] = useState(null);
+  const [status, setStatus] = useState("");
 
   const readExcelFile = (e) => {
     const path = e.target.files[0]?.name;

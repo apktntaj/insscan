@@ -4,7 +4,7 @@ import Title from "./ui/Title";
 const Home = () => {
   return (
     <div className='container'>
-      <Title />
+      <Title title="INSScan" descs={[]} />
       <ActionTableWrapper />
     </div>
   );
