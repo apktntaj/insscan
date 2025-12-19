@@ -1,7 +1,17 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const Navbar = ({ links }) => {
+  const pathname = usePathname();
+
+  // Hide navbar on homepage
+  if (pathname === "/") {
+    return null;
+  }
+
   return (
     <nav className='navbar bg-base-100 font-bold mt-5'>
       <div className='navbar-start'>
