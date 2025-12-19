@@ -4,21 +4,70 @@ import Link from "next/link";
 import { useRef, useState } from "react";
 import React from "react";
 
+// SVG Icons
+const Icons = {
+  CheckVerify: () => (
+    <svg className="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  ),
+  RealTime: () => (
+    <svg className="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+    </svg>
+  ),
+  Download: () => (
+    <svg className="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+    </svg>
+  ),
+  Clock: () => (
+    <svg className="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  ),
+  Target: () => (
+    <svg className="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+    </svg>
+  ),
+  Refresh: () => (
+    <svg className="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+    </svg>
+  ),
+  User: () => (
+    <svg className="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  ),
+  TariffInfo: () => (
+    <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  ),
+  Regulations: () => (
+    <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+    </svg>
+  ),
+};
+
 const features = [
   {
-    icon: "📊",
+    icon: Icons.CheckVerify,
     title: "Periksa LARTAS",
     desc: "Cek secara otomatis persyaratan LARTAS impor dan ekspor berdasarkan kode HS yang diunggah.",
     benefits: ["Verifikasi instan", "Update real-time", "Akurat & resmi"]
   },
   {
-    icon: "⚡",
+    icon: Icons.RealTime,
     title: "Data Real-Time",
     desc: "Tarik data tarif langsung dari API resmi SISP dengan informasi BM, PPN, dan PPH yang selalu terbaru.",
     benefits: ["Data dari SISP", "Tarif terkini", "Reliable source"]
   },
   {
-    icon: "📥",
+    icon: Icons.Download,
     title: "Ekspor Instan",
     desc: "Hasil lengkap terformat rapi dalam file Excel yang siap pakai untuk laporan atau analisis lanjutan.",
     benefits: ["Format siap pakai", "Download cepat", "Professional report"]
@@ -107,7 +156,7 @@ const Home = () => {
             {features.map((feature, i) => (
               <div key={i} className='card bg-white shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2'>
                 <div className='card-body'>
-                  <div className='text-5xl mb-4'>{feature.icon}</div>
+                  <feature.icon />
                   <h3 className='card-title text-2xl text-gray-950'>{feature.title}</h3>
                   <p className='text-gray-600 mb-4'>{feature.desc}</p>
                   <div className='flex flex-wrap gap-2'>
@@ -133,7 +182,7 @@ const Home = () => {
             <div className='card bg-white shadow-md'>
               <div className='card-body'>
                 <h3 className='card-title text-2xl mb-6 flex items-center gap-2'>
-                  <span className='text-2xl'>💰</span>
+                  <Icons.TariffInfo />
                   Informasi Tarif
                 </h3>
                 <ul className='space-y-3'>
@@ -159,7 +208,7 @@ const Home = () => {
             <div className='card bg-white shadow-md'>
               <div className='card-body'>
                 <h3 className='card-title text-2xl mb-6 flex items-center gap-2'>
-                  <span className='text-2xl'>📋</span>
+                  <Icons.Regulations />
                   Persyaratan & Regulasi
                 </h3>
                 <ul className='space-y-3'>
@@ -232,29 +281,29 @@ const Home = () => {
           <div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
             {[
               {
-                icon: "⏱️",
+                icon: Icons.Clock,
                 title: "Hemat Waktu Kerja",
                 desc: "Proses yang biasanya memakan waktu berjam-jam dapat diselesaikan dalam hitungan menit dengan automasi penuh."
               },
               {
-                icon: "🎯",
+                icon: Icons.Target,
                 title: "Data Akurat & Terpercaya",
                 desc: "Informasi langsung bersumber dari SISP (Bea dan Cukai), lembaga resmi pengelola tarif kepabeanan Indonesia."
               },
               {
-                icon: "🔄",
+                icon: Icons.Refresh,
                 title: "Selalu Update",
                 desc: "Data tarif diperbarui secara real-time dari API SISP, memastikan informasi terkini untuk setiap pengecekan."
               },
               {
-                icon: "💼",
+                icon: Icons.User,
                 title: "User-Friendly",
                 desc: "Antarmuka intuitif yang mudah digunakan tanpa memerlukan keahlian teknis atau pelatihan khusus."
               }
             ].map((benefit, i) => (
               <div key={i} className='card bg-gradient-to-br from-blue-50 to-indigo-50 shadow-md hover:shadow-lg transition-shadow'>
                 <div className='card-body'>
-                  <div className='text-5xl mb-4'>{benefit.icon}</div>
+                  <benefit.icon />
                   <h4 className='card-title text-xl text-gray-950'>{benefit.title}</h4>
                   <p className='text-gray-700 mt-2'>{benefit.desc}</p>
                 </div>
