@@ -1,11 +1,15 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Title from "../ui/Title";
+import { Title } from "../presentation/components";
 
-const title = "Raya Activity Page";
-const descs = ["Still in development."];
+const PAGE_TITLE = "Raya Activity Page";
+const PAGE_DESCRIPTION = ["Still in development."];
 
+/**
+ * Rayactivity Page
+ * @description Development/test page with live clock
+ */
 export default function RayactivityPage() {
   const [time, setTime] = useState(new Date().toLocaleTimeString());
 
@@ -17,25 +21,11 @@ export default function RayactivityPage() {
     return () => clearInterval(timer);
   }, []);
 
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.code === "Space") {
-        console.log(time);
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [time]);
-
   return (
-    <div className='container'>
-      <Title title={title} descs={descs} />
-      <div className='container flex justify-center h-screen mt-6'>
-        <p className='text-9xl tracking-wider bg-gradient-to-r from-purple-400 via-emerald-500 to-sky-400 bg-clip-text text-transparent font-extrabold'>
+    <div className="container mx-auto px-4">
+      <Title title={PAGE_TITLE} descs={PAGE_DESCRIPTION} />
+      <div className="flex justify-center h-screen mt-6">
+        <p className="text-9xl tracking-wider bg-gradient-to-r from-purple-400 via-emerald-500 to-sky-400 bg-clip-text text-transparent font-extrabold">
           {time}
         </p>
       </div>
