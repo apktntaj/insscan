@@ -56,7 +56,9 @@ function fetchUserData(userId, repository) {
 }
 
 // Test dengan mock
-const mockRepo = { findById: jest.fn().mockResolvedValue({ id: 1, name: "Test" }) };
+const mockRepo = {
+  findById: jest.fn().mockResolvedValue({ id: 1, name: "Test" }),
+};
 fetchUserData(1, mockRepo);
 ```
 
@@ -456,7 +458,9 @@ const spyGateway = {
 ```javascript
 // 1. Inject dependencies via constructor/factory
 function createService(repository) {
-  return { /* ... */ };
+  return {
+    /* ... */
+  };
 }
 
 // 2. Depend on abstractions (interfaces)
@@ -494,13 +498,13 @@ export function query(sql) {
 
 ## Kesimpulan
 
-| Aspek          | Tanpa DI                          | Dengan DI                         |
-| -------------- | --------------------------------- | --------------------------------- |
-| Testing        | Harus mock global/module          | Inject mock langsung              |
-| Coupling       | Tinggi (import langsung)          | Rendah (via interface)            |
-| Flexibility    | Sulit ganti implementasi          | Mudah swap anytime                |
-| Readability    | Dependencies tersembunyi          | Dependencies eksplisit            |
-| Maintenance    | Perubahan ripple effect           | Isolated changes                  |
+| Aspek       | Tanpa DI                 | Dengan DI              |
+| ----------- | ------------------------ | ---------------------- |
+| Testing     | Harus mock global/module | Inject mock langsung   |
+| Coupling    | Tinggi (import langsung) | Rendah (via interface) |
+| Flexibility | Sulit ganti implementasi | Mudah swap anytime     |
+| Readability | Dependencies tersembunyi | Dependencies eksplisit |
+| Maintenance | Perubahan ripple effect  | Isolated changes       |
 
 ---
 
