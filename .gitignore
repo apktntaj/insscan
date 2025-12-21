@@ -8,6 +8,8 @@
 
 # testing
 /coverage
+/xl/
+/docProps/
 
 # next.js
 /.next/
