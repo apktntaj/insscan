@@ -1,6 +1,8 @@
 # 📚 Dokumentasi Pembelajaran - INSScan
 
-Selamat datang di dokumentasi pembelajaran! Folder ini berisi materi-materi untuk memahami arsitektur dan praktik coding yang digunakan di proyek INSScan.
+Selamat datang di dokumentasi `WHAT I LEARN`.
+
+Folder ini berisi materi-materi untuk memahami konsep yang saya coba terapkan dengan bantuan copilot agent Harapannya agar bisa tetap belajar sambil produktif.
 
 ## 📖 Daftar Materi
 
