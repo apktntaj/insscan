@@ -1,17 +1,20 @@
-import ActionTableWrapper from "../ui/FileReaderWrapper";
-import Title from "../ui/Title";
+import { Title, HsCodeScanner } from "../presentation/components";
 
-const title = "INSScan";
-const description = [
+const PAGE_TITLE = "INSScan";
+const PAGE_DESCRIPTION = [
   "AI-powered invoice scanner for instant HS code lookup and",
   "retrieve realtime tax & restriction goods regulation from Indonesia National Single Window (INSW) site.",
 ];
 
+/**
+ * INSScan Page
+ * @description Main page for HS Code scanning feature
+ */
 export default function InscannPage() {
   return (
-    <div className='container'>
-      <Title title={title} descs={description} />
-      <ActionTableWrapper />
+    <div className="container mx-auto px-4">
+      <Title title={PAGE_TITLE} descs={PAGE_DESCRIPTION} />
+      <HsCodeScanner />
     </div>
   );
 }
