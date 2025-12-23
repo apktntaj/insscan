@@ -1,22 +1,22 @@
-# 📋 PRD: Shipment ETA Tracking Platform
+# 📋 PRD: BL Parser Extension - Browser Extension SaaS
 
-**Document Version:** 1.1  
-**Date:** December 20, 2025  
-**Status:** Final
+**Document Version:** 2.0 (Pivoted Product)  
+**Date:** December 23, 2025  
+**Status:** MVP Ready for Development
 
 ---
 
 ## 1. Executive Summary
 
-Saas pelacakan shipment yang memungkinkan pengguna untuk:
-
-1. **Upload Bill of Lading** → sistem otomatis mengisi form shipment
-2. **Menyimpan data shipment** → dengan kemampuan edit sebelum disimpan
-3. **Auto-fetch & update ETA** → sistem secara otomatis mencari dan memperbaharui jadwal ETA berdasarkan nomor BL
-4. **Generate Excel** → untuk keperluan submit dokumen ke Bea Cukai saat mendekati waktu kedatangan
+**BL Parser Extension** adalah Chrome browser extension yang mengotomatisasi proses pengisian form shipment dengan parsing dokumen Bill of Lading. User upload PDF dokumen BL sekali, sistem extract 15 data field dan menyimpannya. Lalu saat user membuka website (CEISA atau internal software), mereka bisa mengetik shortcut keyboard (mis: `sh` + Ctrl+Shift) dan sistem otomatis mengisi dengan data dari BL yang sudah diparsing.
 
 **Target User:** Staff operasional PPJK / Freight Forwarder  
-**Core Value:** Otomatisasi input shipment + Real-time ETA tracking
+**Core Value:** **Parsing BL cepat + Auto-fill form via keyboard shortcuts**  
+**Business Model:** Credit-based (1 parsing = 1 kredit) + Referral incentive
+
+### Why Pivot?
+
+Dari kompleksitas full tracking system (ETA, notifications, realtime updates), kami fokus pada **core problem yang paling valuable**: **Otomatisasi input shipment form**. Ini mudah dibangun, bisa langsung digunakan, dan complement dengan sistem internal yang sudah ada di setiap PPJK.
 
 ---
 
@@ -24,278 +24,370 @@ Saas pelacakan shipment yang memungkinkan pengguna untuk:
 
 ### Masalah Utama
 
-Saat ini staff operasional PPJK menghadapi **dua masalah utama:**
+Staff operasional PPJK menghadapi **masalah serius saat mengisi form shipment**:
 
-#### 🔴 Problem 1: Tidak Ada Cara Efektif Memantau Shipment Secara Real-time
+| Masalah                   | Dampak                                                                          |
+| ------------------------- | ------------------------------------------------------------------------------- |
+| **Input Manual Dari BL**  | Staff harus baca BL, ketik ulang data ke form/sistem. 10-15 menit per shipment! |
+| **Rentan Human Error**    | Salah ketik nomor BL, nama shipper, address, dll → masalah di Bea Cukai         |
+| **Duplikasi Data**        | Sama data diinput berkali-kali (Excel, CEISA, internal system)                  |
+| **Inefficient Workflow**  | 2-3 jam per hari terbuang hanya untuk input data                                |
+| **Data di Banyak Tempat** | Info shipment tersebar di email, WhatsApp, Excel → chaos                        |
 
-| Masalah                             | Dampak                                                                        |
-| ----------------------------------- | ----------------------------------------------------------------------------- |
-| **Pengecekan ETA Manual**           | Staff harus membuka website shipping line satu per satu untuk setiap shipment |
-| **Tidak Ada Notifikasi Otomatis**   | Perubahan jadwal kapal tidak terdeteksi tepat waktu                           |
-| **Data Tersebar**                   | Informasi shipment tersimpan di berbagai tempat (Excel, email, WhatsApp)      |
-| **Keterlambatan Persiapan Dokumen** | Karena tidak tahu ETA pasti, persiapan dokumen kepabeanan sering terlambat    |
-
-#### 🔴 Problem 2: Proses Pengisian Form yang Masih Manual
-
-| Masalah                 | Dampak                                                              |
-| ----------------------- | ------------------------------------------------------------------- |
-| **Input Satu Per Satu** | Staff harus mengetik ulang data dari Bill of Lading ke sistem/Excel |
-| **Rentan Human Error**  | Salah ketik nomor BL, nama shipper, atau data lainnya               |
-| **Waktu Terbuang**      | 10-15 menit per shipment hanya untuk input data                     |
-| **Duplikasi Kerja**     | Data yang sama diinput berkali-kali di tempat berbeda               |
-
-### Situasi Saat Ini (Current Workflow)
+### Current Workflow (Manual & Inefficient)
 
 ```
-0. Klien mendaftar untuk membuat akun dan mendapatkan kredit awal
-1. Klien mengirim dokumen Bill of Lading (PDF/foto) via email/WhatsApp
-2. Staff membuka dokumen BL, membaca satu per satu field
-3. Staff mengetik manual ke Excel: No BL, Shipper, Consignee, Vessel, dll
-4. Staff membuka website shipping line untuk cek ETA
-5. Staff mencatat ETA di Excel
-6. Setiap hari, staff harus buka lagi website untuk cek apakah ETA berubah
-7. Menjelang kedatangan, staff baru mulai siapkan dokumen Bea Cukai
-8. Jika ETA berubah tanpa diketahui → dokumen terlambat → risiko demurrage
+1. Klien kirim dokumen BL (PDF/photo) via email/WhatsApp
+2. Staff membuka dokumen, membaca field per field
+3. Staff mengetik manual ke Excel/CEISA: No BL, Shipper, Consignee, Vessel, dll
+4. Jika salah ketik → Issue di Bea Cukai
+5. Repeat untuk setiap shipment (50-100 per bulan)
+6. Total waktu terbuang: 2-3 jam/hari
 ```
 
-### Dampak Bisnis
+### Why This Product?
 
-- ⏱️ **Waktu terbuang:** 1-2 jam per hari untuk input data + cek ETA manual
-- 📉 **Risiko kesalahan:** Human error saat input manual menyebabkan masalah di Bea Cukai
-- 😤 **Customer experience buruk:** Klien harus bertanya untuk mendapat update status
-- 💸 **Potensi kerugian:** Biaya demurrage/detention karena tidak siap saat kapal tiba
-- 📋 **Dokumen terlambat:** Persiapan dokumen Bea Cukai mepet karena tidak tahu ETA pasti
+Saat ini tidak ada solusi yang:
+
+- ✅ Terhubung langsung dengan CEISA & internal software PPJK
+- ✅ Parse BL otomatis
+- ✅ Quick data entry via keyboard shortcut
+- ✅ Affordable & credit-based (flexible)
+
+**BL Parser Extension menyelesaikan ini.**
 
 ---
 
-## 3. Solusi yang Diusulkan
+## 3. Solution Overview
 
-**Aplikasi Shipment Tracker dengan alur kerja:**
+**Browser extension yang parse BL → extract 15 field → auto-fill form via keyboard shortcuts**
+
+### How It Works
 
 ```
-Upload BL → Auto-fill Form → Edit & Simpan → Auto-fetch ETA → Real-time Update → Generate Excel
+Step 1: User uploads B/L PDF
+        ↓
+        System parses text, extracts 15 fields:
+        - Shipper, Shipper Address, Consignee, Consignee Address
+        - Notify Party, Notify Party Address
+        - Vessel, Voyage Number, Port of Loading, Port of Discharge
+        - Description of Goods, Container Quantity, Weight, B/L Issued Date
+        - B/L Number
+        ↓
+Step 2: User selects parsed document as "active" in extension popup
+        ↓
+Step 3: User opens CEISA or internal software
+        ↓
+Step 4: User types shortcut (e.g., "sh" + Ctrl+Shift) in form field
+        ↓
+Step 5: Extension auto-fills field with parsed data (e.g., shipper name)
+        ↓
+Step 6: Repeat for all 15 fields
+        ↓
+Result: Form completely filled in 2-3 minutes (vs 15 minutes manual)
 ```
 
-### Fitur Utama:
+### Keyboard Shortcuts (All 15 Fields)
 
-1. **Upload Bill of Lading** — User upload file BL (PDF/gambar), sistem otomatis ekstrak data
-2. **Auto-Fill Form** — Data dari BL otomatis mengisi form shipment
-3. **Edit Sebelum Simpan** — User dapat mengedit/koreksi data sebelum menyimpan
-4. **Auto-Fetch ETA** — Setelah disimpan, sistem otomatis mencari jadwal ETA berdasarkan nomor BL
-5. **Real-time Update** — Sistem secara berkala memperbaharui ETA (setiap 6-12 jam)
-6. **Dashboard Monitoring** — Tampilan semua shipment aktif dengan status ETA terkini
-7. **Generate Excel** — Export data shipment ke format Excel untuk submit ke Bea Cukai
-
----
-
-## 4. MVP (Minimum Viable Product)
-
-### Scope MVP — Phase 1
-
-**Fokus:** Upload BL → Auto-fill → Track ETA → Generate Excel
-
----
-
-#### Feature 1: Upload Bill of Lading & Auto-Fill Form
-
-**Deskripsi:** User upload dokumen Bill of Lading, sistem otomatis mengekstrak data dan mengisi form.
-
-**User Flow:**
-
-1. User klik "Tambah Shipment"
-2. User upload file Bill of Lading (PDF atau gambar)
-3. Sistem memproses dokumen dan mengekstrak data
-4. Form otomatis terisi dengan data yang diekstrak
-5. User mereview dan mengedit data jika perlu
-6. User klik "Simpan"
-
-**Data yang Diekstrak & Disimpan:**
-
-- Nomor BL (Bill of Lading) — **required**
-- Nama Shipper
-- Alamat shipper
-- Nama Consignee
-- Alamat consignee
-- Notify Party
-- Alamat notify party
-- Nama Vessel / Voyage
-- Port of Loading (PoL)
-- Port of Discharge (PoD)
-- Deskripsi barang (Description of Goods)
-- Jumlah container / Quantity
-- Berat (Weight)
-- Tanggal BL issued
-- Dokumen pendukung
-
-**Kemampuan Edit:**
-
-- Semua field dapat diedit oleh user sebelum disimpan
-- Jika ekstraksi gagal/tidak akurat, user bisa input manual
-- Validasi: Nomor BL wajib diisi
+| Field                 | Shortcut  | Example                      |
+| --------------------- | --------- | ---------------------------- |
+| Bill of Lading Number | `bid_num` | HKG1234567                   |
+| Shipper               | `sh`      | PT Maju Sejahtera            |
+| Shipper Address       | `sha`     | Jln. Ahmad Yani, Jakarta     |
+| Consignee             | `cn`      | ABC Company Ltd              |
+| Consignee Address     | `cna`     | 15 High Street, London       |
+| Notify Party          | `np`      | XYZ Logistics                |
+| Notify Party Address  | `npa`     | Pasir Ris, Singapore         |
+| Vessel                | `vs`      | EVER GIVEN                   |
+| Voyage Number         | `vn`      | 2025E                        |
+| Port of Loading       | `pol`     | TANJUNG PELEPAS              |
+| Port of Discharge     | `pod`     | SINGAPORE                    |
+| Description of Goods  | `dg`      | Electronics - Computer Parts |
+| Container Quantity    | `cq`      | 40                           |
+| Weight                | `wt`      | 25000                        |
+| B/L Issued Date       | `bid`     | 2025-01-15                   |
 
 ---
 
-#### Feature 2: Auto-Fetch ETA
+## 4. MVP Scope
 
-**Deskripsi:** Setelah shipment disimpan, sistem otomatis mencari jadwal ETA berdasarkan nomor BL.
+### What's Included (Phase 1)
 
-**Mekanisme:**
+✅ **Extension Features**
 
-- Sistem melakukan lookup ke sumber data shipping line
-- Informasi yang diambil: ETA, vessel name, voyage number, current status
-- Data ETA disimpan dan ditampilkan di dashboard
-- Jika tidak ditemukan, user bisa input ETA manual
+- Chrome browser extension (Manifest v3)
+- Upload B/L PDF (text-based only)
+- Parse dokumen → extract 15 fields
+- Keyboard shortcuts (Ctrl+Shift+code) → auto-fill form
+- Local storage untuk parsed documents
+- Credit deduction (1 credit per parsing)
 
-**Sumber Data:**
+✅ **Website Features**
 
-- API shipping line (prioritas)
-- Web scraping sebagai alternatif
-- Manual input sebagai fallback
+- Landing page
+- User registration (with optional referral code)
+- Login
+- User dashboard (credit balance, usage history, referral stats)
+- Payment page (Xendit integration)
 
----
+✅ **Backend**
 
-#### Feature 3: Periodic ETA Update (Real-time)
+- Express.js API
+- PostgreSQL database
+- User authentication (JWT)
+- PDF parsing service
+- Credit tracking system
+- Xendit payment webhook
+- Referral system with fraud prevention
 
-**Deskripsi:** Sistem secara berkala memperbaharui ETA untuk semua shipment aktif.
+✅ **Monetization**
 
-**Mekanisme:**
+- Sign-up: 10 credits free
+- Top-up pricing: 50k→17cr, 150k→60cr, 400k→150cr, 1m→550cr
+- 1 credit = 1 B/L parsing
+- Referral: Referrer gets 3/5 of referee's purchased credits
 
-- Update otomatis setiap 6-12 jam
-- Cek ulang ETA untuk setiap shipment yang belum arrived
-- Jika ETA berubah:
-  - Tampilkan indikator "ETA Updated"
-  - Simpan riwayat perubahan ETA
-  - (Future) Kirim notifikasi ke user
+### What's NOT Included (Phase 2+)
 
----
+❌ **Future Features**
 
-#### Feature 4: Shipment Dashboard
-
-**Deskripsi:** Tampilan daftar semua shipment dengan informasi ETA terkini.
-
-**Tampilan Dashboard:**
-
-- Tabel dengan kolom: No BL, Shipper, Consignee, Vessel, ETA, Status, Last Updated
-- Filter: berdasarkan status, tanggal ETA
-- Search: berdasarkan nomor BL, shipper, atau consignee
-- Sorting: berdasarkan ETA (terdekat dulu sebagai default)
-
-**Status Shipment:**
-
-- 🔵 **On Schedule** — ETA sesuai jadwal
-- 🟡 **ETA Changed** — Ada perubahan jadwal
-- 🟠 **Arriving Soon** — ETA dalam 3 hari (perlu siapkan dokumen)
-- 🟢 **Arrived** — Kapal sudah tiba
-- ⚪ **Completed** — Shipment selesai diproses
+- Image-based PDF (OCR) - Phase 2
+- Shipment tracking/ETA updates - Future
+- Email/WhatsApp notifications - Future
+- Document generation (PIB/BC 1.1) - Future
+- Team collaboration - Future
+- Bulk upload - Future
 
 ---
 
-#### Feature 5: Generate Excel untuk Bea Cukai
+## 5. User Personas
 
-**Deskripsi:** Export data shipment ke format Excel yang siap untuk keperluan submit dokumen Bea Cukai.
+### Persona 1: Operasional Staff PPJK
 
-**Trigger:**
+- **Name:** Budi (Staff Operasional)
+- **Age:** 28
+- **Pain Point:** Ketik ulang data BL manual 50+ kali per bulan
+- **Goal:** Cepat input shipment, minimize error
+- **Behavior:** Multitasking, sering buka multiple windows
+- **How BL Parser helps:** Shortcut keyboard → fill form in 2 min instead of 15 min
 
-- Manual: User klik tombol "Export Excel" pada shipment tertentu
-- Suggested: Sistem menyarankan export saat shipment H-3 dari ETA
+### Persona 2: PPJK Manager
 
-**Data yang Di-export:**
-
-- Semua informasi shipment (No BL, Shipper, Consignee, dll)
-- Informasi ETA terkini
-- Tanggal export
-- Format sesuai kebutuhan Bea Cukai
-
-**Output:**
-
-- File Excel (.xlsx) yang bisa langsung digunakan untuk referensi submit dokumen
+- **Name:** Siti (Kepala Operasional)
+- **Age:** 35
+- **Pain Point:** Staff spending 2-3 jam daily on manual data entry
+- **Goal:** Increase productivity, reduce human error
+- **Behavior:** Track team efficiency, budget conscious
+- **How BL Parser helps:** Reduce operational cost (2 FTE hours saved/day), improve accuracy
 
 ---
 
-### User Flow Lengkap MVP
+## 6. Success Metrics (MVP Goals)
+
+| Metric                      | Target                         | Why It Matters    |
+| --------------------------- | ------------------------------ | ----------------- |
+| **Extension Installs**      | 100+ in month 1                | Market validation |
+| **User Signups**            | 50+                            | Active user base  |
+| **Time Saved per Shipment** | 15 min → 2 min                 | Core value prop   |
+| **Parsing Accuracy**        | >95%                           | Quality metric    |
+| **Payment Conversion Rate** | 20% (10 signups → 2 customers) | Revenue           |
+| **Referral Success Rate**   | 10% (1 in 10 converts)         | Growth            |
+| **Monthly Active Users**    | 30+                            | Retention         |
+| **Extension Rating**        | >4.5 stars                     | Product quality   |
+
+---
+
+## 7. Business Model
+
+### Revenue Streams
+
+**1. Credit-Based Parsing**
+
+- User sign-up: 10 credits free
+- 1 parsing = 1 credit
+- Top-up tiers (see below)
+
+**2. Top-Up Pricing**
+| Amount (IDR) | Credits | Price/Credit |
+|------|---------|--------------|
+| 50,000 | 17 | Rp 2,941 |
+| 150,000 | 60 | Rp 2,500 |
+| 400,000 | 150 | Rp 2,667 |
+| 1,000,000 | 550 | Rp 1,818 |
+
+**3. Referral Program**
+
+- Referrer earns **3/5 of referee's purchased credits**
+- Example: Referee buys 60 credits → Referrer gets 36 credits
+- Max 17 referrals per referrer
+
+### Unit Economics
+
+**Assumptions:**
+
+- Average revenue per top-up: Rp 150,000 (tier 2)
+- Credits per top-up: 60 credits
+- Conversion rate: 20% (10 signups → 2 paying customers)
+
+**Monthly (50 signups):**
+
+- Paying customers: 10
+- Revenue: 10 × Rp 150,000 = **Rp 1.5M**
+- Cost: ~Rp 100k (AWS/server) = **Rp 1.4M profit**
+
+**Annual (600 signups):**
+
+- Paying customers: 120
+- Revenue: 120 × Rp 150,000 × 12 = **Rp 216M**
+- Cost: ~Rp 1.5M/year = **Rp 214.5M profit**
+
+---
+
+## 8. Monetization: Referral Fraud Prevention
+
+### Why Referral?
+
+Growth lever untuk market yang price-sensitive. Users senang membawa teman jika dapat incentive.
+
+### Fraud Prevention Measures
+
+**To prevent users from gaming the system:**
+
+1. **7-Day Waiting Period** - Referral reward tidak langsung, tunggu 7 hari (prevent refund chargeback)
+2. **Minimum Usage (5 credits)** - Referee harus gunakan minimal 5 credits (prove genuine usage)
+3. **Only Paid Top-ups Count** - Free 10 initial credits tidak count (hanya paid top-up yang trigger referral)
+4. **Email Verification** - Email harus verified (prevent bot accounts)
+5. **IP/Device Check** - Different IP/device dari referrer (prevent same person multiple accounts)
+6. **Max 17 Referrals/Month** - Limit per user (prevent farming)
+
+### Example Flow
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                         USER FLOW MVP                            │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  1. Upload BL                                                    │
-│     └── User upload PDF/gambar Bill of Lading                   │
-│                    ↓                                             │
-│  2. Auto-Fill Form                                               │
-│     └── Sistem ekstrak data → Form terisi otomatis              │
-│                    ↓                                             │
-│  3. Review & Edit                                                │
-│     └── User cek data, edit jika perlu                          │
-│                    ↓                                             │
-│  4. Simpan                                                       │
-│     └── Data tersimpan di database                              │
-│                    ↓                                             │
-│  5. Auto-Fetch ETA                                               │
-│     └── Sistem cari ETA berdasarkan No BL                       │
-│                    ↓                                             │
-│  6. Dashboard Monitoring                                         │
-│     └── Shipment muncul di dashboard dengan ETA                 │
-│                    ↓                                             │
-│  7. Real-time Update                                             │
-│     └── ETA diupdate otomatis setiap 6-12 jam                   │
-│                    ↓                                             │
-│  8. Arriving Soon (H-3)                                          │
-│     └── Status berubah → Sistem suggest "Generate Excel"        │
-│                    ↓                                             │
-│  9. Generate Excel                                               │
-│     └── Export data untuk keperluan Bea Cukai                   │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
+User A (Referrer) share code: ABC12XY9
+      ↓
+User B (Referee) sign up with code ABC12XY9
+      ↓
+User B get 10 free credits + email verification required
+      ↓
+User B top-up Rp 150,000 (60 credits)
+      ↓
+System wait 7 days...
+      ↓
+Day 8: User B used ≥5 credits, IP verified, device verified
+      ↓
+System verify referral → User A get 36 credits (60 × 3/5)
 ```
 
 ---
 
-### Success Metrics MVP
+## 9. Competitive Advantage
 
-| Metric                        | Target                               |
-| ----------------------------- | ------------------------------------ |
-| Akurasi ekstraksi data BL     | 85%+ field terisi dengan benar       |
-| Akurasi ETA fetch             | 90% berhasil mendapat ETA            |
-| Waktu input shipment          | Dari 15 menit → 2 menit per shipment |
-| Jumlah shipment yang di-track | 50+ shipment aktif                   |
-| User adoption                 | 80% staff menggunakan aplikasi       |
+| Feature                          | BL Parser       | Manual Process | Other Tools\*     |
+| -------------------------------- | --------------- | -------------- | ----------------- |
+| **Parse B/L otomatis**           | ✅              | ❌             | Limited           |
+| **Keyboard shortcuts**           | ✅ (Ctrl+Shift) | ❌             | ❌                |
+| **Works with CEISA**             | ✅              | N/A            | ?                 |
+| **Works with internal software** | ✅              | N/A            | ?                 |
+| **Credit-based pricing**         | ✅              | N/A            | ❌ (subscription) |
+| **Referral program**             | ✅              | N/A            | ❌                |
+| **Simple & lightweight**         | ✅              | -              | ❌ (complex)      |
 
----
-
-## 5. Future Phases (Post-MVP)
-
-Fitur yang akan dikembangkan setelah MVP berhasil:
-
-**Phase 2:**
-
-- Notifikasi WhatsApp/Email saat ETA berubah atau mendekati arrival
-- Client portal untuk self-service tracking
-- Bulk upload (multiple BL sekaligus)
-
-**Phase 3:**
-
-- Document automation (generate dokumen PIB/BC 1.1)
-- Integrasi langsung dengan sistem Bea Cukai
-- Multi-user dengan role management
-- Riwayat dan analytics shipment
+\*No direct competitors in Indonesian market for this specific use case
 
 ---
 
-## 6. Glossary
+## 10. Implementation Timeline (MVP)
 
-| Istilah                 | Definisi                                                             |
-| ----------------------- | -------------------------------------------------------------------- |
-| **BL (Bill of Lading)** | Dokumen pengiriman yang berisi detail kargo dan kontrak pengangkutan |
-| **ETA**                 | Estimated Time of Arrival - perkiraan waktu kedatangan kapal         |
-| **PPJK**                | Perusahaan Pengurusan Jasa Kepabeanan (customs clearance company)    |
-| **PoL**                 | Port of Loading - pelabuhan muat                                     |
-| **PoD**                 | Port of Discharge - pelabuhan bongkar                                |
-| **Demurrage**           | Biaya denda karena keterlambatan pengembalian container              |
-| **Shipper**             | Pengirim barang                                                      |
-| **Consignee**           | Penerima barang                                                      |
+| Phase                   | Duration | Deliverables                         |
+| ----------------------- | -------- | ------------------------------------ |
+| **Backend Core**        | Week 1-2 | Express setup, DB, auth, PDF parsing |
+| **Referral & Payments** | Week 2-3 | Xendit integration, fraud prevention |
+| **Extension**           | Week 3-4 | Manifest v3, popup, content script   |
+| **Website**             | Week 4-5 | Landing, auth, dashboard, payments   |
+| **Testing & Deploy**    | Week 5-6 | Tests, Chrome Web Store submit       |
+
+**Total:** 6 weeks to MVP launch
 
 ---
 
-**Document Status:** Draft - Fokus Problem Statement & MVP  
-**Last Updated:** December 20, 2025
+## 11. Go-to-Market Strategy
+
+### Launch Phase (Week 1-4 after deploy)
+
+1. **Direct Outreach**
+
+   - Email PPJK list (5-10 target companies)
+   - WhatsApp groups untuk customs brokers
+   - LinkedIn posts
+
+2. **Content Marketing**
+
+   - Blog post: "Hemat 2 Jam/Hari dengan BL Parser"
+   - Demo video: 30 detik showing before/after
+
+3. **Referral Incentive**
+   - First 100 users: bonus 20 credits (vs 10 normal)
+   - Early adopter: get free upgrades
+
+### Growth Phase (Month 2+)
+
+- Monitor referral metrics
+- Optimize based on feedback
+- Plan Phase 2 features (image OCR, bulk upload)
+
+---
+
+## 12. Key Risks & Mitigations
+
+| Risk                                               | Probability | Impact | Mitigation                                      |
+| -------------------------------------------------- | ----------- | ------ | ----------------------------------------------- |
+| **Low adoption**                                   | Medium      | High   | Heavy referral program, free credits            |
+| **PDF parsing inaccuracy**                         | Low         | Medium | Use robust pdf-parse library, allow manual edit |
+| **Payment issues (Xendit)**                        | Low         | High   | Test thoroughly, backup payment method          |
+| **Browser extension rejection** (Chrome Web Store) | Low         | High   | Follow all guidelines, test early, support team |
+| **Fraud in referral system**                       | Medium      | Low    | Multi-layer fraud detection                     |
+
+---
+
+## 13. Glossary
+
+| Term                     | Definition                                               |
+| ------------------------ | -------------------------------------------------------- |
+| **B/L (Bill of Lading)** | Dokumen pengiriman yang berisi detail kargo              |
+| **PPJK**                 | Perusahaan Pengurusan Jasa Kepabeanan (customs broker)   |
+| **Credit**               | Virtual currency untuk membayar per parsing              |
+| **Shortcut**             | Keyboard code (e.g., "sh") yang trigger auto-fill        |
+| **Referral Code**        | Unique 10-char code untuk invite friend (e.g., ABC12XY9) |
+| **Xendit**               | Payment gateway untuk top-up kredit                      |
+| **Content Script**       | Browser extension file yang inject data ke website       |
+
+---
+
+**Document Status:** Complete - MVP Ready  
+**Last Updated:** December 23, 2025  
+**Next Step:** Development kickoff & GitHub repo creation
+
+---
+
+## 14. FAQ
+
+**Q: Apakah extension ini aman?**  
+A: Ya. Semua parsing terjadi di server kami. Extension hanya menyimpan token & shortcut mapping locally. Password tidak pernah dikirim ke website (hanya JWT token).
+
+**Q: Bagaimana jika PDF parsing gagal?**  
+A: User bisa edit manual semua field sebelum disimpan. Atau upload ulang dengan PDF yang lebih jelas.
+
+**Q: Boleh pakai lebih dari 1 browser atau komputer?**  
+A: Ya, selama login dengan akun yang sama. Setiap device dapat akses semua parsed documents.
+
+**Q: Gimana dengan GDPR/Privacy?**  
+A: Raw PDF text disimpan untuk audit trail. User bisa request data deletion anytime. Comply dengan Indonesian privacy laws.
+
+**Q: Kalau parsing salah, bisa refund kredit?**  
+A: Refund policy: Jika parsing <80% accuracy, user bisa request manual review & potential refund (max 3x per month).
+
+---
+
+**Document Status:** Complete - MVP Specification Ready  
+**Last Updated:** December 23, 2025  
+**Version:** 2.0 (Pivoted Product - Browser Extension SaaS)
