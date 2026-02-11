@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 200" role="img" aria-labelledby="title desc">
+  <title id="title">Pesisir Logo</title>
+  <desc id="desc">Color logo for Pesisir with scan frame icon and wordmark.</desc>
+
+  <defs>
+    <linearGradient id="iconBg" x1="24" y1="20" x2="184" y2="180" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#EEF2FF" />
+      <stop offset="1" stop-color="#E0F2FE" />
+    </linearGradient>
+    <linearGradient id="wordGradient" x1="226" y1="66" x2="560" y2="118" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1D4ED8" />
+      <stop offset="1" stop-color="#0891B2" />
+    </linearGradient>
+  </defs>
+
+  <g>
+    <rect x="24" y="20" width="160" height="160" rx="40" fill="url(#iconBg)" stroke="#0F172A" stroke-width="8" />
+
+    <path d="M62 82V62H82" fill="none" stroke="#1D4ED8" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M126 62H146V82" fill="none" stroke="#1D4ED8" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M82 138H62V118" fill="none" stroke="#1D4ED8" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M146 118V138H126" fill="none" stroke="#1D4ED8" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+
+    <rect x="84" y="88" width="10" height="48" rx="5" fill="#2563EB" />
+    <rect x="100" y="76" width="10" height="60" rx="5" fill="#1D4ED8" />
+    <rect x="116" y="92" width="10" height="44" rx="5" fill="#0EA5E9" />
+    <rect x="132" y="80" width="10" height="56" rx="5" fill="#0284C7" />
+
+    <circle cx="130" cy="128" r="18" fill="none" stroke="#F97316" stroke-width="8" />
+    <path d="M143 141L156 154" fill="none" stroke="#F97316" stroke-width="8" stroke-linecap="round" />
+  </g>
+
+  <g fill="#0F172A">
+    <text x="226" y="104" font-family="Manrope, Inter, system-ui, sans-serif" font-size="74" font-weight="700" letter-spacing="-1.5">
+      <tspan fill="url(#wordGradient)">Pesisir</tspan>
+    </text>
+    <text x="232" y="140" font-family="Manrope, Inter, system-ui, sans-serif" font-size="22" font-weight="600" letter-spacing="1.8" fill="#475569">
+      HS CODE • TAX • LARTAS
+    </text>
+  </g>
+</svg>

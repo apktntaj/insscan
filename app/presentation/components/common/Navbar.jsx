@@ -11,18 +11,17 @@ import { usePathname } from "next/navigation";
  */
 export default function Navbar({ links = [] }) {
     const pathname = usePathname();
-
-    // Hide navbar on homepage
-    if (pathname === "/") {
-        return null;
-    }
+    const mainLinks = [
+        { label: "Home", href: "/" },
+        { label: "Scanner", href: "/inscann" },
+        ...links,
+    ];
 
     return (
-        <nav className="navbar bg-base-100 font-bold mt-5">
-            <div className="navbar-start">
-                {/* DROPDOWN */}
-                <div className="dropdown">
-                    <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
+        <nav className="mx-auto flex h-[4.5rem] w-full max-w-7xl items-center justify-between px-5 sm:px-8 lg:px-12">
+            <div className="flex items-center gap-3">
+                <div className="dropdown lg:hidden">
+                    <button tabIndex={0} className="rounded-xl border border-zinc-200 bg-white p-2 text-zinc-700 shadow-sm">
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="h-5 w-5"
@@ -30,21 +29,16 @@ export default function Navbar({ links = [] }) {
                             viewBox="0 0 24 24"
                             stroke="currentColor"
                         >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M4 6h16M4 12h8m-8 6h16"
-                            />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h8m-8 6h16" />
                         </svg>
-                    </div>
+                    </button>
                     <ul
                         tabIndex={0}
-                        className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
+                        className="menu menu-sm dropdown-content z-[1] mt-3 w-56 rounded-2xl border border-zinc-200 bg-white p-2 shadow-lg"
                     >
-                        {links.map((link, idx) => (
-                            <li key={idx}>
-                                <Link className="text-slate-600 drop-shadow-sm" href={link.href}>
+                        {mainLinks.map((link) => (
+                            <li key={link.href}>
+                                <Link className="rounded-lg text-zinc-700" href={link.href}>
                                     {link.label}
                                 </Link>
                             </li>
@@ -52,36 +46,36 @@ export default function Navbar({ links = [] }) {
                     </ul>
                 </div>
 
-                {/* LOGO */}
-                <div>
-                    <Link
-                        className="flex items-center space-x-2 text-3xl tracking-wider"
-                        href="/"
-                    >
-                        <Image
-                            src="/invoicer.png"
-                            width={50}
-                            height={50}
-                            alt="Logo Rayefy"
-                            className="rounded-full"
-                        />
-                        <span className="bg-gradient-to-r from-purple-400 via-emerald-500 to-sky-400 bg-clip-text text-transparent font-extrabold">
-                            Semestaku
-                        </span>
-                    </Link>
-                </div>
+                <Link className="flex items-center" href="/">
+                    <Image
+                        src="/logo-pesisir.svg"
+                        width={188}
+                        height={50}
+                        alt="Pesisir Logo"
+                        className="h-9 w-auto sm:h-10"
+                        priority
+                    />
+                </Link>
             </div>
 
-            <div className="navbar-end hidden lg:flex">
-                <ul className="menu menu-horizontal px-1">
-                    {links.map((link, idx) => (
-                        <li key={idx}>
-                            <Link className="text-slate-600 drop-shadow-sm" href={link.href}>
-                                {link.label}
-                            </Link>
-                        </li>
-                    ))}
-                </ul>
+            <div className="hidden lg:flex lg:items-center lg:gap-2">
+                {mainLinks.map((link) => {
+                    const isActive = pathname === link.href;
+
+                    return (
+                        <Link
+                            key={link.href}
+                            className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                                isActive
+                                    ? "bg-zinc-900 text-zinc-50"
+                                    : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+                            }`}
+                            href={link.href}
+                        >
+                            {link.label}
+                        </Link>
+                    );
+                })}
             </div>
         </nav>
     );

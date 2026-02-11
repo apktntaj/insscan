@@ -7,7 +7,7 @@
 
 import { createFetchHsCodeDataUseCase } from "../../core/use-cases/fetch-hs-code-data";
 import { inswApiGateway } from "../../infrastructure/services/insw-api.service";
-import { toExcelData } from "../presenters/hs-code.presenter";
+import { toResultData } from "../presenters/hs-code.presenter";
 import { isValidHsCode } from "../../core/entities/hs-code";
 
 /**
@@ -24,11 +24,11 @@ export function createHsCodeController() {
    */
   async function handleFetchRequest(hsCodes) {
     const results = await fetchHsCodeUseCase.fetchMultiple(hsCodes);
-    const excelData = toExcelData(results);
+    const tableData = toResultData(results);
 
     return {
       success: true,
-      data: excelData,
+      data: tableData,
     };
   }
 

@@ -11,7 +11,7 @@ export default function Input({ handleChange, accept = ".xls,.xlsx", className =
         <input
             type="file"
             accept={accept}
-            className={`file-input file-input-bordered file-input-sm md:file-input-md w-full md:max-w-xs ${className}`}
+            className={`block w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-700 file:mr-3 file:rounded-lg file:border-0 file:bg-zinc-900 file:px-3 file:py-2 file:text-xs file:font-medium file:text-zinc-50 hover:file:bg-zinc-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 ${className}`}
             onChange={handleChange}
         />
     );
