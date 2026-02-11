@@ -25,12 +25,35 @@ export function toExcelRow(hsCode) {
 }
 
 /**
- * Transforms array of HS Code entities to Excel format
- * @param {HsCode[]} hsCodes - Array of HS Code entities
- * @returns {Object[]} Array of Excel row data
+ * Transforms HS Code entity to table/API response format
+ * @param {HsCode} hsCode - HS Code entity
+ * @returns {Object}
  */
-export function toExcelData(hsCodes) {
-  return hsCodes.map(toExcelRow);
+export function toResultRow(hsCode) {
+  return {
+    hsCode: hsCode.code,
+    bm: hsCode.bm ?? "tidak ada data",
+    ppn: hsCode.ppn ?? "tidak ada data",
+    pph: hsCode.pph ?? "tidak ada data",
+    pphNonApi: hsCode.pphNonApi ?? "tidak ada data",
+    hasLartasImport: Boolean(hsCode.hasLartasImport),
+    hasLartasBorder: Boolean(hsCode.hasLartasBorder),
+    hasLartasPostBorder: Boolean(hsCode.hasLartasPostBorder),
+    hasLartasExport: Boolean(hsCode.hasLartasExport),
+    lartasImportDetails: hsCode.lartasImportDetails || [],
+    lartasBorderDetails: hsCode.lartasBorderDetails || [],
+    lartasPostBorderDetails: hsCode.lartasPostBorderDetails || [],
+    lartasExportDetails: hsCode.lartasExportDetails || [],
+  };
+}
+
+/**
+ * Transforms array of HS Code entities to table/API response format
+ * @param {HsCode[]} hsCodes - Array of HS Code entities
+ * @returns {Object[]}
+ */
+export function toResultData(hsCodes) {
+  return hsCodes.map(toResultRow);
 }
 
 /**

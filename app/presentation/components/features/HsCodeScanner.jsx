@@ -4,7 +4,7 @@ import React, { useState, useCallback } from "react";
 import HsCodeTable from "./HsCodeTable";
 import Button from "../common/Button";
 import Input from "../common/Input";
-import { fileToArrayBuffer, bufferToJson, downloadAsExcel, isExcelFile } from "../../../infrastructure/excel/excel.service";
+import { fileToArrayBuffer, bufferToJson, isExcelFile } from "../../../infrastructure/excel/excel.service";
 import { isValidHsCode } from "../../../core/entities/hs-code";
 
 /**
@@ -15,6 +15,7 @@ import { isValidHsCode } from "../../../core/entities/hs-code";
  */
 export default function HsCodeScanner() {
     const [fileData, setFileData] = useState(null);
+    const [resultData, setResultData] = useState(null);
     const [status, setStatus] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
@@ -33,6 +34,7 @@ export default function HsCodeScanner() {
             const buffer = await fileToArrayBuffer(file);
             const jsonData = bufferToJson(buffer);
             setFileData(jsonData);
+            setResultData(null);
             setStatus("");
         } catch (error) {
             console.error("Error reading file:", error);
@@ -63,9 +65,8 @@ export default function HsCodeScanner() {
             }
 
             const data = await response.json();
-            downloadAsExcel(data, `hs-code-result-${Date.now()}.xlsx`);
-            setStatus("Berhasil! File telah diunduh.");
-            setFileData(null);
+            setResultData(data);
+            setStatus(`Berhasil! ${data.length} data HS Code ditampilkan.`);
         } catch (error) {
             console.error("Error:", error);
             setStatus("Gagal mengambil data. Silakan coba lagi.");
@@ -75,17 +76,27 @@ export default function HsCodeScanner() {
     }, [fileData]);
 
     return (
-        <div>
-            <div className="container space-y-2 p-4 md:flex md:justify-between md:items-center">
-                <Input handleChange={handleFileChange} />
-                <div className="flex items-center gap-4">
-                    {status && <span className="text-sm text-base-content/70">{status}</span>}
-                    <Button onClick={handleFetchData} disabled={isLoading || !fileData}>
-                        {isLoading ? "Loading..." : "Tarik Data"}
-                    </Button>
+        <div className="space-y-6">
+            <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">
+                <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
+                    <div className="space-y-3">
+                        <p className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-500">Input File</p>
+                        <Input handleChange={handleFileChange} className="max-w-2xl" />
+                        <p className="text-xs leading-6 text-zinc-500 sm:text-sm">
+                            Gunakan file <span className="font-medium text-zinc-700">.xls / .xlsx</span> berisi HS code 8 digit.
+                        </p>
+                    </div>
+
+                    <div className="flex w-full flex-col items-start gap-3 lg:items-end">
+                        <Button onClick={handleFetchData} disabled={isLoading || !fileData} className="w-full px-6 sm:w-auto">
+                            {isLoading ? "Loading..." : "Tarik Data"}
+                        </Button>
+                        {status ? <span className="text-xs text-zinc-500 sm:text-sm">{status}</span> : null}
+                    </div>
                 </div>
             </div>
-            <HsCodeTable fileData={fileData} />
+
+            <HsCodeTable fileData={fileData} resultData={resultData} />
         </div>
     );
 }

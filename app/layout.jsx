@@ -1,29 +1,31 @@
 import { Analytics } from "@vercel/analytics/react";
-import { Inter } from "next/font/google";
+import { Manrope } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "./presentation/components";
 import { navLinks } from "./presentation/config/nav-links";
 
-const inter = Inter({ subsets: ["latin"] });
+const manrope = Manrope({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "INSScan | Home Page",
+  title: "Pesisir | Home Page",
   description: "Upload and done.",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html data-theme="bumblebee" lang="en">
-      <body className={`${inter.className} text-slate-800 lg:px-20`}>
-        <header>
+    <html data-theme="light" lang="en">
+      <body className={`${manrope.className} min-h-screen bg-zinc-50 text-zinc-900 antialiased`}>
+        <header className="sticky top-0 z-40 border-b border-zinc-200/70 bg-zinc-50/85 backdrop-blur-xl">
           <Navbar links={navLinks} />
         </header>
-        <main className="min-h-[80vh] flex">
-          {children}
-          <Analytics />
+        <main className="min-h-[82vh]">
+          <div className="mx-auto w-full max-w-7xl px-5 pb-20 pt-8 sm:px-8 lg:px-12">
+            {children}
+            <Analytics />
+          </div>
         </main>
-        <footer className="footer footer-center p-4 bg-base-800 text-base-content">
-          <aside>
+        <footer className="border-t border-zinc-200/70 bg-zinc-50/90">
+          <aside className="mx-auto max-w-7xl px-5 py-6 text-center text-sm text-zinc-500 sm:px-8 lg:px-12">
             <p>Copyright © 2024 Semesta Raya Software</p>
           </aside>
         </footer>

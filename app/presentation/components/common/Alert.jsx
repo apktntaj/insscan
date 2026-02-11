@@ -8,14 +8,14 @@ import React from "react";
  */
 export default function Alert({ message, variant = "info" }) {
     const variants = {
-        info: "alert-info",
-        success: "alert-success",
-        warning: "alert-warning",
-        error: "alert-error",
+        info: "border-zinc-200 bg-white text-zinc-700",
+        success: "border-zinc-200 bg-white text-zinc-700",
+        warning: "border-zinc-200 bg-white text-zinc-700",
+        error: "border-zinc-200 bg-white text-zinc-700",
     };
 
     return (
-        <div className={`alert ${variants[variant]} my-4`}>
+        <div className={`rounded-2xl border px-4 py-3 text-sm leading-relaxed shadow-sm ${variants[variant]}`}>
             <span>{message}</span>
         </div>
     );

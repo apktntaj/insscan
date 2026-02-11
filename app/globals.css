@@ -1,3 +1,22 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  html,
+  body {
+    @apply bg-zinc-50 text-zinc-900;
+    background-image:
+      radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.95), rgba(250, 250, 250, 0.4) 40%, transparent 60%),
+      radial-gradient(circle at 90% 0%, rgba(244, 244, 245, 0.85), transparent 45%);
+    background-attachment: fixed;
+  }
+
+  ::selection {
+    @apply bg-zinc-900 text-zinc-50;
+  }
+
+  * {
+    text-rendering: geometricPrecision;
+  }
+}

@@ -17,6 +17,10 @@
  * @param {boolean} [params.hasLartasBorder] - Has border regulation
  * @param {boolean} [params.hasLartasPostBorder] - Has post-border regulation
  * @param {boolean} [params.hasLartasExport] - Has export regulation
+ * @param {Object[]} [params.lartasImportDetails] - Import regulation details
+ * @param {Object[]} [params.lartasBorderDetails] - Border regulation details
+ * @param {Object[]} [params.lartasPostBorderDetails] - Post-border regulation details
+ * @param {Object[]} [params.lartasExportDetails] - Export regulation details
  * @returns {HsCode}
  */
 export function createHsCode({
@@ -29,6 +33,10 @@ export function createHsCode({
   hasLartasBorder = false,
   hasLartasPostBorder = false,
   hasLartasExport = false,
+  lartasImportDetails = [],
+  lartasBorderDetails = [],
+  lartasPostBorderDetails = [],
+  lartasExportDetails = [],
 }) {
   return Object.freeze({
     code,
@@ -40,6 +48,10 @@ export function createHsCode({
     hasLartasBorder,
     hasLartasPostBorder,
     hasLartasExport,
+    lartasImportDetails,
+    lartasBorderDetails,
+    lartasPostBorderDetails,
+    lartasExportDetails,
   });
 }
 
@@ -79,5 +91,9 @@ export function createEmptyHsCode(code) {
     hasLartasBorder: false,
     hasLartasPostBorder: false,
     hasLartasExport: false,
+    lartasImportDetails: [],
+    lartasBorderDetails: [],
+    lartasPostBorderDetails: [],
+    lartasExportDetails: [],
   });
 }
