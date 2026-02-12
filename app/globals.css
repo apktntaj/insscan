@@ -20,3 +20,13 @@
     text-rendering: geometricPrecision;
   }
 }
+
+.bl-hover-copy .react-pdf__Page__textContent span {
+  cursor: copy;
+  transition: background-color 120ms ease;
+}
+
+.bl-hover-copy .react-pdf__Page__textContent span:hover {
+  background-color: rgba(24, 24, 27, 0.12);
+  border-radius: 3px;
+}

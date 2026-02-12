@@ -20,6 +20,7 @@ export default function Navbar({ links = [] }) {
     const mainLinks = [
         { label: "Home", href: "/" },
         { label: "Scanner", href: "/inscann" },
+        { label: "BL Scanner", href: "/blscann" },
         ...links,
     ];
 
