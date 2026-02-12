@@ -3,7 +3,13 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { Sora } from "next/font/google";
 import { usePathname } from "next/navigation";
+
+const brandFont = Sora({
+    subsets: ["latin"],
+    weight: ["600", "700"],
+});
 
 /**
  * Navbar Component
@@ -18,7 +24,7 @@ export default function Navbar({ links = [] }) {
     ];
 
     return (
-        <nav className="mx-auto flex h-[4.5rem] w-full max-w-7xl items-center justify-between px-5 sm:px-8 lg:px-12">
+        <nav className="mx-auto flex h-[3.5rem] w-full max-w-7xl items-center justify-between px-5 sm:px-8 lg:px-12">
             <div className="flex items-center gap-3">
                 <div className="dropdown lg:hidden">
                     <button tabIndex={0} className="rounded-xl border border-zinc-200 bg-white p-2 text-zinc-700 shadow-sm">
@@ -46,15 +52,20 @@ export default function Navbar({ links = [] }) {
                     </ul>
                 </div>
 
-                <Link className="flex items-center" href="/">
+                <Link className="flex items-center gap-1.5" href="/">
                     <Image
-                        src="/logo-pesisir.svg"
-                        width={188}
-                        height={50}
+                        src="/logo-pesisir.png"
+                        width={244}
+                        height={65}
                         alt="Pesisir Logo"
-                        className="h-9 w-auto sm:h-10"
+                        className="h-[2.925rem] w-auto sm:h-[3.25rem]"
                         priority
                     />
+                    <span
+                        className={`${brandFont.className} text-[1.02rem] font-bold lowercase leading-none tracking-tight text-zinc-800 sm:text-[1.12rem]`}
+                    >
+                        Pesisir
+                    </span>
                 </Link>
             </div>
 
