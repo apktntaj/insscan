@@ -6,8 +6,10 @@
  */
 
 import { hsCodeController } from "../../../adapters/controllers/hs-code.controller";
+import { toResultRow } from "../../../adapters/presenters/hs-code.presenter";
 
 const encoder = new TextEncoder();
+export const maxDuration = 300;
 
 function toNdjsonLine(payload) {
   return `${JSON.stringify(payload)}\n`;
@@ -34,9 +36,11 @@ export async function POST(req) {
 
           const result = await hsCodeController.handleFetchRequest(hsCodes, {
             onProgress(progress) {
+              const { result: progressResult, ...meta } = progress;
               push({
                 event: "progress",
-                ...progress,
+                ...meta,
+                row: toResultRow(progressResult),
               });
             },
           });

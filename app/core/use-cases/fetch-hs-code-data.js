@@ -11,7 +11,18 @@ import {
   isValidHsCode,
 } from "../entities/hs-code";
 
-const REQUEST_DELAY_MS = 250;
+const REQUEST_DELAY_MIN_MS = parseDelayMs(
+  process.env.INSW_REQUEST_DELAY_MIN_MS,
+  1400
+);
+const REQUEST_DELAY_MAX_MS = parseDelayMs(
+  process.env.INSW_REQUEST_DELAY_MAX_MS,
+  2600
+);
+const REQUEST_ERROR_COOLDOWN_MS = parseDelayMs(
+  process.env.INSW_REQUEST_ERROR_COOLDOWN_MS,
+  4200
+);
 
 /**
  * @typedef {Object} HsCodeGateway
@@ -61,7 +72,7 @@ export function createFetchHsCodeDataUseCase(hsCodeGateway) {
    * Fetches data for multiple HS codes
    * @param {string[]} codes - Array of HS codes
    * @param {Object} [options] - Optional callbacks/options
-   * @param {(progress: {current: number, total: number, code: string, mode: string}) => void} [options.onProgress]
+   * @param {(progress: {current: number, total: number, code: string, mode: string, result: HsCode}) => void} [options.onProgress]
    * @returns {Promise<HsCode[]>}
    */
   async function fetchMultiple(codes, options = {}) {
@@ -100,8 +111,8 @@ export function createFetchHsCodeDataUseCase(hsCodeGateway) {
             mode = "error";
           }
 
-          // Keep a small gap between real INSW requests.
-          await sleep(REQUEST_DELAY_MS);
+          // Add manual-like human pacing between real INSW calls.
+          await sleep(resolveRequestDelay(mode));
         }
       }
 
@@ -111,6 +122,7 @@ export function createFetchHsCodeDataUseCase(hsCodeGateway) {
         onProgress({
           ...progressBase,
           mode,
+          result,
         });
       }
     }
@@ -128,4 +140,26 @@ function sleep(ms) {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
+}
+
+function resolveRequestDelay(mode) {
+  if (mode === "error") {
+    return REQUEST_ERROR_COOLDOWN_MS;
+  }
+
+  return randomBetween(REQUEST_DELAY_MIN_MS, REQUEST_DELAY_MAX_MS);
+}
+
+function randomBetween(min, max) {
+  const safeMin = Math.max(Number(min) || 0, 0);
+  const safeMax = Math.max(Number(max) || safeMin, safeMin);
+  return Math.round(Math.random() * (safeMax - safeMin) + safeMin);
+}
+
+function parseDelayMs(rawValue, fallback) {
+  const parsed = Number(rawValue);
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    return fallback;
+  }
+  return Math.round(parsed);
 }

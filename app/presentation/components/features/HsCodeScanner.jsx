@@ -7,6 +7,12 @@ import Input from "../common/Input";
 import { fileToArrayBuffer, bufferToJson, isExcelFile } from "../../../infrastructure/excel/excel.service";
 import { formatHsCode, isValidHsCode } from "../../../core/entities/hs-code";
 
+const BASE_CHUNK_SIZE = resolveChunkSize(process.env.NEXT_PUBLIC_HS_CHUNK_SIZE);
+const MIN_CHUNK_SIZE = 1;
+const MAX_CHUNK_ATTEMPTS = 5;
+const CHUNK_RETRY_DELAY_MS = 900;
+const CHUNK_GROW_SUCCESS_STREAK = 3;
+
 /**
  * HsCodeScanner Component
  * Presentation Layer - Feature-specific component
@@ -72,6 +78,8 @@ export default function HsCodeScanner() {
             currentCode: null,
             currentMode: null,
             logs: [],
+            chunkSize: BASE_CHUNK_SIZE,
+            baseChunkSize: BASE_CHUNK_SIZE,
             startedAt,
             finishedAt: null,
             elapsedMs: 0,
@@ -83,96 +91,188 @@ export default function HsCodeScanner() {
             etaReferenceMs: null,
         });
 
+        let aggregatedRows = [];
+        let processedGlobal = 0;
+        let activeChunkSize = BASE_CHUNK_SIZE;
+        let stableSuccessStreak = 0;
+        let requestCounter = 0;
+
         try {
-            const response = await fetch("/api/hs-code/progress", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
-            });
+            while (processedGlobal < total) {
+                let pendingChunk = payload.slice(
+                    processedGlobal,
+                    processedGlobal + activeChunkSize
+                );
+                let attempt = 0;
+                let chunkDone = false;
 
-            if (!response.ok) {
-                throw new Error("Failed to fetch data");
+                while (!chunkDone) {
+                    attempt += 1;
+                    requestCounter += 1;
+
+                    try {
+                        setStatus(
+                            `Request ${requestCounter} - memproses ${processedGlobal}/${total} HS code (chunk ${pendingChunk.length})...`
+                        );
+
+                        const response = await fetch("/api/hs-code/progress", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(pendingChunk),
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`Failed to fetch chunk: ${response.status}`);
+                        }
+
+                        if (!response.body) {
+                            throw new Error("Streaming not supported");
+                        }
+
+                        const {
+                            data: chunkData,
+                            isPartial,
+                            processedCount,
+                        } = await consumeProgressStream(response.body, {
+                            onStart: () => {
+                                setProgress((prev) => ({
+                                    ...prev,
+                                    startedAt,
+                                    chunkSize: activeChunkSize,
+                                }));
+                            },
+                            onProgress: (payloadItem) => {
+                                const globalCurrent = Math.min(
+                                    processedGlobal + Math.max(payloadItem.current || 0, 0),
+                                    total
+                                );
+
+                                const logMessage = formatProgressLog({
+                                    ...payloadItem,
+                                    current: globalCurrent,
+                                    total,
+                                });
+
+                                const now = Date.now();
+                                const elapsedMs = Math.max(now - startedAt, 0);
+                                const avgMsPerCode = globalCurrent > 0 ? elapsedMs / globalCurrent : 0;
+                                const etaTotalMs = total > 0 ? Math.round(avgMsPerCode * total) : null;
+                                const etaRemainingMs = etaTotalMs !== null
+                                    ? Math.max(etaTotalMs - elapsedMs, 0)
+                                    : null;
+
+                                setProgress((prev) => ({
+                                    total,
+                                    current: globalCurrent,
+                                    currentCode: payloadItem.code ?? prev.currentCode,
+                                    currentMode: payloadItem.mode ?? prev.currentMode,
+                                    logs: [...prev.logs, logMessage].slice(-10),
+                                    chunkSize: activeChunkSize,
+                                    baseChunkSize: BASE_CHUNK_SIZE,
+                                    startedAt,
+                                    elapsedMs,
+                                    etaRemainingMs,
+                                    etaTotalMs,
+                                    etaTotalMsBeforeComplete:
+                                        globalCurrent < total
+                                            ? etaTotalMs
+                                            : prev.etaTotalMsBeforeComplete ?? etaTotalMs,
+                                }));
+
+                                setStatus(
+                                    `Request ${requestCounter} - memproses ${globalCurrent}/${total} HS code (chunk ${pendingChunk.length})...`
+                                );
+                            },
+                        });
+
+                        if (processedCount <= 0) {
+                            throw new Error("Chunk stream ended without progress");
+                        }
+
+                        aggregatedRows = [...aggregatedRows, ...chunkData];
+                        processedGlobal += processedCount;
+                        chunkDone = true;
+
+                        if (isPartial) {
+                            stableSuccessStreak = 0;
+
+                            if (activeChunkSize > MIN_CHUNK_SIZE) {
+                                activeChunkSize -= 1;
+                                setStatus(
+                                    `Koneksi tidak stabil. Chunk diturunkan ke ${activeChunkSize}...`
+                                );
+                            }
+                        } else if (attempt === 1) {
+                            stableSuccessStreak += 1;
+
+                            if (
+                                stableSuccessStreak >= CHUNK_GROW_SUCCESS_STREAK &&
+                                activeChunkSize < BASE_CHUNK_SIZE
+                            ) {
+                                activeChunkSize += 1;
+                                stableSuccessStreak = 0;
+                                setStatus(
+                                    `Koneksi stabil. Chunk dinaikkan ke ${activeChunkSize}...`
+                                );
+                            }
+                        } else {
+                            stableSuccessStreak = 0;
+                        }
+                    } catch (chunkError) {
+                        console.error(`Request ${requestCounter} attempt ${attempt} failed:`, chunkError);
+                        stableSuccessStreak = 0;
+
+                        if (attempt >= MAX_CHUNK_ATTEMPTS) {
+                            if (activeChunkSize > MIN_CHUNK_SIZE) {
+                                activeChunkSize -= 1;
+                                attempt = 0;
+                                pendingChunk = payload.slice(
+                                    processedGlobal,
+                                    processedGlobal + activeChunkSize
+                                );
+
+                                setStatus(
+                                    `Retry berulang gagal. Chunk diturunkan ke ${activeChunkSize} lalu lanjut...`
+                                );
+                                await sleep(CHUNK_RETRY_DELAY_MS);
+                                continue;
+                            }
+
+                            throw chunkError;
+                        }
+
+                        setStatus(
+                            `Request ${requestCounter} gagal. Retry ${attempt}/${MAX_CHUNK_ATTEMPTS}...`
+                        );
+                        await sleep(CHUNK_RETRY_DELAY_MS);
+                    }
+                }
             }
 
-            if (!response.body) {
-                throw new Error("Streaming not supported");
-            }
-
-            const finalData = await consumeProgressStream(response.body, {
-                onStart: ({ total: streamTotal }) => {
-                    setProgress((prev) => ({
-                        ...prev,
-                        total: streamTotal ?? prev.total,
-                        startedAt,
-                    }));
-                },
-                onProgress: (payloadItem) => {
-                    const logMessage = formatProgressLog(payloadItem);
-                    const now = Date.now();
-                    const safeTotal = payloadItem.total || total || 0;
-                    const safeCurrent = Math.max(payloadItem.current || 0, 0);
-                    const elapsedMs = Math.max(now - startedAt, 0);
-                    const avgMsPerCode = safeCurrent > 0 ? elapsedMs / safeCurrent : 0;
-                    const etaTotalMs = safeTotal > 0 ? Math.round(avgMsPerCode * safeTotal) : null;
-                    const etaRemainingMs = etaTotalMs !== null
-                        ? Math.max(etaTotalMs - elapsedMs, 0)
-                        : null;
-
-                    setProgress((prev) => ({
-                        total: payloadItem.total ?? prev.total,
-                        current: payloadItem.current ?? prev.current,
-                        currentCode: payloadItem.code ?? prev.currentCode,
-                        currentMode: payloadItem.mode ?? prev.currentMode,
-                        logs: [...prev.logs, logMessage].slice(-10),
-                        startedAt,
-                        elapsedMs,
-                        etaRemainingMs,
-                        etaTotalMs,
-                        etaTotalMsBeforeComplete:
-                            safeCurrent < safeTotal
-                                ? etaTotalMs
-                                : prev.etaTotalMsBeforeComplete ?? etaTotalMs,
-                    }));
-
-                    setStatus(
-                        `Memproses ${payloadItem.current}/${safeTotal} HS code secara serial...`
-                    );
-                },
-            });
-
-            setResultData(finalData);
-            setStatus(`Berhasil! ${finalData.length} data HS Code ditampilkan.`);
-            setProgress((prev) => {
-                const finishedAt = Date.now();
-                const actualDurationMs = Math.max(finishedAt - (prev.startedAt || startedAt), 0);
-                const etaReferenceMs = prev.etaTotalMsBeforeComplete ?? prev.etaTotalMs;
-                const etaDeltaMs = typeof etaReferenceMs === "number"
-                    ? actualDurationMs - etaReferenceMs
-                    : null;
-
-                return {
-                    ...prev,
-                    finishedAt,
-                    elapsedMs: actualDurationMs,
-                    etaRemainingMs: 0,
-                    actualDurationMs,
-                    etaReferenceMs,
-                    etaDeltaMs,
-                };
-            });
+            setResultData(aggregatedRows);
+            setStatus(`Berhasil! ${aggregatedRows.length} data HS Code ditampilkan.`);
         } catch (error) {
             console.error("Error:", error);
-            setStatus("Gagal mengambil data. Silakan coba lagi.");
+
+            if (aggregatedRows.length > 0) {
+                setResultData(aggregatedRows);
+                setStatus(
+                    `Proses berhenti sebelum selesai. ${aggregatedRows.length} data parsial berhasil ditampilkan.`
+                );
+            } else {
+                setStatus("Gagal mengambil data. Silakan coba lagi.");
+            }
         } finally {
+            setProgress((prev) => finalizeProgress(prev, startedAt, total, processedGlobal));
             setIsLoading(false);
         }
     }, [fileData]);
 
     return (
-        <div className="space-y-6">
-            <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">
-                <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
-                    <div className="space-y-3">
+        <div className="space-y-6 overflow-x-clip">
+            <div className="overflow-hidden rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">
+                <div className="grid min-w-0 gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
+                    <div className="min-w-0 space-y-3">
                         <p className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-500">Input File</p>
                         <Input handleChange={handleFileChange} className="max-w-2xl" />
                         <p className="text-xs leading-6 text-zinc-500 sm:text-sm">
@@ -180,13 +280,18 @@ export default function HsCodeScanner() {
                         </p>
                     </div>
 
-                    <div className="flex w-full flex-col items-start gap-3 lg:items-end">
+                    <div className="flex min-w-0 w-full flex-col items-start gap-3 lg:w-auto lg:justify-self-end lg:items-end">
                         <Button onClick={handleFetchData} disabled={isLoading || !fileData} className="w-full px-6 sm:w-auto">
                             {isLoading ? "Loading..." : "Tarik Data"}
                         </Button>
-                        {status ? <span className="text-xs text-zinc-500 sm:text-sm">{status}</span> : null}
                     </div>
                 </div>
+
+                {status ? (
+                    <p className="mt-4 max-w-full break-words pr-1 text-xs leading-6 text-zinc-500 sm:text-sm">
+                        {status}
+                    </p>
+                ) : null}
             </div>
 
             {progress.total > 0 ? (
@@ -204,7 +309,7 @@ function ProgressPanel({ progress, isLoading }) {
         : 0;
 
     return (
-        <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-5">
+        <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-5">
             <div className="flex items-center justify-between gap-3">
                 <p className="text-xs font-medium uppercase tracking-[0.18em] text-zinc-500">Proses Fetch</p>
                 <p className="text-sm font-medium text-zinc-700">
@@ -219,12 +324,16 @@ function ProgressPanel({ progress, isLoading }) {
                 />
             </div>
 
-            <p className="mt-3 text-sm text-zinc-700">
+            <p className="mt-3 break-words text-sm text-zinc-700">
                 {progress.currentCode
                     ? `HS aktif: ${formatHsCode(String(progress.currentCode))} (${labelMode(progress.currentMode)})`
                     : "Menunggu proses dimulai..."}
                 {!isLoading && progress.current === progress.total ? " Selesai." : ""}
             </p>
+
+            <div className="mt-2 text-xs text-zinc-500">
+                Mode: serial adaptive chunk (aktif {progress.chunkSize}, maksimum {progress.baseChunkSize})
+            </div>
 
             <div className="mt-3 grid gap-2 text-xs text-zinc-600 sm:grid-cols-2">
                 <p>
@@ -267,7 +376,7 @@ function ProgressPanel({ progress, isLoading }) {
                     <p className="text-xs text-zinc-500">Belum ada log proses.</p>
                 ) : (
                     progress.logs.map((log, idx) => (
-                        <p key={`${log}-${idx}`} className="text-xs text-zinc-600">
+                        <p key={`${log}-${idx}`} className="break-words text-xs text-zinc-600">
                             {log}
                         </p>
                     ))
@@ -282,6 +391,8 @@ async function consumeProgressStream(stream, { onStart, onProgress }) {
     const decoder = new TextDecoder();
     let buffer = "";
     let finalData = null;
+    const partialRows = [];
+    let streamError = null;
 
     while (true) {
         const { done, value } = await reader.read();
@@ -301,6 +412,9 @@ async function consumeProgressStream(stream, { onStart, onProgress }) {
             }
 
             if (event.event === "progress") {
+                if (event.row) {
+                    partialRows.push(event.row);
+                }
                 onProgress?.(event);
                 continue;
             }
@@ -311,7 +425,7 @@ async function consumeProgressStream(stream, { onStart, onProgress }) {
             }
 
             if (event.event === "error") {
-                throw new Error(event.message || "Failed to fetch HS data");
+                streamError = event.message || "Failed to fetch HS data";
             }
         }
     }
@@ -321,16 +435,33 @@ async function consumeProgressStream(stream, { onStart, onProgress }) {
         if (event.event === "complete") {
             finalData = event.data || [];
         }
+        if (event.event === "progress" && event.row) {
+            partialRows.push(event.row);
+            onProgress?.(event);
+        }
         if (event.event === "error") {
-            throw new Error(event.message || "Failed to fetch HS data");
+            streamError = event.message || "Failed to fetch HS data";
         }
     }
 
-    if (!finalData) {
-        throw new Error("No final result from stream");
+    if (Array.isArray(finalData)) {
+        return {
+            data: finalData,
+            isPartial: false,
+            processedCount: finalData.length,
+        };
     }
 
-    return finalData;
+    if (partialRows.length > 0) {
+        return {
+            data: partialRows,
+            isPartial: true,
+            processedCount: partialRows.length,
+            streamError,
+        };
+    }
+
+    throw new Error(streamError || "No final result from stream");
 }
 
 function labelMode(mode) {
@@ -353,6 +484,8 @@ function createInitialProgressState() {
         currentCode: null,
         currentMode: null,
         logs: [],
+        chunkSize: BASE_CHUNK_SIZE,
+        baseChunkSize: BASE_CHUNK_SIZE,
         startedAt: null,
         finishedAt: null,
         elapsedMs: 0,
@@ -400,6 +533,42 @@ function formatDelta(deltaMs) {
 
     const sign = deltaMs > 0 ? "+" : "-";
     return `${sign}${formatDuration(Math.abs(deltaMs))}`;
+}
+
+function finalizeProgress(prev, startedAt, total, processedGlobal) {
+    const finishedAt = Date.now();
+    const actualDurationMs = Math.max(finishedAt - (prev.startedAt || startedAt), 0);
+    const etaReferenceMs = prev.etaTotalMsBeforeComplete ?? prev.etaTotalMs;
+    const etaDeltaMs = typeof etaReferenceMs === "number"
+        ? actualDurationMs - etaReferenceMs
+        : null;
+
+    return {
+        ...prev,
+        total: prev.total || total,
+        current: Math.max(prev.current, processedGlobal),
+        finishedAt,
+        elapsedMs: actualDurationMs,
+        etaRemainingMs: 0,
+        actualDurationMs,
+        etaReferenceMs,
+        etaDeltaMs,
+    };
+}
+
+function resolveChunkSize(rawValue) {
+    const parsed = Number(rawValue);
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+        return 3;
+    }
+
+    return Math.min(Math.max(Math.round(parsed), 1), 10);
+}
+
+function sleep(ms) {
+    return new Promise((resolve) => {
+        setTimeout(resolve, ms);
+    });
 }
 
 /**

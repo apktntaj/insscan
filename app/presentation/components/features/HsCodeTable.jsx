@@ -26,7 +26,7 @@ export default function HsCodeTable({ fileData, resultData }) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 overflow-x-hidden">
       <Alert message="File terdeteksi. Klik 'Tarik Data' untuk melihat tarif dan detail LARTAS." />
       <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
         <div className="max-h-80 overflow-x-auto overflow-y-auto">
@@ -67,15 +67,15 @@ function ResultCards({ rows }) {
   }, [rows]);
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+    <div className="space-y-6 overflow-x-hidden">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard label="Total HS" value={metrics.total} />
         <MetricCard label="LARTAS Ada" value={metrics.lartasAda} />
         <MetricCard label="LARTAS Tidak Ada" value={metrics.lartasTidakAda} />
         <MetricCard label="Ada Data Pajak" value={metrics.pajakLengkap} />
       </div>
 
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 2xl:grid-cols-2">
         {rows.map((row, idx) => {
           const sections = getLartasSections(row);
           const hasLartas = sections.length > 0;
@@ -84,18 +84,20 @@ function ResultCards({ rows }) {
           return (
             <div
               key={`${row.hsCode}-${idx}`}
-              className="rounded-3xl border border-zinc-200 bg-white p-5 shadow-sm transition hover:border-zinc-300 sm:p-6"
+              className="min-w-0 overflow-hidden rounded-3xl border border-zinc-200 bg-white p-5 shadow-sm transition hover:border-zinc-300 sm:p-6"
             >
-              <div className="flex items-center justify-between gap-3">
-                <p className="rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-xs font-medium text-zinc-600">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <p className="shrink-0 rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-xs font-medium text-zinc-600">
                   No {idx + 1}
                 </p>
-                <p className="text-lg font-semibold tracking-tight text-zinc-900">{formatHsCode(String(row.hsCode))}</p>
+                <p className="min-w-0 break-words text-right text-lg font-semibold tracking-tight text-zinc-900">
+                  {formatHsCode(String(row.hsCode))}
+                </p>
               </div>
 
               <div className="mt-5 border-t border-zinc-100 pt-5">
                 <p className="text-xs font-medium uppercase tracking-[0.15em] text-zinc-500">Data Pajak</p>
-                <div className="mt-3 grid grid-cols-2 gap-2">
+                <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
                   <TaxCell label="BM" value={row.bm} />
                   <TaxCell label="PPN" value={row.ppn} />
                   <TaxCell label="PPH" value={row.pph} />
@@ -129,7 +131,7 @@ function ResultCards({ rows }) {
                   <p className="mt-2 text-sm text-zinc-500">-</p>
                 ) : (
                   <>
-                    <p className="mt-2 line-clamp-2 text-sm leading-6 text-zinc-700">{preview}</p>
+                    <p className="mt-2 line-clamp-2 break-words text-sm leading-6 text-zinc-700">{preview}</p>
                     <button
                       type="button"
                       className="mt-3 rounded-xl border border-zinc-300 px-3 py-2 text-xs font-medium text-zinc-700 transition hover:bg-zinc-100"
@@ -156,15 +158,17 @@ function LartasModal({ row, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/55 p-4 backdrop-blur-sm" onClick={onClose}>
       <div
-        className="w-full max-w-5xl rounded-3xl border border-zinc-200 bg-white p-5 shadow-xl sm:p-7"
+        className="mx-auto flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-zinc-200 bg-white p-5 shadow-xl sm:p-7"
         onClick={(event) => event.stopPropagation()}
       >
         <div>
           <p className="text-sm text-zinc-500">No {row.index}</p>
-          <h3 className="mt-1 text-xl font-semibold tracking-tight text-zinc-900">HS {formatHsCode(String(row.hsCode))}</h3>
+          <h3 className="mt-1 break-words text-xl font-semibold tracking-tight text-zinc-900">
+            HS {formatHsCode(String(row.hsCode))}
+          </h3>
         </div>
 
-        <div className="mt-5 max-h-[68vh] space-y-4 overflow-y-auto pr-1">
+        <div className="mt-5 flex-1 space-y-4 overflow-y-auto pr-1">
           {sections.length === 0 ? (
             <p className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-600">Tidak ada detail LARTAS.</p>
           ) : (
@@ -179,18 +183,22 @@ function LartasModal({ row, onClose }) {
                     >
                       <div className="grid grid-cols-1 gap-2 leading-6 sm:grid-cols-2">
                         <p>
-                          <span className="font-medium text-zinc-900">Nama Izin:</span> {detail.namaIzin || "-"}
+                          <span className="font-medium text-zinc-900">Nama Izin:</span>{" "}
+                          <span className="break-words">{detail.namaIzin || "-"}</span>
                         </p>
                         <p>
-                          <span className="font-medium text-zinc-900">No SKEP:</span> {detail.noSkep || "-"}
+                          <span className="font-medium text-zinc-900">No SKEP:</span>{" "}
+                          <span className="break-words">{detail.noSkep || "-"}</span>
                         </p>
                         <p>
-                          <span className="font-medium text-zinc-900">ID Dokumen:</span> {detail.idDokumen || "-"}
+                          <span className="font-medium text-zinc-900">ID Dokumen:</span>{" "}
+                          <span className="break-words">{detail.idDokumen || "-"}</span>
                         </p>
                         <p>
-                          <span className="font-medium text-zinc-900">Komoditi:</span> {detail.komoditi || "-"}
+                          <span className="font-medium text-zinc-900">Komoditi:</span>{" "}
+                          <span className="break-words">{detail.komoditi || "-"}</span>
                         </p>
-                        <p className="sm:col-span-2">
+                        <p className="break-words sm:col-span-2">
                           <span className="font-medium text-zinc-900">Dok Pabean:</span>{" "}
                           {(detail.dokumenPabean || []).join(", ") || "-"}
                         </p>
@@ -238,18 +246,18 @@ function LartasModal({ row, onClose }) {
 
 function MetricCard({ label, value }) {
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+    <div className="min-w-0 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
       <p className="text-xs uppercase tracking-[0.14em] text-zinc-500">{label}</p>
-      <p className="mt-2 text-2xl font-semibold tracking-tight text-zinc-900">{value}</p>
+      <p className="mt-2 break-words text-2xl font-semibold tracking-tight text-zinc-900">{value}</p>
     </div>
   );
 }
 
 function TaxCell({ label, value }) {
   return (
-    <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-3">
+    <div className="min-w-0 rounded-xl border border-zinc-200 bg-zinc-50 p-3">
       <p className="text-[11px] uppercase tracking-[0.12em] text-zinc-500">{label}</p>
-      <p className="mt-1 text-sm font-medium text-zinc-800">{value || "tidak ada data"}</p>
+      <p className="mt-1 break-words text-sm font-medium text-zinc-800">{value || "tidak ada data"}</p>
     </div>
   );
 }

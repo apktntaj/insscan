@@ -12,7 +12,7 @@ const PAGE_DESCRIPTION = [
  */
 export default function InscannPage() {
   return (
-    <div className="space-y-6 pb-8 sm:space-y-8">
+    <div className="mx-auto w-full max-w-6xl space-y-6 pb-8 sm:space-y-8">
       <Title title={PAGE_TITLE} descs={PAGE_DESCRIPTION} />
       <HsCodeScanner />
     </div>
