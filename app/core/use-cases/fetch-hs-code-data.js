@@ -12,7 +12,6 @@ import {
 } from "../entities/hs-code";
 
 const REQUEST_DELAY_MS = 250;
-const MAX_CONCURRENCY = 5;
 
 /**
  * @typedef {Object} HsCodeGateway
@@ -61,44 +60,62 @@ export function createFetchHsCodeDataUseCase(hsCodeGateway) {
   /**
    * Fetches data for multiple HS codes
    * @param {string[]} codes - Array of HS codes
+   * @param {Object} [options] - Optional callbacks/options
+   * @param {(progress: {current: number, total: number, code: string, mode: string}) => void} [options.onProgress]
    * @returns {Promise<HsCode[]>}
    */
-  async function fetchMultiple(codes) {
-    const uniqueCodes = [...new Set(codes.filter(isValidHsCode))];
-    const resultMap = new Map();
-    const concurrency = Math.min(
-      Math.max(resolveConcurrency(uniqueCodes.length), 1),
-      MAX_CONCURRENCY
-    );
-    let cursor = 0;
+  async function fetchMultiple(codes, options = {}) {
+    const onProgress = typeof options.onProgress === "function"
+      ? options.onProgress
+      : null;
 
-    // Run with bounded worker pool to keep request rate controlled.
-    async function worker() {
-      while (true) {
-        const currentIndex = cursor;
-        cursor += 1;
+    const list = Array.isArray(codes) ? codes.map((code) => String(code ?? "")) : [];
+    const total = list.length;
+    const results = [];
+    const cache = new Map();
 
-        if (currentIndex >= uniqueCodes.length) {
-          return;
+    for (let index = 0; index < total; index += 1) {
+      const code = list[index];
+      const progressBase = {
+        current: index + 1,
+        total,
+        code,
+      };
+
+      let result = createEmptyHsCode(code);
+      let mode = "invalid";
+
+      if (isValidHsCode(code)) {
+        if (cache.has(code)) {
+          result = cache.get(code);
+          mode = "cached";
+        } else {
+          try {
+            result = await fetchSingle(code);
+            cache.set(code, result);
+            mode = "fetched";
+          } catch (error) {
+            console.error(`Failed to process HS code ${code}:`, error);
+            result = createEmptyHsCode(code);
+            mode = "error";
+          }
+
+          // Keep a small gap between real INSW requests.
+          await sleep(REQUEST_DELAY_MS);
         }
+      }
 
-        const code = uniqueCodes[currentIndex];
-        const result = await fetchSingle(code);
-        resultMap.set(code, result);
+      results.push(result);
 
-        // Add a short delay to avoid burst traffic to INSW.
-        await sleep(REQUEST_DELAY_MS);
+      if (onProgress) {
+        onProgress({
+          ...progressBase,
+          mode,
+        });
       }
     }
 
-    const workers = Array.from({ length: concurrency }, () => worker());
-    await Promise.all(workers);
-
-    // Map back to original order, handling duplicates
-    return codes.map((code) => {
-      const found = resultMap.get(code);
-      return found || createEmptyHsCode(code);
-    });
+    return results;
   }
 
   return {
@@ -111,17 +128,4 @@ function sleep(ms) {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
-}
-
-/**
- * Resolves worker count (1-5) based on request size.
- * @param {number} totalCodes - Number of unique HS codes
- * @returns {number}
- */
-function resolveConcurrency(totalCodes) {
-  if (totalCodes > 100) return 5;
-  if (totalCodes > 60) return 4;
-  if (totalCodes > 30) return 3;
-  if (totalCodes > 10) return 2;
-  return 1;
 }

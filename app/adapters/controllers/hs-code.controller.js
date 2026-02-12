@@ -20,10 +20,11 @@ export function createHsCodeController() {
   /**
    * Handles request to fetch HS code data
    * @param {string[]} hsCodes - Array of HS codes from request
+   * @param {Object} [options] - Optional callbacks/options
    * @returns {Promise<Object>} Response with Excel-formatted data
    */
-  async function handleFetchRequest(hsCodes) {
-    const results = await fetchHsCodeUseCase.fetchMultiple(hsCodes);
+  async function handleFetchRequest(hsCodes, options = {}) {
+    const results = await fetchHsCodeUseCase.fetchMultiple(hsCodes, options);
     const tableData = toResultData(results);
 
     return {
