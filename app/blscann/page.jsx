@@ -10,7 +10,7 @@ const PAGE_DESCRIPTION = [
 export default function BlScannerPage() {
     return (
         <div className="mx-auto w-full max-w-6xl space-y-6 pb-8 sm:space-y-8">
-            <Title title={PAGE_TITLE} descs={PAGE_DESCRIPTION} />
+            <Title title={PAGE_TITLE} descs={PAGE_DESCRIPTION} variant="modern" eyebrow="BL Scanner" />
             <BlScanner />
         </div>
     );
