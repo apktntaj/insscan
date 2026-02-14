@@ -6,7 +6,7 @@
  */
 
 import { hsCodeController } from "../../adapters/controllers/hs-code.controller";
-export const maxDuration = 300;
+export const maxDuration = 60;
 
 export async function POST(req) {
   try {
