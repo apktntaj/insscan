@@ -1,10 +1,10 @@
 import Title from "../presentation/components/common/Title";
 import BlScanner from "../presentation/components/features/BlScanner";
 
-const PAGE_TITLE = "BL Scanner";
+const PAGE_TITLE = "Klik lalu salin.";
 const PAGE_DESCRIPTION = [
-    "Upload PDF Bill of Lading, lalu hover teks untuk menyalin nilai ke clipboard.",
-    "Mode saat ini fokus ke viewer + hover-copy. Parsing field akan ditambahkan di fase berikutnya.",
+    "Kurangi salah ketik saat input data Bill of Lading.",
+    "Cukup hover dan salin langsung ke clipboard."
 ];
 
 export default function BlScannerPage() {

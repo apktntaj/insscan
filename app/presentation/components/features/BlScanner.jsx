@@ -61,7 +61,7 @@ export default function BlScanner() {
 
     const handleDocumentSuccess = useCallback(({ numPages: totalPages }) => {
         setNumPages(totalPages);
-        setStatus("PDF siap dipindai. Hover teks untuk copy ke clipboard.");
+        setStatus("PDF siap dipindai. Klik teks untuk copy ke clipboard.");
     }, []);
 
     const copyToClipboard = useCallback(async (value) => {
@@ -122,17 +122,14 @@ export default function BlScanner() {
     return (
         <div className="space-y-6">
             <section className="overflow-hidden rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">
-                <div className="flex flex-col gap-3">
-                    <p className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-500">Upload BL PDF</p>
+                <div className="flex flex-col gap-2">
+                    <p className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-500">Upload dokumen Bill of Lading berformat pdf</p>
                     <input
                         type="file"
                         accept="application/pdf"
                         onChange={handleFileChange}
                         className="file-input file-input-bordered w-full max-w-xl border-zinc-300 bg-white"
                     />
-                    <p className="text-xs leading-6 text-zinc-500 sm:text-sm">
-                        Fitur ini belum melakukan parsing field. Nilai teks akan disalin langsung saat pointer hover.
-                    </p>
                 </div>
 
                 <p className="mt-4 break-words text-xs leading-6 text-zinc-600 sm:text-sm">{status}</p>
@@ -213,7 +210,7 @@ export default function BlScanner() {
                     </aside>
                 </section>
             ) : (
-                <section className="rounded-3xl border border-dashed border-zinc-300 bg-white/80 p-10 text-center shadow-sm">
+                <section className="rounded-3xl border border-dashed border-zinc-300 bg-white/80 p-3 text-center shadow-sm">
                     <p className="text-sm text-zinc-500">Belum ada file. Upload PDF untuk mulai menampilkan dokumen.</p>
                 </section>
             )}
