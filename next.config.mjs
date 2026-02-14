@@ -1,11 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  webpack: (config) => {
+  webpack: (config, { dev }) => {
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
       canvas: false,
       encoding: false,
     };
+
+    // Avoid intermittent filesystem cache rename errors in local dev
+    // (ENOENT on .next/cache/webpack/*.pack.gz_ -> *.pack.gz).
+    if (dev) {
+      config.cache = { type: "memory" };
+    }
 
     return config;
   },

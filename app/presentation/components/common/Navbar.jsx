@@ -3,13 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Sora } from "next/font/google";
 import { usePathname } from "next/navigation";
-
-const brandFont = Sora({
-    subsets: ["latin"],
-    weight: ["600", "700"],
-});
 
 /**
  * Navbar Component
@@ -19,8 +13,8 @@ export default function Navbar({ links = [] }) {
     const pathname = usePathname();
     const mainLinks = [
         { label: "Home", href: "/" },
-        { label: "Scanner", href: "/inscann" },
-        { label: "BL Scanner", href: "/blscann" },
+        { label: "Inscann", href: "/inscann" },
+        { label: "Blscann", href: "/blscann" },
         ...links,
     ];
 
@@ -63,7 +57,7 @@ export default function Navbar({ links = [] }) {
                         priority
                     />
                     <span
-                        className={`${brandFont.className} text-[1.02rem] font-bold lowercase leading-none tracking-tight text-zinc-800 sm:text-[1.12rem]`}
+                        className="text-[1.02rem] font-bold leading-none tracking-tight text-zinc-800 sm:text-[1.12rem]"
                     >
                         Pesisir
                     </span>

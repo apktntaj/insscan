@@ -21,10 +21,13 @@ export default function BlScanner() {
     const [numPages, setNumPages] = useState(0);
     const [pageNumber, setPageNumber] = useState(1);
     const [scale, setScale] = useState(1.15);
-    const [status, setStatus] = useState("Upload PDF Bill of Lading, lalu hover teks untuk auto-copy.");
+    const [status, setStatus] = useState("Upload PDF Bill of Lading, lalu klik teks untuk menyalin.");
     const [lastCopiedValue, setLastCopiedValue] = useState("");
+    const [showCopiedPopup, setShowCopiedPopup] = useState(false);
+    const [popupSeed, setPopupSeed] = useState(0);
     const lastCopyTextRef = useRef("");
     const lastCopyTsRef = useRef(0);
+    const popupTimerRef = useRef(null);
 
     useEffect(() => {
         if (!file) {
@@ -40,17 +43,28 @@ export default function BlScanner() {
         setPageNumber(1);
         setLastCopiedValue("");
         lastCopyTextRef.current = "";
-        setStatus("PDF berhasil dimuat. Arahkan pointer ke teks untuk menyalin nilai.");
+        setStatus("PDF berhasil dimuat. Klik teks untuk menyalin nilai.");
 
         return () => URL.revokeObjectURL(url);
     }, [file]);
+
+    useEffect(() => {
+        return () => {
+            if (popupTimerRef.current) {
+                window.clearTimeout(popupTimerRef.current);
+            }
+        };
+    }, []);
 
     const handleFileChange = useCallback((event) => {
         const nextFile = event.target.files?.[0];
 
         if (!nextFile) return;
 
-        if (nextFile.type !== "application/pdf") {
+        const hasPdfMime = nextFile.type === "application/pdf";
+        const hasPdfExtension = nextFile.name.toLowerCase().endsWith(".pdf");
+
+        if (!hasPdfMime && !hasPdfExtension) {
             setStatus("File harus berformat PDF.");
             event.target.value = "";
             return;
@@ -91,7 +105,7 @@ export default function BlScanner() {
         }
     }, []);
 
-    const handleTextHover = useCallback(
+    const handleTextClick = useCallback(
         async (event) => {
             const target = event.target;
             if (!(target instanceof HTMLElement)) return;
@@ -107,14 +121,22 @@ export default function BlScanner() {
 
             const copied = await copyToClipboard(rawText);
             if (!copied) {
-                setStatus("Clipboard diblokir browser. Coba klik teks sekali lalu hover lagi.");
+                setStatus("Clipboard diblokir browser. Coba klik teks sekali lagi.");
                 return;
             }
 
             lastCopyTsRef.current = now;
             lastCopyTextRef.current = rawText;
             setLastCopiedValue(rawText);
-            setStatus(`Tersalin otomatis dari hover: "${truncateText(rawText, 56)}"`);
+            setPopupSeed((prev) => prev + 1);
+            setShowCopiedPopup(true);
+            if (popupTimerRef.current) {
+                window.clearTimeout(popupTimerRef.current);
+            }
+            popupTimerRef.current = window.setTimeout(() => {
+                setShowCopiedPopup(false);
+            }, 2400);
+            setStatus(`Tersalin: "${truncateText(rawText, 56)}"`);
         },
         [copyToClipboard]
     );
@@ -131,12 +153,11 @@ export default function BlScanner() {
                         className="file-input file-input-bordered w-full max-w-xl border-zinc-300 bg-white"
                     />
                 </div>
-
                 <p className="mt-4 break-words text-xs leading-6 text-zinc-600 sm:text-sm">{status}</p>
             </section>
 
             {fileUrl ? (
-                <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_20rem]">
+                <section>
                     <div className="overflow-hidden rounded-3xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-6">
                         <div className="flex flex-wrap items-center justify-between gap-3">
                             <div className="text-xs uppercase tracking-[0.18em] text-zinc-500">
@@ -177,8 +198,9 @@ export default function BlScanner() {
                         </div>
 
                         <div className="mt-4 overflow-auto rounded-2xl border border-zinc-200 bg-zinc-100/70 p-3">
-                            <div className="bl-hover-copy flex min-w-max justify-center" onMouseOver={handleTextHover}>
+                            <div className="bl-hover-copy flex min-w-max justify-center" onClick={handleTextClick}>
                                 <Document
+                                    key={fileUrl}
                                     file={fileUrl}
                                     onLoadSuccess={handleDocumentSuccess}
                                     onLoadError={() => setStatus("Gagal memuat PDF. Pastikan file valid dan berbasis teks.")}
@@ -195,25 +217,26 @@ export default function BlScanner() {
                             </div>
                         </div>
                     </div>
-
-                    <aside className="overflow-hidden rounded-3xl border border-zinc-200 bg-white p-5 shadow-sm">
-                        <p className="text-xs font-medium uppercase tracking-[0.18em] text-zinc-500">Hover Copy Monitor</p>
-                        <p className="mt-3 text-sm leading-7 text-zinc-600">
-                            Arahkan pointer ke teks PDF. Program akan otomatis menyalin nilai yang sedang di-hover.
-                        </p>
-                        <div className="mt-5 rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
-                            <p className="text-xs uppercase tracking-[0.16em] text-zinc-500">Nilai Terakhir</p>
-                            <p className="mt-2 min-h-12 break-words text-sm font-medium text-zinc-800">
-                                {lastCopiedValue || "Belum ada nilai yang tersalin."}
-                            </p>
-                        </div>
-                    </aside>
                 </section>
             ) : (
                 <section className="rounded-3xl border border-dashed border-zinc-300 bg-white/80 p-3 text-center shadow-sm">
                     <p className="text-sm text-zinc-500">Belum ada file. Upload PDF untuk mulai menampilkan dokumen.</p>
                 </section>
             )}
+
+            <div
+                aria-live="polite"
+                className={`pointer-events-none fixed bottom-6 right-4 z-50 w-[min(24rem,calc(100vw-2rem))] transform transition-all duration-300 sm:right-6 ${
+                    showCopiedPopup ? "translate-y-0 scale-100 opacity-100" : "translate-y-3 scale-95 opacity-0"
+                }`}
+            >
+                <div key={popupSeed} className="rounded-2xl border border-cyan-200 bg-white/95 p-4 shadow-2xl backdrop-blur">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-700">Nilai Terakhir</p>
+                    <p className="mt-2 break-words text-sm font-medium text-zinc-800">
+                        {lastCopiedValue || "Belum ada nilai yang tersalin."}
+                    </p>
+                </div>
+            </div>
         </div>
     );
 }
