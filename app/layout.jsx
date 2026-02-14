@@ -1,10 +1,7 @@
 import { Analytics } from "@vercel/analytics/react";
-import { Manrope } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "./presentation/components";
 import { navLinks } from "./presentation/config/nav-links";
-
-const manrope = Manrope({ subsets: ["latin"] });
 
 export const metadata = {
   title: "Pesisir | Home Page",
@@ -14,7 +11,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html data-theme="light" lang="en">
-      <body className={`${manrope.className} min-h-screen bg-zinc-50 text-zinc-900 antialiased`}>
+      <body className="min-h-screen bg-zinc-50 text-zinc-900 antialiased [font-family:ui-sans-serif,system-ui,-apple-system,Segoe_UI,Roboto,Helvetica,Arial,sans-serif]">
         <header className="sticky top-0 z-40 border-b border-zinc-200/70 bg-zinc-50/85 backdrop-blur-xl">
           <Navbar links={navLinks} />
         </header>
