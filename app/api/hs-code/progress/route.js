@@ -9,7 +9,7 @@ import { hsCodeController } from "../../../adapters/controllers/hs-code.controll
 import { toResultRow } from "../../../adapters/presenters/hs-code.presenter";
 
 const encoder = new TextEncoder();
-export const maxDuration = 300;
+export const maxDuration = 60;
 
 function toNdjsonLine(payload) {
   return `${JSON.stringify(payload)}\n`;
