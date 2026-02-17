@@ -4,8 +4,8 @@ import { Navbar } from "./presentation/components";
 import { navLinks } from "./presentation/config/nav-links";
 
 export const metadata = {
-  title: "Pesisir | Home Page",
-  description: "Upload and done.",
+  title: "Pesisir | BL Scanner & INScann",
+  description: "Klik untuk salin data BL dan validasi HS code dalam satu workspace.",
 };
 
 export default function RootLayout({ children }) {

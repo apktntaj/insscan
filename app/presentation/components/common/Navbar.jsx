@@ -13,8 +13,8 @@ export default function Navbar({ links = [] }) {
     const pathname = usePathname();
     const mainLinks = [
         { label: "Home", href: "/" },
-        // { label: "Inscann", href: "/inscann" },
-        { label: "BL Scann", href: "/blscann" },
+        { label: "INScann", href: "/inscann" },
+        { label: "BL Scanner", href: "/blscann" },
         ...links,
     ];
 
