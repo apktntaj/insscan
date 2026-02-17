@@ -21,12 +21,14 @@ export default function BlScanner() {
     const [numPages, setNumPages] = useState(0);
     const [pageNumber, setPageNumber] = useState(1);
     const [scale, setScale] = useState(1.15);
-    const [status, setStatus] = useState("Upload PDF Bill of Lading, lalu klik teks untuk menyalin.");
+    const [status, setStatus] = useState("Upload PDF Bill of Lading, lalu klik untuk copy. Tahan Ctrl untuk chain.");
     const [lastCopiedValue, setLastCopiedValue] = useState("");
     const [showCopiedPopup, setShowCopiedPopup] = useState(false);
     const [popupSeed, setPopupSeed] = useState(0);
     const lastCopyTextRef = useRef("");
     const lastCopyTsRef = useRef(0);
+    const chainBufferRef = useRef("");
+    const ctrlPressedRef = useRef(false);
     const popupTimerRef = useRef(null);
 
     useEffect(() => {
@@ -43,7 +45,9 @@ export default function BlScanner() {
         setPageNumber(1);
         setLastCopiedValue("");
         lastCopyTextRef.current = "";
-        setStatus("PDF berhasil dimuat. Klik teks untuk menyalin nilai.");
+        chainBufferRef.current = "";
+        ctrlPressedRef.current = false;
+        setStatus("PDF berhasil dimuat. Klik untuk copy, tahan Ctrl lalu klik untuk chain.");
 
         return () => URL.revokeObjectURL(url);
     }, [file]);
@@ -55,6 +59,51 @@ export default function BlScanner() {
             }
         };
     }, []);
+
+    useEffect(() => {
+        if (!fileUrl) {
+            chainBufferRef.current = "";
+            ctrlPressedRef.current = false;
+            return;
+        }
+
+        const handleKeyDown = (event) => {
+            if (event.key !== "Control") return;
+            if (ctrlPressedRef.current) return;
+
+            ctrlPressedRef.current = true;
+            chainBufferRef.current = "";
+            setStatus("Mode chain aktif. Tahan Ctrl dan klik beberapa teks.");
+        };
+
+        const stopChainMode = () => {
+            if (!ctrlPressedRef.current && !chainBufferRef.current) return;
+            ctrlPressedRef.current = false;
+            chainBufferRef.current = "";
+            setStatus("Mode chain nonaktif. Klik biasa untuk copy tunggal.");
+        };
+
+        const handleKeyUp = (event) => {
+            if (event.key !== "Control") return;
+            stopChainMode();
+        };
+
+        const handleBlur = () => {
+            if (!ctrlPressedRef.current && !chainBufferRef.current) return;
+            ctrlPressedRef.current = false;
+            chainBufferRef.current = "";
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+        window.addEventListener("keyup", handleKeyUp);
+        window.addEventListener("blur", handleBlur);
+
+        return () => {
+            window.removeEventListener("keydown", handleKeyDown);
+            window.removeEventListener("keyup", handleKeyUp);
+            window.removeEventListener("blur", handleBlur);
+        };
+    }, [fileUrl]);
 
     const handleFileChange = useCallback((event) => {
         const nextFile = event.target.files?.[0];
@@ -75,7 +124,7 @@ export default function BlScanner() {
 
     const handleDocumentSuccess = useCallback(({ numPages: totalPages }) => {
         setNumPages(totalPages);
-        setStatus("PDF siap dipindai. Klik teks untuk copy ke clipboard.");
+        setStatus("PDF siap dipindai. Klik untuk copy, tahan Ctrl lalu klik untuk chain.");
     }, []);
 
     const copyToClipboard = useCallback(async (value) => {
@@ -87,7 +136,6 @@ export default function BlScanner() {
             await navigator.clipboard.writeText(cleanValue);
             return true;
         } catch (error) {
-            // Fallback for browsers that block async clipboard in some contexts.
             try {
                 const helper = document.createElement("textarea");
                 helper.value = cleanValue;
@@ -115,19 +163,30 @@ export default function BlScanner() {
             const rawText = target.textContent?.replace(/\s+/g, " ").trim() ?? "";
             if (!rawText) return;
 
+            const isChainClick = event.ctrlKey && ctrlPressedRef.current;
+            if (!isChainClick) {
+                chainBufferRef.current = "";
+            }
+            const nextValue = isChainClick
+                ? (chainBufferRef.current ? `${chainBufferRef.current} ${rawText}` : rawText)
+                : rawText;
+            if (isChainClick) {
+                chainBufferRef.current = nextValue;
+            }
+
             const now = Date.now();
             if (now - lastCopyTsRef.current < AUTO_COPY_GAP_MS) return;
-            if (rawText === lastCopyTextRef.current) return;
+            if (!isChainClick && nextValue === lastCopyTextRef.current) return;
 
-            const copied = await copyToClipboard(rawText);
+            const copied = await copyToClipboard(nextValue);
             if (!copied) {
                 setStatus("Clipboard diblokir browser. Coba klik teks sekali lagi.");
                 return;
             }
 
             lastCopyTsRef.current = now;
-            lastCopyTextRef.current = rawText;
-            setLastCopiedValue(rawText);
+            lastCopyTextRef.current = nextValue;
+            setLastCopiedValue(nextValue);
             setPopupSeed((prev) => prev + 1);
             setShowCopiedPopup(true);
             if (popupTimerRef.current) {
@@ -136,7 +195,11 @@ export default function BlScanner() {
             popupTimerRef.current = window.setTimeout(() => {
                 setShowCopiedPopup(false);
             }, 2400);
-            setStatus(`Tersalin: "${truncateText(rawText, 56)}"`);
+            if (isChainClick) {
+                setStatus(`Chain aktif: "${truncateText(nextValue, 56)}"`);
+            } else {
+                setStatus(`Tersalin: "${truncateText(nextValue, 56)}"`);
+            }
         },
         [copyToClipboard]
     );

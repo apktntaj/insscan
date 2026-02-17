@@ -1,14 +1,14 @@
 import { Title, HsCodeScanner } from "../presentation/components";
 
-const PAGE_TITLE = "Pesisir";
+const PAGE_TITLE = "INScann";
 const PAGE_DESCRIPTION = [
   "Upload file HS code lalu tarik data tarif, pajak, dan regulasi LARTAS secara langsung.",
   "Tampilan hasil dibuat ringkas per card agar nyaman dipindai saat volume data besar.",
 ];
 
 /**
- * Pesisir Page
- * @description Main page for HS Code scanning feature
+ * INScann Page
+ * @description Main page for INScann feature
  */
 export default function InscannPage() {
   return (

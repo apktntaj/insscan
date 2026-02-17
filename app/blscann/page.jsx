@@ -1,10 +1,10 @@
 import Title from "../presentation/components/common/Title";
 import BlScanner from "../presentation/components/features/BlScanner";
 
-const PAGE_TITLE = "Klik lalu salin.";
+const PAGE_TITLE = "Klik untuk Salin. Tahan Ctrl untuk Chain.";
 const PAGE_DESCRIPTION = [
-    "Kurangi salah ketik saat input data Bill of Lading.",
-    "Cukup hover dan salin langsung ke clipboard."
+    "Ambil data Bill of Lading lebih cepat, minim salah ketik.",
+    "Klik sekali untuk salin satu nilai. Tahan Ctrl sambil klik beberapa teks untuk menggabungkan nilai. Lepas Ctrl untuk mengakhiri chain."
 ];
 
 export default function BlScannerPage() {
