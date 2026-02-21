@@ -37,27 +37,38 @@ export default function Navbar({ links = [] }) {
                         tabIndex={0}
                         className="menu menu-sm dropdown-content z-[1] mt-3 w-56 rounded-2xl border border-zinc-200 bg-white p-2 shadow-lg"
                     >
-                        {mainLinks.map((link) => (
-                            <li key={link.href}>
-                                <Link className="rounded-lg text-zinc-700" href={link.href}>
-                                    {link.label}
-                                </Link>
-                            </li>
-                        ))}
+                        {mainLinks.map((link) => {
+                            const isActive = pathname === link.href;
+                            return (
+                                <li key={link.href}>
+                                    <Link
+                                        className={`rounded-lg ${
+                                            isActive
+                                                ? "bg-gradient-to-r from-sky-700 to-cyan-600 text-white"
+                                                : "text-zinc-700"
+                                        }`}
+                                        href={link.href}
+                                    >
+                                        {link.label}
+                                    </Link>
+                                </li>
+                            );
+                        })}
                     </ul>
                 </div>
 
-                <Link className="flex items-center gap-1.5" href="/">
+                <Link className="group relative flex items-center gap-1.5" href="/">
+                    <span className="pointer-events-none absolute -inset-1 rounded-2xl bg-gradient-to-r from-sky-300/55 to-cyan-300/55 opacity-0 blur-xl transition group-hover:opacity-100" />
                     <Image
                         src="/logo-pesisir.png"
                         width={244}
                         height={65}
                         alt="Pesisir Logo"
-                        className="h-[2.925rem] w-auto sm:h-[3.25rem]"
+                        className="relative h-[2.925rem] w-auto drop-shadow-[0_6px_18px_rgba(8,145,178,0.30)] sm:h-[3.25rem]"
                         priority
                     />
                     <span
-                        className="text-[1.02rem] font-bold leading-none tracking-tight text-zinc-800 sm:text-[1.12rem]"
+                        className="relative bg-gradient-to-r from-sky-800 to-cyan-600 bg-clip-text text-[1.02rem] font-bold leading-none tracking-tight text-transparent sm:text-[1.12rem]"
                     >
                         Pesisir
                     </span>
@@ -73,7 +84,7 @@ export default function Navbar({ links = [] }) {
                             key={link.href}
                             className={`rounded-full px-4 py-2 text-sm font-medium transition ${
                                 isActive
-                                    ? "bg-zinc-900 text-zinc-50"
+                                    ? "bg-gradient-to-r from-sky-700 to-cyan-600 text-white shadow-[0_8px_20px_rgba(2,132,199,0.25)]"
                                     : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
                             }`}
                             href={link.href}

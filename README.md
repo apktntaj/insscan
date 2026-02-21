@@ -79,3 +79,31 @@ npm start
 ## 📝 Lisensi
 
 Private - All rights reserved
+
+## Environment (HS Code Source)
+
+Untuk menghindari token INSW yang berubah setiap hari, jalankan mode publik:
+
+```bash
+INSW_PUBLIC_ONLY_MODE=true
+```
+
+Catatan:
+- Jika `INSW_PUBLIC_ONLY_MODE=true`, aplikasi tidak akan memakai endpoint CMS ber-token.
+- Aplikasi akan mencoba endpoint publik detail HS code terlebih dulu, lalu fallback ke endpoint publik list.
+- Field tarif/LARTAS yang tersedia bergantung pada respons endpoint publik INSW saat itu.
+
+## Mock Data (Detail Komoditas)
+
+Untuk belajar struktur data dan mengurangi fetch berulang ke INSW:
+
+- File mock: `app/infrastructure/mocks/insw-detail-komoditas.mock.json`
+- Aktifkan mode mock lokal:
+
+```bash
+INSW_USE_LOCAL_MOCK=true
+```
+
+Opsional:
+- `INSW_MOCK_ONLY_MODE=true` → hanya baca file mock, tanpa fallback fetch live.
+- `INSW_MOCK_FILE_PATH=...` → ganti path file mock.
