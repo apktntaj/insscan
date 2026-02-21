@@ -5,14 +5,31 @@
  * @description Implements HsCodeGateway interface for INSW API
  */
 
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+
 const INSW_CMS_DETAIL_URL = "https://api.insw.go.id/api/cms/detail-komoditas";
 const INSW_PUBLIC_HSCODE_URL = "https://api.insw.go.id/api-prod/ref/hscode";
+const INSW_PUBLIC_DETAIL_ENDPOINTS = [
+  "https://api.insw.go.id/api-prod-ba/ref/hscode/komoditas",
+  "https://api.insw.go.id/api-prod/ref/hscode/komoditas",
+];
 const INSW_CMS_TOKEN = process.env.INSW_CMS_TOKEN || process.env.INSW_BEARER_TOKEN;
+const INSW_PUBLIC_ONLY_MODE =
+  process.env.INSW_PUBLIC_ONLY_MODE === "true" ||
+  process.env.INSW_DISABLE_AUTH_SOURCES === "true";
+const INSW_USE_LOCAL_MOCK = process.env.INSW_USE_LOCAL_MOCK === "true";
+const INSW_MOCK_ONLY_MODE = process.env.INSW_MOCK_ONLY_MODE === "true";
+const INSW_MOCK_FILE_PATH =
+  process.env.INSW_MOCK_FILE_PATH ||
+  path.join(process.cwd(), "app/infrastructure/mocks/insw-detail-komoditas.mock.json");
 
 const INSW_HEADERS = {
   accept: "application/json, text/plain, */*",
   "accept-language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
 };
+let cachedMockSnapshot = null;
+let mockSnapshotLoaded = false;
 
 /**
  * Fetches HS code data from INSW API
@@ -27,8 +44,20 @@ async function fetchByCode(hsCode) {
   }
 
   try {
+    if (INSW_USE_LOCAL_MOCK) {
+      const mockDetail = await loadMockCmsDetailByCode(normalizedCode);
+
+      if (mockDetail) {
+        return mapCmsDetailToRawData(mockDetail);
+      }
+
+      if (INSW_MOCK_ONLY_MODE) {
+        return null;
+      }
+    }
+
     // Primary source for LARTAS + tariff details. Requires valid CMS token.
-    if (INSW_CMS_TOKEN) {
+    if (!INSW_PUBLIC_ONLY_MODE && INSW_CMS_TOKEN) {
       const detailData = await fetchCmsDetailByCode(normalizedCode);
 
       if (detailData) {
@@ -36,7 +65,13 @@ async function fetchByCode(hsCode) {
       }
     }
 
-    // Fallback public endpoint (no auth). LARTAS fields are typically unavailable here.
+    // Public detail endpoint (no auth), if available.
+    const publicDetailData = await fetchPublicDetailByCode(normalizedCode);
+    if (publicDetailData) {
+      return publicDetailData;
+    }
+
+    // Final fallback public list endpoint (no auth). LARTAS fields are typically unavailable here.
     const response = await fetch(INSW_PUBLIC_HSCODE_URL, {
       method: "GET",
       headers: INSW_HEADERS,
@@ -72,6 +107,7 @@ async function fetchByCode(hsCode) {
  */
 function mapCmsDetailToRawData(data) {
   const tarif = Array.isArray(data.informasiTarif) ? data.informasiTarif : [];
+  const dokumenPabeanLinkMap = buildDokumenPabeanLinkMap(data.dokPabean);
   const getTarifValue = (matcher) =>
     tarif.find((item) => matcher(String(item.label || "").toLowerCase()))?.value ??
     null;
@@ -83,11 +119,18 @@ function mapCmsDetailToRawData(data) {
     (label) => label.includes("pph") && label.includes("non")
   );
 
-  const lartasBorderDetails = extractRegulationDetails(data.regulasiImporBorder);
-  const lartasPostBorderDetails = extractRegulationDetails(
-    data.regulasiImporPostborder
+  const lartasBorderDetails = attachDokumenLinksToRegulations(
+    extractRegulationDetails(data.regulasiImporBorder),
+    dokumenPabeanLinkMap
   );
-  const lartasExportDetails = extractRegulationDetails(data.regulasiEkspor);
+  const lartasPostBorderDetails = attachDokumenLinksToRegulations(
+    extractRegulationDetails(data.regulasiImporPostborder),
+    dokumenPabeanLinkMap
+  );
+  const lartasExportDetails = attachDokumenLinksToRegulations(
+    extractRegulationDetails(data.regulasiEkspor),
+    dokumenPabeanLinkMap
+  );
   const lartasImportDetails = mergeLartasDetails([
     ...lartasBorderDetails,
     ...lartasPostBorderDetails,
@@ -116,10 +159,12 @@ function mapCmsDetailToRawData(data) {
  */
 function mapPublicHsCodeToRawData(data) {
   return {
-    bm: data.bmMfn ?? null,
-    ppn: null,
-    pph: null,
-    pphNonApi: null,
+    bm: normalizeTarifValue(data.bmMfn ?? data.bm ?? data.bm_mfn ?? null),
+    ppn: normalizeTarifValue(data.ppn ?? data.ppnBm ?? data.ppn_bm ?? null),
+    pph: normalizeTarifValue(data.pph ?? data.pphApi ?? data.pph_api ?? null),
+    pphNonApi: normalizeTarifValue(
+      data.pphNonApi ?? data.pph_non_api ?? data.pphNonAPI ?? null
+    ),
     hasLartasImport: false,
     hasLartasBorder: false,
     hasLartasPostBorder: false,
@@ -132,11 +177,109 @@ function mapPublicHsCodeToRawData(data) {
 }
 
 /**
+ * Tries unauthenticated public detail endpoints by HS code.
+ * @param {string} hsCode - 8-digit HS code
+ * @returns {Promise<Object|null>}
+ */
+async function fetchPublicDetailByCode(hsCode) {
+  for (const endpoint of INSW_PUBLIC_DETAIL_ENDPOINTS) {
+    const candidates = [
+      `${endpoint}?hs_code=${encodeURIComponent(hsCode)}`,
+      `${endpoint}?hsCode=${encodeURIComponent(hsCode)}`,
+      `${endpoint}?kodeHsCode=${encodeURIComponent(hsCode)}`,
+    ];
+
+    for (const url of candidates) {
+      try {
+        const response = await fetch(url, {
+          method: "GET",
+          headers: INSW_HEADERS,
+        });
+
+        if (!response.ok) {
+          continue;
+        }
+
+        const json = await response.json();
+        const payload = extractFirstDataPayload(json);
+
+        if (!payload) {
+          continue;
+        }
+
+        const mapped = mapPublicHsCodeToRawData(payload);
+        if (hasMeaningfulData(mapped)) {
+          return mapped;
+        }
+      } catch {
+        // Best-effort endpoint probing; ignore and continue.
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Extract first usable object from known API payload shapes.
+ * @param {unknown} json
+ * @returns {Object|null}
+ */
+function extractFirstDataPayload(json) {
+  if (!json || typeof json !== "object") {
+    return null;
+  }
+
+  const data = json.data ?? json.result ?? json.payload ?? null;
+
+  if (Array.isArray(data)) {
+    return data[0] ?? null;
+  }
+
+  if (data && typeof data === "object") {
+    if (Array.isArray(data.komoditas)) {
+      return data.komoditas[0] ?? null;
+    }
+    if (Array.isArray(data.items)) {
+      return data.items[0] ?? null;
+    }
+    return data;
+  }
+
+  return null;
+}
+
+/**
+ * Determines if mapped response has useful tariff/lartas values.
+ * @param {Object|null} raw
+ * @returns {boolean}
+ */
+function hasMeaningfulData(raw) {
+  if (!raw) {
+    return false;
+  }
+
+  const hasTarif = Boolean(raw.bm || raw.ppn || raw.pph || raw.pphNonApi);
+  const hasLartas = Boolean(
+    raw.hasLartasImport ||
+      raw.hasLartasBorder ||
+      raw.hasLartasPostBorder ||
+      raw.hasLartasExport
+  );
+
+  return hasTarif || hasLartas;
+}
+
+/**
  * Fetches detailed HS code data from CMS detail-komoditas endpoint
  * @param {string} hsCode - 8-digit HS code
  * @returns {Promise<Object|null>}
  */
 async function fetchCmsDetailByCode(hsCode) {
+  if (!INSW_CMS_TOKEN) {
+    return null;
+  }
+
   const token =
     INSW_CMS_TOKEN.startsWith("Basic ") ||
     INSW_CMS_TOKEN.startsWith("Bearer ")
@@ -279,6 +422,7 @@ function mergeLartasDetails(details) {
       merged.set(key, {
         ...detail,
         dokumenPabean: [...(detail.dokumenPabean || [])],
+        links: [...(detail.links || [])],
       });
       continue;
     }
@@ -289,6 +433,8 @@ function mergeLartasDetails(details) {
     ]);
 
     existing.dokumenPabean = Array.from(joinedDocCodes).sort();
+    const joinedLinks = new Set([...(existing.links || []), ...(detail.links || [])]);
+    existing.links = Array.from(joinedLinks);
 
     if (!existing.link && detail.link) {
       existing.link = detail.link;
@@ -307,6 +453,8 @@ function normalizeRegulationLink(entry) {
   const rawLink =
     entry.file_path ||
     entry.filePath ||
+    entry.ket_link ||
+    entry.ketLink ||
     entry.url ||
     entry.link ||
     entry.document_url ||
@@ -321,14 +469,129 @@ function normalizeRegulationLink(entry) {
   }
 
   if (rawLink.startsWith("./")) {
-    return `https://insw.go.id/${rawLink.slice(2)}`;
+    return `https://api.insw.go.id/${rawLink.slice(2)}`;
   }
 
   if (rawLink.startsWith("/")) {
-    return `https://insw.go.id${rawLink}`;
+    return `https://api.insw.go.id${rawLink}`;
   }
 
   return null;
+}
+
+/**
+ * Loads mock CMS detail-komoditas payload by HS code from local JSON file.
+ * @param {string} hsCode - normalized numeric HS code
+ * @returns {Promise<Object|null>}
+ */
+async function loadMockCmsDetailByCode(hsCode) {
+  const snapshot = await loadMockSnapshot();
+  if (!snapshot || typeof snapshot !== "object") {
+    return null;
+  }
+
+  const byItems =
+    snapshot.items && typeof snapshot.items === "object"
+      ? Object.entries(snapshot.items).find(
+          ([key]) => normalizeHsCode(key) === hsCode
+        )?.[1]
+      : null;
+
+  if (byItems && typeof byItems === "object") {
+    return byItems;
+  }
+
+  const candidates = Array.isArray(snapshot.data)
+    ? snapshot.data
+    : Array.isArray(snapshot.items)
+    ? snapshot.items
+    : [];
+
+  const byArray = candidates.find(
+    (item) => normalizeHsCode(item?.hs_code || item?.hsCode) === hsCode
+  );
+
+  return byArray && typeof byArray === "object" ? byArray : null;
+}
+
+/**
+ * Reads and memoizes local mock snapshot JSON.
+ * @returns {Promise<Object|null>}
+ */
+async function loadMockSnapshot() {
+  if (mockSnapshotLoaded) {
+    return cachedMockSnapshot;
+  }
+
+  mockSnapshotLoaded = true;
+
+  try {
+    const raw = await readFile(INSW_MOCK_FILE_PATH, "utf8");
+    cachedMockSnapshot = JSON.parse(raw);
+  } catch {
+    cachedMockSnapshot = null;
+  }
+
+  return cachedMockSnapshot;
+}
+
+/**
+ * Builds mapping from dokumen pabean code to regulation PDF link.
+ * @param {Object} dokPabean - CMS dokPabean payload
+ * @returns {Map<string,string>}
+ */
+function buildDokumenPabeanLinkMap(dokPabean) {
+  const map = new Map();
+
+  if (!dokPabean || typeof dokPabean !== "object") {
+    return map;
+  }
+
+  for (const entries of Object.values(dokPabean)) {
+    if (!Array.isArray(entries)) {
+      continue;
+    }
+
+    for (const entry of entries) {
+      const code = String(entry.kd_dokumen || "").trim();
+      const link = normalizeRegulationLink(entry);
+
+      if (!code || !link) {
+        continue;
+      }
+
+      if (!map.has(code)) {
+        map.set(code, link);
+      }
+    }
+  }
+
+  return map;
+}
+
+/**
+ * Enriches LARTAS details with document links from dokumen pabean mapping.
+ * @param {Array<Object>} details - LARTAS details
+ * @param {Map<string,string>} dokumenLinkMap - Mapping of doc code to link
+ * @returns {Array<Object>}
+ */
+function attachDokumenLinksToRegulations(details, dokumenLinkMap) {
+  if (!Array.isArray(details) || details.length === 0) {
+    return [];
+  }
+
+  return details.map((detail) => {
+    const linksFromDokumen = (detail.dokumenPabean || [])
+      .map((code) => dokumenLinkMap.get(String(code)))
+      .filter(Boolean);
+    const links = Array.from(new Set([...(detail.links || []), ...linksFromDokumen]));
+
+    return {
+      ...detail,
+      links,
+      link: detail.link || links[0] || null,
+    };
+  });
 }
 
 /**

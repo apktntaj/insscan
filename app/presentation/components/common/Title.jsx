@@ -19,7 +19,7 @@ export default function Title({ title, descs = [], variant = "default", eyebrow 
                     {eyebrow ? (
                         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-700">{eyebrow}</p>
                     ) : null}
-                    <h1 className="mt-2 bg-gradient-to-r from-sky-900 via-cyan-700 to-blue-900 bg-clip-text text-4xl font-bold tracking-tight text-transparent sm:text-5xl" style={{ fontFamily: "var(--font-logo)" }}>
+                    <h1 className="mt-2 bg-gradient-to-r from-sky-900 to-cyan-700 bg-clip-text text-4xl font-bold tracking-tight text-transparent sm:text-5xl" style={{ fontFamily: "var(--font-logo)" }}>
                         {title}
                     </h1>
                     <div className="mx-auto mt-4 max-w-3xl space-y-1">

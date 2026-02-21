@@ -14,6 +14,8 @@ const productCards = [
     ],
     href: "/blscann",
     cta: "Buka BL Scanner",
+    accent: "from-sky-500/20 to-cyan-500/20",
+    dot: "bg-sky-500",
   },
   {
     title: "INScann",
@@ -26,6 +28,8 @@ const productCards = [
     ],
     href: "/inscann",
     cta: "Buka INScann",
+    accent: "from-cyan-500/20 to-sky-500/20",
+    dot: "bg-cyan-500",
   },
 ];
 
@@ -38,18 +42,18 @@ const quickFlow = [
 export default function Home() {
   return (
     <div className="space-y-12 pb-8 sm:space-y-16">
-      <section className="relative overflow-hidden rounded-[2rem] border border-zinc-200 bg-white px-6 py-10 shadow-sm sm:px-10 sm:py-14">
-        <div className="absolute -right-20 -top-20 h-56 w-56 rounded-full border border-zinc-100" />
-        <div className="absolute -bottom-24 left-16 h-56 w-56 rounded-full border border-zinc-100" />
+      <section className="relative overflow-hidden rounded-[2rem] border border-sky-100/90 bg-gradient-to-br from-sky-50 via-white to-cyan-50 px-6 py-10 shadow-sm sm:px-10 sm:py-14">
+        <div className="pointer-events-none absolute -top-16 right-8 h-44 w-44 rounded-full bg-sky-300/35 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-20 left-6 h-52 w-52 rounded-full bg-cyan-300/35 blur-3xl" />
 
         <div className="relative max-w-4xl">
-          <p className="inline-flex rounded-full border border-zinc-200 bg-zinc-50 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.18em] text-zinc-600">
+          <p className="inline-flex rounded-full border border-cyan-200/80 bg-white/75 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.18em] text-cyan-700">
             Pesisir Platform
           </p>
-          <h1 className="mt-6 text-4xl font-semibold tracking-tight text-zinc-950 sm:text-5xl lg:text-6xl">
+          <h1 className="mt-6 bg-gradient-to-r from-sky-900 to-cyan-700 bg-clip-text text-4xl font-semibold tracking-tight text-transparent sm:text-5xl lg:text-6xl">
             Workspace operasional untuk BL copy-chain dan validasi HS code.
           </h1>
-          <p className="mt-5 max-w-3xl text-base leading-8 text-zinc-600">
+          <p className="mt-5 max-w-3xl text-base leading-8 text-zinc-700">
             Gunakan BL Scanner untuk copy data Bill of Lading lebih cepat, lalu lanjutkan ke INScann untuk verifikasi tarif, pajak, dan LARTAS.
           </p>
           <div className="mt-9 flex flex-wrap gap-3">
@@ -73,14 +77,15 @@ export default function Home() {
         {productCards.map((card) => (
           <article
             key={card.title}
-            className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm transition hover:border-zinc-300"
+            className="relative overflow-hidden rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm transition hover:border-cyan-300"
           >
+            <div className={`pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-gradient-to-br ${card.accent} blur-2xl`} />
             <h2 className="text-lg font-semibold text-zinc-900">{card.title}</h2>
             <p className="mt-3 text-sm leading-7 text-zinc-600">{card.description}</p>
             <ul className="mt-4 space-y-2 text-sm text-zinc-600">
               {card.points.map((point) => (
                 <li key={point} className="flex gap-2">
-                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-zinc-400" />
+                  <span className={`mt-1 h-1.5 w-1.5 rounded-full ${card.dot}`} />
                   <span>{point}</span>
                 </li>
               ))}
