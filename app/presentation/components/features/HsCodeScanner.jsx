@@ -328,7 +328,7 @@ export default function HsCodeScanner() {
                         mode === "file" ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-300 text-zinc-700"
                     }`}
                 >
-                    File / Multiple
+                    File / Multiple HS Codes
                 </button>
             </div>
 
