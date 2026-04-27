@@ -8,6 +8,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
+const INSW_CMS_SEARCH_URL = "https://api.insw.go.id/api/cms/hscode";
 const INSW_CMS_DETAIL_URL = "https://api.insw.go.id/api/cms/detail-komoditas";
 const INSW_PUBLIC_HSCODE_URL = "https://api.insw.go.id/api-prod/ref/hscode";
 const INSW_PUBLIC_DETAIL_ENDPOINTS = [
@@ -57,8 +58,9 @@ async function fetchByCode(hsCode) {
     }
 
     // Primary source for LARTAS + tariff details. Requires valid CMS token.
+    // Two-step flow: Search first, then fetch details
     if (!INSW_PUBLIC_ONLY_MODE && INSW_CMS_TOKEN) {
-      const detailData = await fetchCmsDetailByCode(normalizedCode);
+      const detailData = await fetchCmsDetailWithSearch(normalizedCode);
 
       if (detailData) {
         return mapCmsDetailToRawData(detailData);
@@ -271,7 +273,91 @@ function hasMeaningfulData(raw) {
 }
 
 /**
+ * Searches for HS codes from CMS search endpoint
+ * First request in two-step flow
+ * @param {string} keyword - HS code keyword/value to search
+ * @param {number} size - Result page size (default: 200)
+ * @param {number} from - Result offset/pagination (default: 0)
+ * @returns {Promise<Array<Object>>} Array of matching HS code search results
+ */
+async function fetchCmsSearchByKeyword(keyword, size = 200, from = 0) {
+  if (!INSW_CMS_TOKEN) {
+    return [];
+  }
+
+  const token =
+    INSW_CMS_TOKEN.startsWith("Basic ") ||
+    INSW_CMS_TOKEN.startsWith("Bearer ")
+      ? INSW_CMS_TOKEN
+      : `Basic ${INSW_CMS_TOKEN}`;
+
+  try {
+    const searchUrl = `${INSW_CMS_SEARCH_URL}?keyword=${encodeURIComponent(keyword)}&size=${size}&from=${from}`;
+    
+    const response = await fetch(searchUrl, {
+      method: "GET",
+      headers: {
+        ...INSW_HEADERS,
+        authorization: token,
+        origin: "https://insw.go.id",
+        referer: "https://insw.go.id/",
+      },
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        console.warn("INSW CMS token is invalid or expired.");
+      }
+      return [];
+    }
+
+    const json = await response.json();
+    const data = json?.data;
+
+    // Handle various response formats
+    if (Array.isArray(data)) {
+      return data;
+    }
+
+    if (data && typeof data === "object" && Array.isArray(data.items)) {
+      return data.items;
+    }
+
+    if (data && typeof data === "object" && Array.isArray(data.results)) {
+      return data.results;
+    }
+
+    return [];
+  } catch (error) {
+    console.error(`Failed to search CMS for keyword ${keyword}:`, error);
+    return [];
+  }
+}
+
+/**
+ * Two-step flow: Search for HS code, then fetch detailed data
+ * @param {string} hsCode - 8-digit HS code to search and fetch
+ * @returns {Promise<Object|null>} Detailed HS code data or null if not found
+ */
+async function fetchCmsDetailWithSearch(hsCode) {
+  // Step 1: Search for the HS code
+  const searchResults = await fetchCmsSearchByKeyword(hsCode, 200, 0);
+
+  if (searchResults.length === 0) {
+    console.debug(`No search results found for HS code ${hsCode}`);
+    return null;
+  }
+
+  console.debug(`Found ${searchResults.length} search results for HS code ${hsCode}`);
+
+  // Step 2: Fetch detailed data for the matched HS code
+  const detailData = await fetchCmsDetailByCode(hsCode);
+  return detailData;
+}
+
+/**
  * Fetches detailed HS code data from CMS detail-komoditas endpoint
+ * Second request in two-step flow
  * @param {string} hsCode - 8-digit HS code
  * @returns {Promise<Object|null>}
  */
@@ -286,31 +372,36 @@ async function fetchCmsDetailByCode(hsCode) {
       ? INSW_CMS_TOKEN
       : `Basic ${INSW_CMS_TOKEN}`;
 
-  const response = await fetch(`${INSW_CMS_DETAIL_URL}?hsCode=${hsCode}`, {
-    method: "GET",
-    headers: {
-      ...INSW_HEADERS,
-      authorization: token,
-      origin: "https://insw.go.id",
-      referer: "https://insw.go.id/",
-    },
-  });
+  try {
+    const response = await fetch(`${INSW_CMS_DETAIL_URL}?hsCode=${hsCode}`, {
+      method: "GET",
+      headers: {
+        ...INSW_HEADERS,
+        authorization: token,
+        origin: "https://insw.go.id",
+        referer: "https://insw.go.id/",
+      },
+    });
 
-  if (!response.ok) {
-    if (response.status === 401) {
-      console.warn("INSW CMS token is invalid or expired.");
+    if (!response.ok) {
+      if (response.status === 401) {
+        console.warn("INSW CMS token is invalid or expired.");
+      }
+      return null;
     }
+
+    const json = await response.json();
+    const payload = json?.data;
+
+    if (!payload) {
+      return null;
+    }
+
+    return Array.isArray(payload) ? payload[0] ?? null : payload;
+  } catch (error) {
+    console.error(`Failed to fetch CMS detail for HS code ${hsCode}:`, error);
     return null;
   }
-
-  const json = await response.json();
-  const payload = json?.data;
-
-  if (!payload) {
-    return null;
-  }
-
-  return Array.isArray(payload) ? payload[0] ?? null : payload;
 }
 
 /**
@@ -610,4 +701,6 @@ async function fetchByCodes(hsCodes) {
 export const inswApiGateway = {
   fetchByCode,
   fetchByCodes,
+  fetchCmsSearchByKeyword,
+  fetchCmsDetailWithSearch,
 };
