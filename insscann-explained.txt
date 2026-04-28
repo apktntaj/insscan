@@ -1,0 +1,143 @@
+Saya akan menganalisis alur menu insscan di codebase Anda. Biarkan saya melihat file-file yang relevan terlebih dahulu.   
+
+Read [](file:///home/aa/Projects/insscan/app/inscann/page.jsx)
+
+Read [](file:///home/aa/Projects/insscan/app/presentation/components/features/HsCodeScanner.jsx#1-1), lines 1 to 100
+
+Read [](file:///home/aa/Projects/insscan/app/api)
+
+Read [](file:///home/aa/Projects/insscan/app/infrastructure/services/insw-api.service.js#1-1), lines 1 to 200
+
+Read [](file:///home/aa/Projects/insscan/app/core/use-cases/fetch-hs-code-data.js#1-1), lines 1 to 100
+
+Read [](file:///home/aa/Projects/insscan/app/api/hs-code)
+
+Read [](file:///home/aa/Projects/insscan/app/adapters/controllers/hs-code.controller.js#1-1), lines 1 to 50
+
+Read [](file:///home/aa/Projects/insscan/app/presentation/components/features/HsCodeTable.jsx#1-1), lines 1 to 100
+
+Read [](file:///home/aa/Projects/insscan/app/api/hs-code/route.js)
+
+Saya telah menganalisis alur menu INScann di codebase Anda. Berikut penjelasannya:
+
+## 📊 Alur Menu INScann
+
+### **1️⃣ Layer Presentasi (Frontend)**
+**File:** page.jsx
+
+```
+INScann Page
+    ↓
+HsCodeScanner Component (2 mode)
+├── Single Input Mode
+└── File/Multiple Mode ← Yang utama
+```
+
+### **2️⃣ HsCodeScanner Component** 
+**File:** HsCodeScanner.jsx
+
+Menangani input user dengan flow:
+- User upload file Excel
+- File dibaca menggunakan `fileToArrayBuffer()` dari excel.service.js
+- HS codes divalidasi dengan `isValidHsCode()`
+- User klik tombol **"Tarik Data"** → panggil API
+
+### **3️⃣ API Request**
+**Endpoint:** `POST /api/hs-code`  
+**File:** route.js
+
+```javascript
+Body: [
+  { hs_code: "1234567890" },
+  { hs_code: "0987654321" },
+  ...
+]
+```
+
+### **4️⃣ Controller Layer (Adapter)**
+**File:** hs-code.controller.js
+
+```
+POST /api/hs-code
+    ↓
+hsCodeController.handleFetchRequest()
+    ↓
+Inject FetchHsCodeDataUseCase + inswApiGateway
+    ↓
+Execute fetchMultiple(hsCodes)
+    ↓
+Map hasil ke HsCodePresenter (toResultData)
+```
+
+### **5️⃣ Use Case Layer (Business Logic)**
+**File:** fetch-hs-code-data.js
+
+```
+fetchMultiple(codes) 
+    ↓ Loop setiap HS code
+    ├── Validasi format code
+    ├── Check cache (avoid duplicate API calls)
+    ├── Call gateway.fetchByCode(code)
+    ├── Delay antara request (1.4s - 2.6s) untuk rate limiting
+    └── Return HsCode entity
+```
+
+### **6️⃣ Gateway Layer (INSW API Service)**
+**File:** insw-api.service.js
+
+Fetch data dengan prioritas:
+```
+1. Local Mock (jika INSW_USE_LOCAL_MOCK=true)
+            ↓ [jika tidak ada]
+2. CMS API (memerlukan INSW_CMS_TOKEN)
+   - Fetch search → Get detail-komoditas
+   - Parse: BM, PPN, PPH, LARTAS
+            ↓ [jika token tidak valid]
+3. Public Detail Endpoint (no auth)
+            ↓ [jika tidak ada]
+4. Public List Endpoint (fallback terakhir)
+```
+
+### **7️⃣ Presenter & Display**
+**File:** HsCodeTable.jsx
+
+Hasil ditampilkan dalam **LARTAS Matrix Table**:
+```
+┌─────┬──────────┬────────┬────────┬────────┐
+│ No  │ HS Code  │ Dok BC │ Dok SP │ Dok PP │
+├─────┼──────────┼────────┼────────┼────────┤
+│ 1   │ 12.34.56 │  ✓    │   ✓    │   ✗    │
+│ 2   │ 98.76.54 │  ✓    │   ✗    │   ✗    │
+└─────┴──────────┴────────┴────────┴────────┘
+```
+
+Fitur tambahan:
+- Filter: "LARTAS Only" atau "All"
+- Click sel → lihat detail regulasi
+
+---
+
+## 🏗️ Arsitektur Clean Architecture
+```
+User Interface
+      ↓
+Presentation Components (HsCodeScanner)
+      ↓
+API Route (/api/hs-code)
+      ↓
+Controllers (Adapter)
+      ↓
+Use Cases (Business Logic)
+      ↓
+Gateway (Infrastructure/INSW API)
+      ↓
+External API (INSW)
+```
+
+**Keuntungan:**
+- ✅ Setiap layer punya tanggung jawab jelas
+- ✅ Mudah test (mock gateway)
+- ✅ Easy to extend (fallback data sources)
+- ✅ Rate limiting & caching built-in
+
+Apakah ada bagian tertentu yang ingin dijelaskan lebih detail?

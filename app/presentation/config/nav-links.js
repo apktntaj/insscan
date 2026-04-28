@@ -6,6 +6,11 @@
 export const navLinks = [
   {
     id: 1,
+    label: "Shipments",
+    href: "/shipments",
+  },
+  {
+    id: 2,
     label: "Feedback",
     href: "mailto:alamasyarie@outlook.com",
   },
