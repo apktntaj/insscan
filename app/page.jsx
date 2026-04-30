@@ -3,20 +3,20 @@
 import Link from "next/link";
 
 const productCards = [
-  {
-    title: "B/L Scanner",
-    description:
-      "Upload Bill of Lading PDF, lalu klik teks untuk copy cepat. Tahan Ctrl sambil klik untuk chain value menjadi satu hasil copy.",
-    points: [
-      "Copy tunggal dengan satu klik.",
-      "Chain multi klik selama Ctrl ditekan.",
-      "Lepas Ctrl untuk mengakhiri chain otomatis.",
-    ],
-    href: "/blscann",
-    cta: "Buka BL Scanner",
-    accent: "from-sky-500/20 to-cyan-500/20",
-    dot: "bg-sky-500",
-  },
+  // {
+  //   title: "B/L Scanner",
+  //   description:
+  //     "Upload Bill of Lading PDF, lalu klik teks untuk copy cepat. Tahan Ctrl sambil klik untuk chain value menjadi satu hasil copy.",
+  //   points: [
+  //     "Copy tunggal dengan satu klik.",
+  //     "Chain multi klik selama Ctrl ditekan.",
+  //     "Lepas Ctrl untuk mengakhiri chain otomatis.",
+  //   ],
+  //   href: "/blscann",
+  //   cta: "Buka BL Scanner",
+  //   accent: "from-sky-500/20 to-cyan-500/20",
+  //   dot: "bg-sky-500",
+  // },
   {
     title: "INScann",
     description:
