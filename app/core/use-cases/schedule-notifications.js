@@ -9,7 +9,7 @@
 
 import { isNotificationDue, toIsoDateString } from "../entities/public-holidays";
 
-const POLL_INTERVAL_MS = 3 * 60 * 60 * 1000; // 3 hours
+const POLL_INTERVAL_MS = 5 * 60 * 1000; // DEV: 5 minutes (change to 3 * 60 * 60 * 1000 for production)
 
 /**
  * Creates the Schedule Notifications use case

@@ -31,6 +31,7 @@ export function useShipments() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [query, setQuery] = useState("");
+  const [lastRefreshedAt, setLastRefreshedAt] = useState(null);
   const queryRef = useRef(query);
   queryRef.current = query;
 
@@ -53,6 +54,7 @@ export function useShipments() {
       setError(err?.message || "Unexpected error loading shipments");
     } finally {
       setLoading(false);
+      setLastRefreshedAt(new Date());
     }
   }, []);
 
@@ -102,6 +104,7 @@ export function useShipments() {
     query,
     setQuery,
     refresh,
+    lastRefreshedAt,
     createShipment,
     editShipment,
     terminateShipment,

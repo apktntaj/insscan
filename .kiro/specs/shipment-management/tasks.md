@@ -6,15 +6,15 @@ Implement a browser-local shipment tracking module following Clean Architecture.
 
 ## Tasks
 
-- [x] 1. Set up core entities and ports
+- [x] 1. Set up core entities and ports 
   - [x] 1.1 Create `app/core/entities/shipment.js` — Shipment entity factory, validation helpers (`isValidDate`, `isRequiredFieldPresent`), and status constants
     - _Requirements: 1.1, 1.5, 1.6, 1.7, 9.3, 9.4_
   - [x] 1.2 Create `app/core/entities/public-holidays.js` — hardcoded Indonesian public holidays list for current year and `getHMinusOne(targetDate)` helper
     - _Requirements: 7.1, 7.2_
-  - [ ]* 1.3 Write property test for `getHMinusOne` (Property 15: H-1 is always a working day before the target date)
+  - [x] 1.3 Write property test for `getHMinusOne` (Property 15: H-1 is always a working day before the target date)
     - **Property 15: H-1 is always a working day before the target date**
     - **Validates: Requirements 7.1, 7.2**
-  - [ ]* 1.4 Write property test for `isValidDate` (Property 17: Date validation correctly classifies inputs)
+  - [ ] 1.4 Write property test for `isValidDate` (Property 17: Date validation correctly classifies inputs)
     - **Property 17: Date validation correctly classifies inputs**
     - **Validates: Requirements 9.3, 9.5**
   - [x] 1.5 Create `app/core/ports/shipment-repository.port.js` — JSDoc typedef for `ShipmentRepository` interface and `validateShipmentRepository` guard
@@ -25,7 +25,7 @@ Implement a browser-local shipment tracking module following Clean Architecture.
 - [x] 2. Implement use cases
   - [x] 2.1 Create `app/core/use-cases/create-shipment.js` — validate required fields, enforce 500-record cap, check uniqueness, persist via repository port; return `{ ok, data/error }` shape
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 2.3, 9.1, 9.2, 9.4_
-  - [ ]* 2.2 Write property test for `createShipment` — Property 1 (round-trip), Property 2 (increments count), Property 3 (limit blocks), Property 4 (required field validation), Property 5 (uniqueness)
+  - [ ] 2.2 Write property test for `createShipment` — Property 1 (round-trip), Property 2 (increments count), Property 3 (limit blocks), Property 4 (required field validation), Property 5 (uniqueness)
     - **Property 1: Shipment creation round-trip — Validates: Requirements 1.1, 1.2**
     - **Property 2: Create increments active count — Validates: Requirements 1.3, 2.1**
     - **Property 3: Record limit blocks creation — Validates: Requirements 1.4, 2.3**
@@ -33,28 +33,28 @@ Implement a browser-local shipment tracking module following Clean Architecture.
     - **Property 5: Shipment number and B/L number uniqueness — Validates: Requirements 1.6, 1.7, 9.1, 9.2**
   - [x] 2.3 Create `app/core/use-cases/edit-shipment.js` — strip immutable fields from update payload, persist via repository port; return `{ ok, data/error }` shape
     - _Requirements: 4.1, 4.2, 4.3, 4.4_
-  - [ ]* 2.4 Write property test for `editShipment` — Property 8 (immutable fields preserved) and Property 9 (edit round-trip)
+  - [ ] 2.4 Write property test for `editShipment` — Property 8 (immutable fields preserved) and Property 9 (edit round-trip)
     - **Property 8: Immutable fields cannot be changed via edit — Validates: Requirements 4.2**
     - **Property 9: Edit round-trip persists mutable changes — Validates: Requirements 4.4**
   - [x] 2.5 Create `app/core/use-cases/terminate-shipment.js` — mark record terminated via repository port; return `{ ok, error }` shape
     - _Requirements: 5.1, 5.2, 5.3, 5.4_
-  - [ ]* 2.6 Write property test for `terminateShipment` — Property 10 (excluded from active list) and Property 11 (decrements count)
+  - [ ] 2.6 Write property test for `terminateShipment` — Property 10 (excluded from active list) and Property 11 (decrements count)
     - **Property 10: Terminated record is excluded from active list — Validates: Requirements 5.3**
     - **Property 11: Terminate decrements active count — Validates: Requirements 5.4**
   - [x] 2.7 Create `app/core/use-cases/list-shipments.js` — fetch active records sorted by ETA asc (nulls last), apply optional search query across blNumber/shipperName/consigneeName/alias
     - _Requirements: 3.1, 3.2, 3.3, 3.4_
-  - [ ]* 2.8 Write property test for `listShipments` — Property 6 (sorted by ETA ascending) and Property 7 (search returns only matching records)
+  - [ ] 2.8 Write property test for `listShipments` — Property 6 (sorted by ETA ascending) and Property 7 (search returns only matching records)
     - **Property 6: List is sorted by ETA ascending — Validates: Requirements 3.2**
     - **Property 7: Search returns only matching records — Validates: Requirements 3.3, 3.4**
   - [x] 2.9 Create `app/core/use-cases/export-shipments.js` — fetch all records, build Excel rows via presenter, call xlsx download, delete all on success; abort delete on failure; return `{ ok, error }` shape
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8_
-  - [ ]* 2.10 Write property test for `exportShipments` — Property 12 (export completeness), Property 13 (clears records), Property 14 (failed export preserves records)
+  - [ ] 2.10 Write property test for `exportShipments` — Property 12 (export completeness), Property 13 (clears records), Property 14 (failed export preserves records)
     - **Property 12: Export output is complete and well-structured — Validates: Requirements 6.3, 6.4**
     - **Property 13: Successful export clears all records — Validates: Requirements 6.6, 6.7**
     - **Property 14: Failed export leaves records intact — Validates: Requirements 6.8**
   - [x] 2.11 Create `app/core/use-cases/schedule-notifications.js` — start 3-hour polling loop; on each tick compute H-1 for ETA and customNotificationDate, fire notification if due and not already sent today (sessionStorage dedup)
     - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5_
-  - [ ]* 2.12 Write property test for notification due check — Property 16 (notification due check is correct)
+  - [ ] 2.12 Write property test for notification due check — Property 16 (notification due check is correct)
     - **Property 16: Notification due check is correct — Validates: Requirements 7.3**
 
 - [x] 3. Checkpoint — core logic complete
