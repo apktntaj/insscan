@@ -7,11 +7,8 @@ const nextConfig = {
       encoding: false,
     };
 
-    // Avoid intermittent filesystem cache rename errors in local dev
-    // (ENOENT on .next/cache/webpack/*.pack.gz_ -> *.pack.gz).
-    if (dev) {
-      config.cache = { type: "memory" };
-    }
+    // Disable webpack cache to avoid corruption with large libraries (xlsx)
+    config.cache = { type: "memory" };
 
     return config;
   },
