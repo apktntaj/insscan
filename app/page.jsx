@@ -4,7 +4,7 @@ import Link from "next/link";
 
 const productCards = [
   {
-    title: "BL Scanner",
+    title: "B/L Scanner",
     description:
       "Upload Bill of Lading PDF, lalu klik teks untuk copy cepat. Tahan Ctrl sambil klik untuk chain value menjadi satu hasil copy.",
     points: [
