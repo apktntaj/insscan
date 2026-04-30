@@ -11,9 +11,11 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useShipments } from "../../hooks/useShipments";
+import { useDashboard } from "../../hooks/useDashboard";
 import ShipmentTable from "./ShipmentTable";
 import ShipmentForm from "./ShipmentForm";
 import ShipmentExportButton from "./ShipmentExportButton";
+import DashboardSection from "./DashboardSection";
 import { shipmentController } from "../../../adapters/controllers/shipment.controller";
 import { MAX_RECORD_LIMIT } from "../../../core/use-cases/create-shipment";
 
@@ -25,11 +27,15 @@ export default function ShipmentManager() {
     error,
     query,
     setQuery,
+    refresh,
+    lastRefreshedAt,
     createShipment,
     editShipment,
     terminateShipment,
     exportShipments,
   } = useShipments();
+
+  const { alertsByShipmentId } = useDashboard({ shipments, loading, refresh });
 
   const [formOpen, setFormOpen] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
@@ -190,6 +196,15 @@ export default function ShipmentManager() {
         </div>
       )}
 
+      {/* Dashboard section */}
+      <DashboardSection
+        shipments={shipments}
+        loading={loading}
+        refresh={refresh}
+        lastRefreshedAt={lastRefreshedAt}
+        onEditShipment={handleOpenEdit}
+      />
+
       {/* Shipment table */}
       <ShipmentTable
         shipments={shipments}
@@ -198,6 +213,7 @@ export default function ShipmentManager() {
         onQueryChange={setQuery}
         onEdit={handleOpenEdit}
         onTerminate={handleTerminate}
+        alertsByShipmentId={alertsByShipmentId}
       />
 
       {/* Create / Edit form modal */}

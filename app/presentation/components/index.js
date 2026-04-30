@@ -13,3 +13,7 @@ export { default as ShipmentManager } from "./features/ShipmentManager";
 export { default as ShipmentTable } from "./features/ShipmentTable";
 export { default as ShipmentForm } from "./features/ShipmentForm";
 export { default as ShipmentExportButton } from "./features/ShipmentExportButton";
+export { default as DashboardSection } from "./features/DashboardSection";
+export { default as DashboardWidget } from "./features/DashboardWidget";
+export { default as ActionableList } from "./features/ActionableList";
+export { default as AlertBadge } from "./features/AlertBadge";

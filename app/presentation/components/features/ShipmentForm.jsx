@@ -5,13 +5,17 @@
  * Presentation Layer — Feature component
  *
  * @description Modal form for creating and editing shipment records.
- * Immutable fields (shipmentNumber, blNumber) are read-only in edit mode.
+ * - All text inputs are auto-uppercased for readability and consistency.
+ * - Shipment number is auto-generated (not user-editable) from consignee initials + month + year + serial.
+ * - Immutable fields (blNumber) are read-only in edit mode.
  */
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import { extractConsigneeInitials, generateShipmentNumber } from "../../../core/entities/shipment";
+
+const MONTH_ABBR = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
 
 const EMPTY_FORM = {
-  shipmentNumber: "",
   blNumber: "",
   shipperName: "",
   consigneeName: "",
@@ -24,6 +28,19 @@ const EMPTY_FORM = {
   alias: "",
   notes: "",
 };
+
+/**
+ * Returns a preview of the generated shipment number based on consignee name.
+ * Serial is shown as "???" since the real serial is determined at save time.
+ */
+function previewShipmentNumber(consigneeName) {
+  if (!consigneeName || !consigneeName.trim()) return "—";
+  const now = new Date();
+  const initials = extractConsigneeInitials(consigneeName);
+  const month = MONTH_ABBR[now.getMonth()];
+  const year = String(now.getFullYear()).slice(-2);
+  return `${initials}${month}${year}???`;
+}
 
 /**
  * @param {{
@@ -44,7 +61,6 @@ export default function ShipmentForm({ isOpen, onClose, onSubmit, initialData = 
     if (isOpen) {
       if (initialData && isEditMode) {
         setForm({
-          shipmentNumber: initialData.shipmentNumber || "",
           blNumber: initialData.blNumber || "",
           shipperName: initialData.shipperName || "",
           consigneeName: initialData.consigneeName || "",
@@ -65,18 +81,21 @@ export default function ShipmentForm({ isOpen, onClose, onSubmit, initialData = 
     }
   }, [isOpen, initialData, isEditMode]);
 
+  /** Handles text input changes — auto-uppercases all text values */
   function handleChange(e) {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type } = e.target;
+    // Date inputs should not be uppercased
+    const newValue = type === "date" ? value : value.toUpperCase();
+    setForm((prev) => ({ ...prev, [name]: newValue }));
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: null }));
   }
 
   function validate() {
     const newErrors = {};
-    if (!isEditMode && !form.shipmentNumber.trim()) newErrors.shipmentNumber = "Shipment number is required";
     if (!isEditMode && !form.blNumber.trim()) newErrors.blNumber = "B/L number is required";
     if (!form.shipperName.trim()) newErrors.shipperName = "Shipper name is required";
     if (!form.consigneeName.trim()) newErrors.consigneeName = "Consignee name is required";
+    if (!form.eta) newErrors.eta = "ETA wajib diisi";
     return newErrors;
   }
 
@@ -94,8 +113,8 @@ export default function ShipmentForm({ isOpen, onClose, onSubmit, initialData = 
     // Build clean payload — strip empty optional strings to null
     const payload = {};
     for (const [key, value] of Object.entries(form)) {
-      if (isEditMode && (key === "shipmentNumber" || key === "blNumber")) continue;
-      payload[key] = value.trim() === "" ? null : value.trim();
+      if (isEditMode && key === "blNumber") continue;
+      payload[key] = typeof value === "string" && value.trim() === "" ? null : value;
     }
 
     const result = await onSubmit(payload);
@@ -136,29 +155,33 @@ export default function ShipmentForm({ isOpen, onClose, onSubmit, initialData = 
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5 p-6">
-          {/* Immutable fields */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <FormField
-              label="Shipment Number"
-              name="shipmentNumber"
-              value={form.shipmentNumber}
-              onChange={handleChange}
-              readOnly={isEditMode}
-              required={!isEditMode}
-              error={errors.shipmentNumber}
-              placeholder="e.g. SHP-2025-001"
-            />
-            <FormField
-              label="B/L Number"
-              name="blNumber"
-              value={form.blNumber}
-              onChange={handleChange}
-              readOnly={isEditMode}
-              required={!isEditMode}
-              error={errors.blNumber}
-              placeholder="e.g. MSKU1234567"
-            />
+
+          {/* Shipment number — auto-generated preview (create) or read-only display (edit) */}
+          <div className="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
+            <p className="text-xs font-medium text-zinc-500">Shipment Number (auto-generated)</p>
+            <p className="mt-0.5 font-mono text-sm font-semibold text-zinc-800">
+              {isEditMode
+                ? initialData?.shipmentNumber || "—"
+                : previewShipmentNumber(form.consigneeName)}
+            </p>
+            {!isEditMode && form.consigneeName.trim() && (
+              <p className="mt-0.5 text-[11px] text-zinc-400">
+                Serial number assigned on save. Format: initials + month + year + sequence.
+              </p>
+            )}
           </div>
+
+          {/* B/L Number */}
+          <FormField
+            label="B/L Number"
+            name="blNumber"
+            value={form.blNumber}
+            onChange={handleChange}
+            readOnly={isEditMode}
+            required={!isEditMode}
+            error={errors.blNumber}
+            placeholder="E.G. MSKU1234567"
+          />
 
           {/* Required mutable fields */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -169,7 +192,7 @@ export default function ShipmentForm({ isOpen, onClose, onSubmit, initialData = 
               onChange={handleChange}
               required
               error={errors.shipperName}
-              placeholder="Shipper company name"
+              placeholder="SHIPPER COMPANY NAME"
             />
             <FormField
               label="Consignee Name"
@@ -178,7 +201,7 @@ export default function ShipmentForm({ isOpen, onClose, onSubmit, initialData = 
               onChange={handleChange}
               required
               error={errors.consigneeName}
-              placeholder="Consignee company name"
+              placeholder="CONSIGNEE COMPANY NAME"
             />
           </div>
 
@@ -189,14 +212,14 @@ export default function ShipmentForm({ isOpen, onClose, onSubmit, initialData = 
               name="vesselName"
               value={form.vesselName}
               onChange={handleChange}
-              placeholder="e.g. MV Ever Given"
+              placeholder="E.G. MV EVER GIVEN"
             />
             <FormField
               label="Voyage"
               name="voyage"
               value={form.voyage}
               onChange={handleChange}
-              placeholder="e.g. 025W"
+              placeholder="E.G. 025W"
             />
           </div>
 
@@ -207,14 +230,14 @@ export default function ShipmentForm({ isOpen, onClose, onSubmit, initialData = 
               name="portOfLoading"
               value={form.portOfLoading}
               onChange={handleChange}
-              placeholder="e.g. Shanghai"
+              placeholder="E.G. SHANGHAI"
             />
             <FormField
               label="Port of Discharge"
               name="portOfDischarge"
               value={form.portOfDischarge}
               onChange={handleChange}
-              placeholder="e.g. Tanjung Priok"
+              placeholder="E.G. TANJUNG PRIOK"
             />
           </div>
 
@@ -226,6 +249,7 @@ export default function ShipmentForm({ isOpen, onClose, onSubmit, initialData = 
               type="date"
               value={form.eta}
               onChange={handleChange}
+              required
               error={errors.eta}
             />
             <FormField
@@ -244,7 +268,7 @@ export default function ShipmentForm({ isOpen, onClose, onSubmit, initialData = 
             name="alias"
             value={form.alias}
             onChange={handleChange}
-            placeholder="Short friendly name for quick recall"
+            placeholder="SHORT FRIENDLY NAME FOR QUICK RECALL"
           />
           <div>
             <label className="mb-1.5 block text-xs font-medium text-zinc-700">Notes</label>
@@ -253,8 +277,8 @@ export default function ShipmentForm({ isOpen, onClose, onSubmit, initialData = 
               value={form.notes}
               onChange={handleChange}
               rows={3}
-              placeholder="Additional remarks..."
-              className="block w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 resize-none"
+              placeholder="ADDITIONAL REMARKS..."
+              className="block w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm uppercase text-zinc-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 resize-none"
             />
           </div>
 
@@ -308,6 +332,8 @@ function FormField({ label, name, value, onChange, readOnly, required, error, pl
         readOnly={readOnly}
         placeholder={placeholder}
         className={`block w-full rounded-xl border px-3 py-2 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 ${
+          type !== "date" ? "uppercase" : ""
+        } ${
           readOnly
             ? "border-zinc-200 bg-zinc-100 text-zinc-500 cursor-not-allowed"
             : error

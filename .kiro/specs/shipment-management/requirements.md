@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The Shipment Management feature provides a simple, browser-based record system for tracking shipments with automated notifications. This feature enables PPJK and freight forwarder staff to record shipment information, manage up to 500 total shipment records, export records to Excel (which clears all records), and receive automated notifications one working day before ETA or custom dates. The system uses browser-local storage (IndexedDB) and is designed for single-user use.
+The Shipment Management feature provides a simple, browser-based record system for tracking shipments with automated notifications. This feature enables PPJK and freight forwarder staff t o record shipment information, manage up to 500 total shipment records, export records to Excel (which clears all records), and receive automated notifications one working day before ETA or custom dates. The system uses browser-local storage (IndexedDB) and is designed for single-user use.
 
 ## Glossary
 
@@ -148,3 +148,15 @@ The Shipment Management feature provides a simple, browser-based record system f
 3. THE Shipment_Manager SHALL display loading indicators during storage operations and Excel export
 4. THE Shipment_Manager SHALL display success messages after successful create, update, terminate, and export operations
 5. THE Shipment_Manager SHALL be responsive and functional on desktop browsers (Chrome, Firefox, Safari, Edge)
+
+### Requirement 11: ETA sebagai Field Wajib
+
+**User Story:** As an operational staff member, I want ETA to be a required field when creating or editing a shipment, so that the dashboard and alert engine always have the data needed to evaluate shipment status accurately.
+
+#### Acceptance Criteria
+
+1. WHEN a user submits a shipment creation form, THE Shipment_Manager SHALL validate that the ETA field contains a valid date value
+2. IF the ETA field is empty or contains an invalid date when creating a shipment, THEN THE Shipment_Manager SHALL display a validation error message and prevent record creation
+3. WHEN a user submits a shipment edit form, THE Shipment_Manager SHALL validate that the ETA field contains a valid date value
+4. IF the ETA field is empty or contains an invalid date when editing a shipment, THEN THE Shipment_Manager SHALL display a validation error message and prevent the update from being saved
+5. THE Shipment_Manager SHALL visually mark the ETA field as required (e.g., with an asterisk or "required" label) in both the create and edit forms

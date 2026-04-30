@@ -8,6 +8,7 @@
  */
 
 import React, { useState } from "react";
+import AlertBadge from "./AlertBadge";
 
 /**
  * @param {{
@@ -17,9 +18,10 @@ import React, { useState } from "react";
  *   onQueryChange: (q: string) => void,
  *   onEdit: (shipment: Object) => void,
  *   onTerminate: (id: number) => Promise<void>,
+ *   alertsByShipmentId?: Map<number, Object>,
  * }} props
  */
-export default function ShipmentTable({ shipments, loading, query, onQueryChange, onEdit, onTerminate }) {
+export default function ShipmentTable({ shipments, loading, query, onQueryChange, onEdit, onTerminate, alertsByShipmentId }) {
   const [terminatingId, setTerminatingId] = useState(null);
   const [confirmId, setConfirmId] = useState(null);
 
@@ -92,12 +94,20 @@ export default function ShipmentTable({ shipments, loading, query, onQueryChange
                   className={`transition hover:bg-zinc-50 ${s.isNotificationDue ? "bg-amber-50/60" : ""}`}
                 >
                   <td className="px-4 py-3 font-medium text-zinc-900">
-                    {s.shipmentNumber}
-                    {s.isNotificationDue && (
-                      <span className="ml-1.5 inline-flex rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-700">
-                        H-1
-                      </span>
-                    )}
+                    <div className="flex items-center gap-2">
+                      <span>{s.shipmentNumber}</span>
+                      {s.isNotificationDue && (
+                        <span className="inline-flex rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-700">
+                          H-1
+                        </span>
+                      )}
+                      {alertsByShipmentId && (() => {
+                        const alertResult = alertsByShipmentId.get(s.id);
+                        return alertResult ? (
+                          <AlertBadge alerts={alertResult.alerts} highestRisk={alertResult.highestRisk} />
+                        ) : null;
+                      })()}
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-zinc-600">{s.blNumber}</td>
                   <td className="px-4 py-3 text-zinc-600">{s.shipperName}</td>

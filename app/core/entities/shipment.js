@@ -95,7 +95,55 @@ export function isRequiredFieldPresent(value) {
  * @returns {{ valid: boolean, missingFields: string[] }}
  */
 export function validateRequiredFields(input) {
-  const required = ["shipmentNumber", "blNumber", "shipperName", "consigneeName"];
+  const required = ["blNumber", "shipperName", "consigneeName", "eta"];
   const missingFields = required.filter((f) => !isRequiredFieldPresent(input?.[f]));
   return { valid: missingFields.length === 0, missingFields };
+}
+
+/**
+ * Legal entity prefixes to strip when extracting consignee initials.
+ * Covers common Indonesian and international entity types.
+ */
+const ENTITY_PREFIXES = new Set([
+  "PT", "CV", "UD", "PD", "TB", "FA", "NV", "BV", "LLC", "LTD", "INC",
+  "CORP", "CO", "PTE", "SDN", "BHD", "TBK", "PERSERO", "THE",
+]);
+
+/**
+ * Extracts initials from a consignee name, skipping legal entity prefixes.
+ * Example: "PT Maju Bersama" → "MB", "CV Karya Utama" → "KU"
+ * @param {string} consigneeName
+ * @returns {string} Uppercase initials (2–4 chars)
+ */
+export function extractConsigneeInitials(consigneeName) {
+  if (!consigneeName || typeof consigneeName !== "string") return "XX";
+
+  const words = consigneeName
+    .trim()
+    .toUpperCase()
+    .split(/\s+/)
+    .filter((w) => w.length > 0 && !ENTITY_PREFIXES.has(w));
+
+  if (words.length === 0) return "XX";
+
+  // Take first letter of each meaningful word, up to 4 chars
+  return words.map((w) => w[0]).join("").slice(0, 4);
+}
+
+const MONTH_ABBR = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+
+/**
+ * Generates a shipment number in the format: {INITIALS}{MON}{YY}{NNN}
+ * Example: "MBJAN26001"
+ * @param {string} consigneeName - Used to derive initials
+ * @param {number} serial - Monthly serial number (1-based)
+ * @param {Date} [date] - Defaults to current date
+ * @returns {string}
+ */
+export function generateShipmentNumber(consigneeName, serial, date = new Date()) {
+  const initials = extractConsigneeInitials(consigneeName);
+  const month = MONTH_ABBR[date.getMonth()];
+  const year = String(date.getFullYear()).slice(-2);
+  const paddedSerial = String(serial).padStart(3, "0");
+  return `${initials}${month}${year}${paddedSerial}`;
 }

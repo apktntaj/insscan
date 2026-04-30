@@ -5,9 +5,24 @@
  * @description Validates input, enforces record cap and uniqueness, persists shipment
  */
 
-import { createShipment, validateRequiredFields, isValidDate } from "../entities/shipment";
+import { createShipment, validateRequiredFields, isValidDate, generateShipmentNumber, extractConsigneeInitials } from "../entities/shipment";
 
 export const MAX_RECORD_LIMIT = 500;
+
+/**
+ * Determines the next monthly serial number for shipment number generation.
+ * Counts existing active shipments whose shipment number starts with the same
+ * initials+month+year prefix, then returns count + 1.
+ * @param {Object[]} existingShipments - All active shipments
+ * @param {string} prefix - e.g. "MBJAN26"
+ * @returns {number}
+ */
+function getNextSerial(existingShipments, prefix) {
+  const matching = existingShipments.filter((s) =>
+    s.shipmentNumber && s.shipmentNumber.toUpperCase().startsWith(prefix.toUpperCase())
+  );
+  return matching.length + 1;
+}
 
 /**
  * Creates the Create Shipment use case
@@ -63,23 +78,35 @@ export function createCreateShipmentUseCase(repository) {
       };
     }
 
-    // 4. Check uniqueness — shipment number
+    // 4. Fetch existing records (needed for uniqueness checks and serial generation)
     const existing = await repository.listActive();
+
+    // 5. Auto-generate shipment number
+    const now = new Date();
+    const MONTH_ABBR = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+    const initials = extractConsigneeInitials(input.consigneeName);
+    const month = MONTH_ABBR[now.getMonth()];
+    const year = String(now.getFullYear()).slice(-2);
+    const prefix = `${initials}${month}${year}`;
+    const serial = getNextSerial(existing, prefix);
+    const shipmentNumber = generateShipmentNumber(input.consigneeName, serial, now);
+
+    // 6. Check uniqueness — shipment number
     const dupShipmentNumber = existing.find(
-      (s) => s.shipmentNumber.trim().toLowerCase() === input.shipmentNumber.trim().toLowerCase()
+      (s) => s.shipmentNumber.trim().toLowerCase() === shipmentNumber.trim().toLowerCase()
     );
     if (dupShipmentNumber) {
       return {
         ok: false,
         error: {
           code: "DUPLICATE_SHIPMENT_NUMBER",
-          message: `Shipment number "${input.shipmentNumber}" already exists`,
+          message: `Shipment number "${shipmentNumber}" already exists`,
           field: "shipmentNumber",
         },
       };
     }
 
-    // 5. Check uniqueness — B/L number
+    // 7. Check uniqueness — B/L number
     const dupBlNumber = existing.find(
       (s) => s.blNumber.trim().toLowerCase() === input.blNumber.trim().toLowerCase()
     );
@@ -94,12 +121,12 @@ export function createCreateShipmentUseCase(repository) {
       };
     }
 
-    // 6. Persist
-    const now = new Date().toISOString();
+    // 8. Persist
     const shipment = createShipment({
       ...input,
-      createdAt: now,
-      updatedAt: now,
+      shipmentNumber,
+      createdAt: now.toISOString(),
+      updatedAt: now.toISOString(),
     });
 
     try {
