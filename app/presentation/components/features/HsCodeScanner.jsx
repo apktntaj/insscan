@@ -10,7 +10,7 @@ import { formatHsCode, isValidHsCode } from "../../../core/entities/hs-code";
 const BASE_CHUNK_SIZE = resolveChunkSize(process.env.NEXT_PUBLIC_HS_CHUNK_SIZE);
 const MIN_CHUNK_SIZE = 1;
 const MAX_CHUNK_ATTEMPTS = 5;
-const CHUNK_RETRY_DELAY_MS = 900;
+const CHUNK_RETRY_DELAY_MS = 360;
 const CHUNK_GROW_SUCCESS_STREAK = 3;
 
 /**

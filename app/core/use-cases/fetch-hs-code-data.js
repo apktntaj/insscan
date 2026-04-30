@@ -13,15 +13,15 @@ import {
 
 const REQUEST_DELAY_MIN_MS = parseDelayMs(
   process.env.INSW_REQUEST_DELAY_MIN_MS,
-  1400
+  560
 );
 const REQUEST_DELAY_MAX_MS = parseDelayMs(
   process.env.INSW_REQUEST_DELAY_MAX_MS,
-  2600
+  1040
 );
 const REQUEST_ERROR_COOLDOWN_MS = parseDelayMs(
   process.env.INSW_REQUEST_ERROR_COOLDOWN_MS,
-  4200
+  1680
 );
 
 /**
