@@ -12,6 +12,6 @@ export const navLinks = [
   {
     id: 2,
     label: "Feedback",
-    href: "mailto:alamasyarie@outlook.com",
+    href: "/feedback",
   },
 ];
