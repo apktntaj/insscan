@@ -1,109 +1,61 @@
-# 📦 InsScan - Shipment ETA Tracking Platform
+# Pesisir
 
-Platform pelacakan shipment yang membantu staff operasional PPJK / Freight Forwarder untuk:
+Platform operasional berbasis browser untuk staf PPJK dan freight forwarder di Indonesia. Dibuat untuk mengurangi kerja manual dalam pengecekan regulasi impor dan pengelolaan data shipment.
 
-- **Upload Bill of Lading** → Sistem otomatis mengisi form shipment
-- **Menyimpan data shipment** → Dengan kemampuan edit sebelum disimpan
-- **Auto-fetch & update ETA** → Sistem otomatis mencari dan memperbaharui jadwal ETA
-- **Generate Excel** → Untuk keperluan submit dokumen ke Bea Cukai
+## Fitur
 
-## 🚀 Status Proyek
+| Fitur | Status |
+|---|---|
+| Cek LARTAS — lookup HS code, tarif, dan status restriksi impor via INSW | ✅ Live |
+| Shipments — CRUD data shipment, tersimpan di browser (IndexedDB) | ✅ Live |
+| Export shipment ke Excel | ✅ Live |
+| Feedback & roadmap board | ✅ Live |
+| BL Scanner — parse PDF Bill of Lading untuk auto-fill form | 🔄 In Progress |
+| ETA Notifications | ⏳ Planned |
 
-🟡 **Dalam Pengembangan** — MVP Phase 1
+## Tech Stack
 
-## ✨ Fitur
+- **Next.js 14** (App Router)
+- **Tailwind CSS** + DaisyUI
+- **Clean Architecture** — core, adapters, infrastructure, presentation
+- **IndexedDB** — penyimpanan data shipment di sisi browser
+- **INSW API** — sumber data HS code, tarif, dan LARTAS
 
-| Fitur                                  | Status         |
-| -------------------------------------- | -------------- |
-| Upload Bill of Lading & Auto-Fill Form | 🔄 In Progress |
-| Auto-Fetch ETA                         | 🔄 In Progress |
-| Periodic ETA Update                    | ⏳ Planned     |
-| Shipment Dashboard                     | ⏳ Planned     |
-| Generate Excel untuk Bea Cukai         | ⏳ Planned     |
-
-## 🛠️ Tech Stack
-
-- **Framework:** Next.js 14 (App Router)
-- **Styling:** Tailwind CSS
-- **Architecture:** Clean Architecture
-
-## 📁 Struktur Proyek
-
-```
-app/
-├── adapters/          # Controllers & Presenters
-├── api/               # API Routes
-├── core/              # Entities, Ports, Use Cases
-├── infrastructure/    # External Services (API, Excel)
-└── presentation/      # UI Components
-```
-
-## 🏃 Cara Menjalankan
-
-### Prasyarat
-
-- Node.js 18+
-- npm / yarn / pnpm
-
-### Instalasi
+## Menjalankan Project
 
 ```bash
-# Clone repository
-git clone <repository-url>
-cd insscan
-
-# Install dependencies
 npm install
-```
-
-### Development
-
-```bash
 npm run dev
 ```
 
-Buka [http://localhost:3000](http://localhost:3000) di browser.
+Buka [http://localhost:3000](http://localhost:3000).
 
-### Production Build
+## Environment Variables
 
-```bash
-npm run build
-npm start
-```
-
-## 📖 Dokumentasi
-
-- [PRD (Product Requirements Document)](docs/PRD.md)
-- [Technical Requirements](docs/TECHNICAL_REQUIREMENTS.md)
-
-## 📝 Lisensi
-
-Private - All rights reserved
-
-## Environment (HS Code Source)
-
-Untuk menghindari token INSW yang berubah setiap hari, jalankan mode publik:
+Salin `.env.example` ke `.env` dan sesuaikan nilainya.
 
 ```bash
-INSW_PUBLIC_ONLY_MODE=true
+cp .env.example .env
 ```
 
-Catatan:
-- Jika `INSW_PUBLIC_ONLY_MODE=true`, aplikasi tidak akan memakai endpoint CMS ber-token.
-- Aplikasi akan mencoba endpoint publik detail HS code terlebih dulu, lalu fallback ke endpoint publik list.
-- Field tarif/LARTAS yang tersedia bergantung pada respons endpoint publik INSW saat itu.
+| Variable | Keterangan |
+|---|---|
+| `INSW_CMS_TOKEN` | Token autentikasi INSW CMS (opsional) |
+| `INSW_PUBLIC_ONLY_MODE` | `true` untuk skip endpoint CMS, pakai endpoint publik saja |
+| `INSW_USE_LOCAL_MOCK` | `true` untuk pakai data mock lokal |
+| `INSW_MOCK_ONLY_MODE` | `true` untuk hanya pakai mock, tanpa fetch live |
 
-## Mock Data (Detail Komoditas)
+## Struktur Project
 
-Untuk belajar struktur data dan mengurangi fetch berulang ke INSW:
-
-- File mock: `app/infrastructure/mocks/insw-detail-komoditas.mock.json`
-- Aktifkan mode mock lokal:
-
-```bash
-INSW_USE_LOCAL_MOCK=true
+```
+app/
+├── core/           # Business logic (entities, use cases, ports)
+├── adapters/       # Controllers & presenters
+├── infrastructure/ # External services (INSW API, Excel, IndexedDB)
+├── presentation/   # React components & hooks
+└── api/            # Next.js API routes
 ```
 
-Opsional:
-- `INSW_MOCK_ONLY_MODE=true` → hanya baca file mock, tanpa fallback fetch live.
-- `INSW_MOCK_FILE_PATH=...` → ganti path file mock.
+## Devlog
+
+Catatan perjalanan keputusan arah project ada di [`docs/devlog.md`](docs/devlog.md).
