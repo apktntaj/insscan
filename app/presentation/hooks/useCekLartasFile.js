@@ -387,7 +387,8 @@ export function useCekLartasFile() {
     setStatus("Menyiapkan proses fetch serial...");
 
     const hsCodes = extractHsCodes(fileData);
-    const payload = hsCodes.map((hs) => ({ hs_code: hs }));
+    const uniqueHsCodes = [...new Set(hsCodes)];
+    const payload = uniqueHsCodes.map((hs) => ({ hs_code: hs }));
     const total = payload.length;
 
     if (total === 0) {
