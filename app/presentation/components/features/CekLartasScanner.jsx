@@ -11,64 +11,28 @@ import FileInputPanel from "./cek-lartas/FileInputPanel";
  * @description Komponen utama halaman Cek Lartas.
  * Hanya bertanggung jawab merender mode toggle dan mendelegasikan ke
  * SingleInputPanel atau FileInputPanel sesuai mode aktif.
- * State mode disimpan di sini; state fetch/file ada di masing-masing hook dalam sub-panel.
  *
  * @returns {JSX.Element}
- *
- * @example
- * // Render awal: mode = "single"
- * // → ModeToggle dengan "Input Tunggal" aktif
- * // → SingleInputPanel dirender
- *
- * @example
- * // Setelah klik "Input File / Banyak HS Code":
- * // → mode = "file"
- * // → FileInputPanel dirender
  */
 export default function CekLartasScanner() {
   const [mode, setMode] = useState("single");
+  const isFile = mode === "file";
 
   return (
-    <div className="space-y-6 overflow-x-clip">
-      {/* Mode Toggle */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <div className="space-y-4 overflow-x-clip">
+      {/* Toggle button — centered */}
+      <div className="flex justify-center">
         <button
           type="button"
-          onClick={() => setMode("single")}
-          className={`rounded-2xl border p-4 text-left transition ${
-            mode === "single"
-              ? "border-sky-200 bg-gradient-to-br from-sky-900 to-cyan-700 text-white shadow-sm"
-              : "border-zinc-200 bg-white text-zinc-700 hover:border-sky-100 hover:bg-sky-50/50"
-          }`}
+          onClick={() => setMode(isFile ? "single" : "file")}
+          className="rounded-full border border-sky-200 px-4 py-1.5 text-xs font-medium text-cyan-700 transition hover:bg-sky-50"
         >
-          <p className={`text-sm font-semibold ${mode === "single" ? "text-white" : "text-zinc-900"}`}>
-            Input Tunggal
-          </p>
-          <p className={`mt-1 text-xs leading-relaxed ${mode === "single" ? "text-sky-200" : "text-zinc-500"}`}>
-            Cek satu HS code dengan tampilan card yang mudah dibaca.
-          </p>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setMode("file")}
-          className={`rounded-2xl border p-4 text-left transition ${
-            mode === "file"
-              ? "border-sky-200 bg-gradient-to-br from-sky-900 to-cyan-700 text-white shadow-sm"
-              : "border-zinc-200 bg-white text-zinc-700 hover:border-sky-100 hover:bg-sky-50/50"
-          }`}
-        >
-          <p className={`text-sm font-semibold ${mode === "file" ? "text-white" : "text-zinc-900"}`}>
-            Input File / Banyak HS Code
-          </p>
-          <p className={`mt-1 text-xs leading-relaxed ${mode === "file" ? "text-sky-200" : "text-zinc-500"}`}>
-            Upload file Excel berisi banyak HS code, hasil ditampilkan sebagai tabel matriks LARTAS.
-          </p>
+          Klik untuk mode  {isFile ? "single" : "multiple"}
         </button>
       </div>
 
-      {/* Panel sesuai mode aktif */}
-      {mode === "single" ? <SingleInputPanel /> : <FileInputPanel />}
+      {/* Panel — label mode aktif ada di dalam masing-masing panel */}
+      {isFile ? <FileInputPanel /> : <SingleInputPanel />}
     </div>
   );
 }
