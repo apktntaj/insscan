@@ -21,29 +21,52 @@ function LartasMatrixTable({ rows }) {
     [matrixRows, viewMode]
   );
 
+  const lartasCount = matrixRows.filter((r) => r.hasLartas).length;
+  const totalCount = matrixRows.length;
+
   return (
     <div className="space-y-4 overflow-x-hidden">
-      <Alert message="Matriks LARTAS per dokumen pabean. Klik sel 'Ada' untuk melihat detail regulasi per dokumen." />
-      <div className="flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          onClick={() => setViewMode("lartas")}
-          className={`rounded-full border px-3 py-1.5 text-xs font-medium ${
-            viewMode === "lartas" ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-300 text-zinc-700"
-          }`}
-        >
-          LARTAS Only
-        </button>
-        <button
-          type="button"
-          onClick={() => setViewMode("all")}
-          className={`rounded-full border px-3 py-1.5 text-xs font-medium ${
-            viewMode === "all" ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-300 text-zinc-700"
-          }`}
-        >
-          All
-        </button>
+      {/* Header: ringkasan + toggle filter */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700">Hasil Cek LARTAS</p>
+          <p className="mt-0.5 text-sm text-zinc-600">
+            <span className="font-semibold text-zinc-900">{lartasCount}</span> dari{" "}
+            <span className="font-semibold text-zinc-900">{totalCount}</span> HS code terkena LARTAS.
+            {" "}Klik sel <span className="font-medium text-zinc-800">Ada</span> untuk lihat detail regulasi.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setViewMode("lartas")}
+            className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+              viewMode === "lartas"
+                ? "border-cyan-700 bg-gradient-to-r from-sky-900 to-cyan-700 text-white"
+                : "border-zinc-300 text-zinc-600 hover:border-sky-200 hover:bg-sky-50"
+            }`}
+          >
+            Hanya yang LARTAS
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode("all")}
+            className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+              viewMode === "all"
+                ? "border-cyan-700 bg-gradient-to-r from-sky-900 to-cyan-700 text-white"
+                : "border-zinc-300 text-zinc-600 hover:border-sky-200 hover:bg-sky-50"
+            }`}
+          >
+            Semua HS Code
+          </button>
+        </div>
       </div>
+
+      {/* Keterangan kolom dokumen pabean */}
+      <p className="text-xs text-zinc-500">
+        Kolom <span className="font-medium text-zinc-700">Dok</span> menunjukkan kode dokumen pabean yang dipersyaratkan (misal: 20 = PIB, 40 = PEB).
+      </p>
+
       <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
         <div className="max-h-[34rem] overflow-x-auto overflow-y-auto">
           <table className="w-full min-w-[720px] text-left text-sm">
@@ -72,6 +95,7 @@ function LartasMatrixTable({ rows }) {
                           {cellDetails.length > 0 ? (
                             <button
                               type="button"
+                              title="Klik untuk lihat detail regulasi"
                               onClick={() =>
                                 setActiveCell({
                                   referenceNo: item.referenceNo,
@@ -80,12 +104,12 @@ function LartasMatrixTable({ rows }) {
                                   details: cellDetails,
                                 })
                               }
-                              className="rounded-full border border-zinc-900 px-2.5 py-1 text-xs font-medium text-zinc-900 transition hover:bg-zinc-100"
+                              className="inline-flex items-center gap-1 rounded-full border border-cyan-700 bg-gradient-to-r from-sky-900 to-cyan-700 px-2.5 py-1 text-xs font-medium text-white transition hover:from-sky-800 hover:to-cyan-600"
                             >
-                              Ada ({cellDetails.length})
+                              Ada ({cellDetails.length}) ↗
                             </button>
                           ) : (
-                            <span className="text-zinc-400">-</span>
+                            <span className="text-zinc-300">—</span>
                           )}
                         </td>
                       );
@@ -96,7 +120,7 @@ function LartasMatrixTable({ rows }) {
               {displayedRows.length === 0 ? (
                 <tr className="border-t border-zinc-100 text-zinc-600">
                   <td className="px-4 py-4" colSpan={docCodes.length + 2}>
-                    Tidak ada data untuk filter ini.
+                    Tidak ada HS code yang terkena LARTAS.
                   </td>
                 </tr>
               ) : null}

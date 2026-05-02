@@ -36,40 +36,39 @@ export default function LartasDocModal({ cell, onClose }) {
 
         <div className="mt-5 flex-1 space-y-4 overflow-y-auto pr-1">
           {grouped.map((group) => (
-            <div key={group.category} className="rounded-2xl border border-zinc-200 p-4 sm:p-5">
-              <p className="text-sm font-semibold uppercase tracking-[0.12em] text-zinc-700">{group.category}</p>
+            <div key={group.category} className="rounded-2xl border border-sky-100 p-4 sm:p-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-cyan-700">{group.category}</p>
               <div className="mt-3 space-y-3">
                 {group.items.map((detail, idx) => {
                   const links = resolveRegulationLinks(detail);
                   return (
-                    <div key={`${group.category}-${detail.idDokumen || idx}`} className="rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-sm text-zinc-700">
-                      <p>
-                        <span className="font-medium text-zinc-900">Nama Izin:</span> {detail.namaIzin || "-"}
+                    <div key={`${group.category}-${detail.idDokumen || idx}`} className="rounded-xl border border-zinc-100 bg-zinc-50 p-4 text-sm text-zinc-700">
+                      {/* Baris utama: nama izin + masa berlaku */}
+                      <p className="text-base font-semibold text-zinc-900">{detail.namaIzin || "Nama izin tidak tersedia"}</p>
+                      <p className="mt-1 text-xs text-zinc-500">
+                        Berlaku: <span className="font-medium text-zinc-700">{formatDate(detail.tanggalMulai)}</span>
+                        {" "}s/d{" "}
+                        <span className="font-medium text-zinc-700">{formatDate(detail.tanggalAkhir)}</span>
                       </p>
-                      <p className="mt-1">
-                        <span className="font-medium text-zinc-900">No SKEP:</span> {detail.noSkep || "-"}
-                      </p>
-                      <p className="mt-1">
-                        <span className="font-medium text-zinc-900">ID Dokumen:</span> {detail.idDokumen || "-"}
-                      </p>
-                      <p className="mt-1">
-                        <span className="font-medium text-zinc-900">Masa Berlaku:</span> {formatDate(detail.tanggalMulai)} -{" "}
-                        {formatDate(detail.tanggalAkhir)}
-                      </p>
-                      <p className="mt-1">
-                        <span className="font-medium text-zinc-900">Dok Pabean:</span> {(detail.dokumenPabean || []).join(", ") || "-"}
-                      </p>
+                      {/* Detail sekunder */}
+                      <div className="mt-3 grid grid-cols-1 gap-1 text-xs text-zinc-600 sm:grid-cols-2">
+                        <p><span className="text-zinc-400">No SKEP</span> — {detail.noSkep || "-"}</p>
+                        <p><span className="text-zinc-400">ID Dokumen</span> — {detail.idDokumen || "-"}</p>
+                        <p className="sm:col-span-2">
+                          <span className="text-zinc-400">Dok Pabean</span> — {(detail.dokumenPabean || []).join(", ") || "-"}
+                        </p>
+                      </div>
                       {links.length > 0 ? (
-                        <div className="mt-2 flex flex-wrap gap-1.5">
+                        <div className="mt-3 flex flex-wrap gap-1.5">
                           {links.slice(0, 3).map((url, linkIdx) => (
                             <a
                               key={`${group.category}-${idx}-link-${linkIdx}`}
                               href={url}
                               target="_blank"
                               rel="noreferrer"
-                              className="inline-flex rounded-lg border border-zinc-300 px-2 py-1 text-xs font-medium text-zinc-800 transition hover:bg-zinc-100"
+                              className="inline-flex items-center gap-1 rounded-lg border border-sky-200 px-2.5 py-1 text-xs font-medium text-cyan-700 transition hover:bg-sky-50"
                             >
-                              PDF {linkIdx + 1}
+                              Lihat PDF {linkIdx + 1} ↗
                             </a>
                           ))}
                         </div>
