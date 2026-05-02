@@ -34,6 +34,29 @@ const productCards = [
   },
 ];
 
+const whyReasons = [
+  {
+    pain: "Cek LARTAS satu per satu",
+    solve:
+      "Invoice bisa punya puluhan HS code. Cek manual ke situs INSW satu per satu bisa makan waktu berjam-jam. Pesisir memproses semuanya sekaligus dari file Excel yang sudah kamu punya.",
+  },
+  {
+    pain: "Data shipment tersebar di mana-mana",
+    solve:
+      "Nomor BL di email, ETA di WhatsApp, status di spreadsheet berbeda. Pesisir menyatukan semua data shipment dalam satu tempat — bisa dicari, diedit, dan diekspor kapan saja.",
+  },
+  {
+    pain: "Keputusan shipment dibuat tanpa gambaran yang jelas",
+    solve:
+      "Sulit prioritas mana shipment yang perlu ditangani duluan kalau datanya tersebar. Dashboard Pesisir menyajikan status dan ETA semua shipment dalam satu tampilan — supaya kamu bisa ambil keputusan lebih cepat dan lebih tepat.",
+  },
+  {
+    pain: "Tools yang ada terasa kaku dan lambat",
+    solve:
+      "Spreadsheet dan sistem internal PPJK sering kali tidak dirancang untuk kecepatan kerja harian. Pesisir didesain khusus untuk alur kerja operasional — antarmuka yang bersih, responsif, dan tidak membuang klik.",
+  },
+];
+
 const faqs = [
   {
     q: "Kenapa data shipment disimpan di browser, bukan di server?",
@@ -168,6 +191,24 @@ export default function Home() {
             </Link>
           </article>
         ))}
+      </section>
+
+      <section className="rounded-3xl border border-zinc-200 bg-white px-7 py-8 shadow-sm sm:px-9">
+        <p className="text-xs font-medium uppercase tracking-widest text-cyan-600">Kenapa Pesisir?</p>
+        <h3 className="mt-2 text-lg font-semibold text-zinc-900 sm:text-xl">
+          Dibuat untuk mengurangi kerja manual yang tidak perlu.
+        </h3>
+        <div className="mt-7 grid grid-cols-1 gap-6 sm:grid-cols-2">
+          {whyReasons.map((item) => (
+            <div key={item.pain} className="flex gap-4">
+              <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-cyan-400" />
+              <div>
+                <p className="text-sm font-medium text-zinc-800">{item.pain}</p>
+                <p className="mt-1.5 text-sm leading-7 text-zinc-500">{item.solve}</p>
+              </div>
+            </div>
+          ))}
+        </div>
       </section>
 
       <section className="rounded-3xl border border-zinc-200 bg-white px-7 py-8 shadow-sm sm:px-9">
