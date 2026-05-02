@@ -6,10 +6,10 @@ const productCards = [
   {
     title: "Cek Lartas",
     description:
-      "Verifikasi HS code, tarif bea masuk, pajak, dan status LARTAS langsung dari sumber INSW.",
+      "Cek LARTAS dari daftar HS code dari invoice langsung.",
     points: [
-      "Cek HS code single maupun batch dari file Excel.",
-      "Lihat tarif BM, PPN, PPH, dan PPH Non-API.",
+      "Tidak perlu cek satu persatu HS code",
+      "Unggah file excel yang berisi daftar HS code.",
       "Periksa status LARTAS dan detail regulasi impor.",
     ],
     href: "/cek-lartas",
@@ -20,11 +20,11 @@ const productCards = [
   {
     title: "Shipments",
     description:
-      "Kelola data pengiriman dan pantau status shipment dalam satu tampilan terpusat.",
+      "Kelola data pengiriman dan pantau status shipment dalam satu tempat.",
     points: [
-      "Input dan edit data pengiriman secara manual.",
-      "Pantau status dan estimasi kedatangan.",
-      "Ekspor data ke Excel untuk dokumentasi bea cukai.",
+      "Pantau status dan estimasi kedatangan shipment.",
+      "Ekspor data ke Excel untuk keperluan arsip dan pelaporan.",
+      "Data aman karena tersimpan di browser (bukan di server pihak ketiga)."
     ],
     href: "/shipments",
     cta: "Lihat Shipments",
@@ -48,13 +48,13 @@ export default function Home() {
 
         <div className="relative max-w-4xl">
           <p className="inline-flex rounded-full border border-cyan-200/80 bg-white/75 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.18em] text-cyan-700">
-            Pesisir Platform
+            Pesisir
           </p>
           <h1 className="mt-6 bg-gradient-to-r from-sky-900 to-cyan-700 bg-clip-text text-4xl font-semibold tracking-tight text-transparent sm:text-5xl lg:text-6xl">
-            Workspace operasional untuk Cek Lartas dan manajemen Shipments.
+            Platform operasional untuk tim ekspor impor.
           </h1>
           <p className="mt-5 max-w-3xl text-base leading-8 text-zinc-700">
-            Gunakan Cek Lartas untuk verifikasi HS code, tarif, dan status LARTAS dari INSW. Kelola data pengiriman di modul Shipments untuk tracking dan dokumentasi bea cukai.
+            Hemat waktumu dari input satu persatu HS code untuk mencari informasi LARTAS dan pantau status shipment melalui dashboard bukan tabel.
           </p>
           <div className="mt-9 flex flex-wrap gap-3">
             <Link
