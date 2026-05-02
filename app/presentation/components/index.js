@@ -17,3 +17,6 @@ export { default as DashboardSection } from "./features/DashboardSection";
 export { default as DashboardWidget } from "./features/DashboardWidget";
 export { default as ActionableList } from "./features/ActionableList";
 export { default as AlertBadge } from "./features/AlertBadge";
+export { default as RoadmapBoard } from "./features/RoadmapBoard";
+export { default as SuggestionForm } from "./features/SuggestionForm";
+export { default as SupportSection } from "./features/SupportSection";
