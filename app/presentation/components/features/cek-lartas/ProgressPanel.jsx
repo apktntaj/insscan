@@ -100,13 +100,16 @@ function formatDelta(deltaMs) {
  */
 export default function ProgressPanel({ progress, isLoading }) {
   const percent = calcPercent(progress.current, progress.total);
+  const isDone = !isLoading && progress.current === progress.total && progress.total > 0;
 
   return (
     <div className="overflow-hidden rounded-2xl border border-sky-100 bg-white p-4 shadow-sm sm:p-5">
       <div className="flex items-center justify-between gap-3">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700">Proses Fetch</p>
-        <p className="text-sm font-medium text-zinc-700">
-          {progress.current}/{progress.total}
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700">
+          {isDone ? "Selesai" : "Sedang Memproses..."}
+        </p>
+        <p className="text-sm font-semibold text-zinc-900">
+          {progress.current} / {progress.total} HS code
         </p>
       </div>
 
@@ -116,67 +119,52 @@ export default function ProgressPanel({ progress, isLoading }) {
           style={{ width: `${percent}%` }}
         />
       </div>
+      <p className="mt-1 text-right text-xs font-medium text-zinc-500">{percent}%</p>
 
-      <p className="mt-2 text-right text-xs font-medium text-zinc-700">{percent}%</p>
-
-      <p className="mt-2 break-words text-sm text-zinc-700">
-        {progress.currentCode
-          ? `HS aktif: ${formatHsCode(String(progress.currentCode))} (${labelMode(progress.currentMode)})`
-          : "Menunggu proses dimulai..."}
-        {!isLoading && progress.current === progress.total && progress.total > 0 ? " Selesai." : ""}
-      </p>
-
-      <div className="mt-2 text-xs text-zinc-500">
-        Mode: serial adaptive chunk (aktif {progress.chunkSize}, maksimum {progress.baseChunkSize})
-      </div>
-
-      <div className="mt-3 grid gap-2 text-xs text-zinc-600 sm:grid-cols-2">
-        <p>
-          Durasi berjalan:{" "}
-          <span className="font-medium text-zinc-800">{formatDuration(progress.elapsedMs)}</span>
-        </p>
-        <p>
-          ETA selesai:{" "}
-          <span className="font-medium text-zinc-800">
+      {/* Satu info waktu utama: selesai jam berapa */}
+      {!isDone && progress.etaTotalMs !== null ? (
+        <p className="mt-3 text-sm text-zinc-600">
+          Estimasi selesai pukul{" "}
+          <span className="font-semibold text-zinc-900">
             {formatEtaClock(progress.startedAt, progress.etaTotalMs)}
           </span>
         </p>
-        <p className="sm:col-span-2">
-          Sisa estimasi:{" "}
-          <span className="font-medium text-zinc-800">
-            {formatDuration(progress.etaRemainingMs)}
-          </span>
-        </p>
-      </div>
+      ) : null}
 
-      {!isLoading && progress.actualDurationMs !== null ? (
-        <div className="mt-3 rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-xs text-zinc-600">
-          <p>
-            Durasi aktual:{" "}
-            <span className="font-medium text-zinc-900">{formatDuration(progress.actualDurationMs)}</span>
-          </p>
-          <p className="mt-1">
-            ETA referensi:{" "}
-            <span className="font-medium text-zinc-900">{formatDuration(progress.etaReferenceMs)}</span>
-          </p>
-          <p className="mt-1">
-            Selisih aktual vs ETA:{" "}
-            <span className="font-medium text-zinc-900">{formatDelta(progress.etaDeltaMs)}</span>
+      {/* Setelah selesai: ringkasan singkat */}
+      {isDone && progress.actualDurationMs !== null ? (
+        <div className="mt-3 rounded-xl border border-sky-100 bg-sky-50/40 p-3 text-sm">
+          <p className="text-zinc-700">
+            Selesai dalam{" "}
+            <span className="font-semibold text-zinc-900">{formatDuration(progress.actualDurationMs)}</span>
+            {typeof progress.etaDeltaMs === "number" ? (
+              <span className="ml-2 text-xs text-zinc-500">
+                ({formatDelta(progress.etaDeltaMs)} dari estimasi)
+              </span>
+            ) : null}
           </p>
         </div>
       ) : null}
 
-      <div className="mt-3 max-h-36 space-y-1 overflow-y-auto rounded-xl border border-zinc-200 bg-zinc-50 p-3">
-        {progress.logs.length === 0 ? (
-          <p className="text-xs text-zinc-500">Belum ada log proses.</p>
-        ) : (
-          progress.logs.map((log, idx) => (
-            <p key={`${log}-${idx}`} className="break-words text-xs text-zinc-600">
+      {/* HS code aktif saat proses berjalan */}
+      {isLoading && progress.currentCode ? (
+        <p className="mt-2 text-xs text-zinc-500">
+          Sedang memproses:{" "}
+          <span className="font-medium text-zinc-700">{formatHsCode(String(progress.currentCode))}</span>
+          {" "}({labelMode(progress.currentMode)})
+        </p>
+      ) : null}
+
+      {/* Log aktivitas */}
+      {progress.logs.length > 0 ? (
+        <div className="mt-3 max-h-28 space-y-1 overflow-y-auto rounded-xl border border-zinc-100 bg-zinc-50 p-3">
+          {progress.logs.map((log, idx) => (
+            <p key={`${log}-${idx}`} className="break-words text-xs text-zinc-500">
               {log}
             </p>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }

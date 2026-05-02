@@ -90,7 +90,14 @@ export default function FileInputPanel() {
         {/* Status Alert */}
         {status ? (
           <div className="mt-4">
-            <Alert message={status} variant={alertVariant} />
+            <Alert
+              message={
+                alertVariant === "warning"
+                  ? `${status} Data yang sudah berhasil diambil tetap bisa diekspor.`
+                  : status
+              }
+              variant={alertVariant}
+            />
           </div>
         ) : null}
       </div>
