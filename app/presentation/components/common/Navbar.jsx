@@ -57,19 +57,17 @@ export default function Navbar({ links = [] }) {
                     </ul>
                 </div>
 
-                <Link className="group relative flex items-center gap-1.5" href="/">
+                <Link className="group relative flex items-center gap-2" href="/">
                     <span className="pointer-events-none absolute -inset-1 rounded-2xl bg-gradient-to-r from-sky-300/55 to-cyan-300/55 opacity-0 blur-xl transition group-hover:opacity-100" />
                     <Image
-                        src="/logo-pesisir.png"
-                        width={244}
-                        height={65}
+                        src="/logo-container.svg"
+                        width={40}
+                        height={40}
                         alt="Pesisir Logo"
-                        className="relative h-[2.925rem] w-auto drop-shadow-[0_6px_18px_rgba(8,145,178,0.30)] sm:h-[3.25rem]"
+                        className="relative h-9 w-9 object-contain sm:h-10 sm:w-10"
                         priority
                     />
-                    <span
-                        className="relative bg-gradient-to-r from-sky-800 to-cyan-600 bg-clip-text text-[1.02rem] font-bold leading-none tracking-tight text-transparent sm:text-[1.12rem]"
-                    >
+                    <span className="relative bg-gradient-to-r from-sky-800 to-cyan-600 bg-clip-text text-[1.1rem] font-bold leading-none tracking-tight text-transparent sm:text-[1.2rem]">
                         Pesisir
                     </span>
                 </Link>
