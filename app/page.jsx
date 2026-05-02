@@ -3,40 +3,40 @@
 import Link from "next/link";
 
 const productCards = [
-  // {
-  //   title: "B/L Scanner",
-  //   description:
-  //     "Upload Bill of Lading PDF, lalu klik teks untuk copy cepat. Tahan Ctrl sambil klik untuk chain value menjadi satu hasil copy.",
-  //   points: [
-  //     "Copy tunggal dengan satu klik.",
-  //     "Chain multi klik selama Ctrl ditekan.",
-  //     "Lepas Ctrl untuk mengakhiri chain otomatis.",
-  //   ],
-  //   href: "/blscann",
-  //   cta: "Buka BL Scanner",
-  //   accent: "from-sky-500/20 to-cyan-500/20",
-  //   dot: "bg-sky-500",
-  // },
   {
-    title: "INScann",
+    title: "Cek Lartas",
     description:
-      "Cek HS code secara batch dari file Excel untuk melihat tarif, pajak, dan detail LARTAS dalam alur yang rapi.",
+      "Verifikasi HS code, tarif bea masuk, pajak, dan status LARTAS langsung dari sumber INSW.",
     points: [
-      "Upload file Excel berisi HS code 8 digit.",
-      "Tarik data BM, PPN, PPH, dan PPH Non-API.",
-      "Lihat detail LARTAS dari sumber INSW.",
+      "Cek HS code single maupun batch dari file Excel.",
+      "Lihat tarif BM, PPN, PPH, dan PPH Non-API.",
+      "Periksa status LARTAS dan detail regulasi impor.",
     ],
-    href: "/inscann",
-    cta: "Buka INScann",
+    href: "/cek-lartas",
+    cta: "Buka Cek Lartas",
     accent: "from-cyan-500/20 to-sky-500/20",
     dot: "bg-cyan-500",
+  },
+  {
+    title: "Shipments",
+    description:
+      "Kelola data pengiriman dan pantau status shipment dalam satu tampilan terpusat.",
+    points: [
+      "Input dan edit data pengiriman secara manual.",
+      "Pantau status dan estimasi kedatangan.",
+      "Ekspor data ke Excel untuk dokumentasi bea cukai.",
+    ],
+    href: "/shipments",
+    cta: "Lihat Shipments",
+    accent: "from-sky-500/20 to-cyan-500/20",
+    dot: "bg-sky-500",
   },
 ];
 
 const quickFlow = [
-  "Pilih modul sesuai kebutuhan: BL Scanner atau INScann.",
-  "Proses data langsung di halaman modul terkait.",
-  "Copy hasil dengan cepat untuk mengurangi salah input manual.",
+  "Input data pengiriman di modul Shipments — catat nomor BL, shipper, dan estimasi kedatangan.",
+  "Verifikasi HS code dan status LARTAS di modul Cek Lartas sebelum proses kepabeanan.",
+  "Ekspor atau catat hasil untuk keperluan dokumentasi dan pelaporan bea cukai.",
 ];
 
 export default function Home() {
@@ -51,23 +51,23 @@ export default function Home() {
             Pesisir Platform
           </p>
           <h1 className="mt-6 bg-gradient-to-r from-sky-900 to-cyan-700 bg-clip-text text-4xl font-semibold tracking-tight text-transparent sm:text-5xl lg:text-6xl">
-            Workspace operasional untuk BL copy-chain dan validasi HS code.
+            Workspace operasional untuk Cek Lartas dan manajemen Shipments.
           </h1>
           <p className="mt-5 max-w-3xl text-base leading-8 text-zinc-700">
-            Gunakan BL Scanner untuk copy data Bill of Lading lebih cepat, lalu lanjutkan ke INScann untuk verifikasi tarif, pajak, dan LARTAS.
+            Gunakan Cek Lartas untuk verifikasi HS code, tarif, dan status LARTAS dari INSW. Kelola data pengiriman di modul Shipments untuk tracking dan dokumentasi bea cukai.
           </p>
           <div className="mt-9 flex flex-wrap gap-3">
             <Link
-              href="/blscann"
+              href="/cek-lartas"
               className="rounded-xl bg-zinc-900 px-5 py-3 text-sm font-medium text-zinc-50 transition hover:bg-zinc-800"
             >
-              Buka BL Scanner
+              Buka Cek Lartas
             </Link>
             <Link
-              href="/inscann"
+              href="/shipments"
               className="rounded-xl border border-zinc-300 px-5 py-3 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100"
             >
-              Buka INScann
+              Lihat Shipments
             </Link>
           </div>
         </div>
