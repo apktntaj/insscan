@@ -43,23 +43,23 @@ export default function SingleInputPanel() {
       <div className="overflow-hidden rounded-3xl border border-sky-100 bg-white p-6 shadow-sm sm:p-8">
         <div className="grid min-w-0 gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
           <div className="min-w-0 space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700">Input Tunggal</p>
-            <input
-              type="text"
-              value={singleInput}
-              onChange={(e) => setSingleInput(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") handleFetch(); }}
-              placeholder="Contoh: 84713090"
-              className="block w-full max-w-2xl rounded-xl border border-sky-100 bg-sky-50/40 px-3 py-2 text-sm text-zinc-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
-            />
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700">Input Tunggal</p>
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={singleInput}
+                onChange={(e) => setSingleInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") handleFetch(); }}
+                placeholder="Contoh: 84713090"
+                className="block min-w-0 flex-1 rounded-xl border border-sky-100 bg-sky-50/40 px-3 py-2 text-sm text-zinc-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+              />
+              <Button onClick={handleFetch} disabled={isSingleLoading} className="shrink-0 !border-cyan-700 !bg-gradient-to-r !from-sky-900 !to-cyan-700 hover:!from-sky-800 hover:!to-cyan-600">
+                {isSingleLoading ? "Loading..." : "Cari HS Code"}
+              </Button>
+            </div>
             <p className="text-xs leading-6 text-zinc-500 sm:text-sm">
               Masukkan satu HS code 8 digit untuk tampilan hasil berbentuk card.
             </p>
-          </div>
-          <div className="flex min-w-0 w-full flex-col items-start gap-3 lg:w-auto lg:justify-self-end lg:items-end">
-            <Button onClick={handleFetch} disabled={isSingleLoading} className="w-full px-6 sm:w-auto !border-cyan-700 !bg-gradient-to-r !from-sky-900 !to-cyan-700 hover:!from-sky-800 hover:!to-cyan-600">
-              {isSingleLoading ? "Loading..." : "Cari HS Code"}
-            </Button>
           </div>
         </div>
 

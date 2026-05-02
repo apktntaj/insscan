@@ -60,9 +60,7 @@ export default function FileInputPanel() {
       <div className="overflow-hidden rounded-3xl border border-sky-100 bg-white p-6 shadow-sm sm:p-8">
         <div className="grid min-w-0 gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
           <div className="min-w-0 space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700">
-              Input File
-            </p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700">Input File</p>
             <Input handleChange={handleFileChange} className="max-w-2xl" />
             <p className="text-xs leading-6 text-zinc-500 sm:text-sm">
               Gunakan file{" "}
