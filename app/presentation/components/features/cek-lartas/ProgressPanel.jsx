@@ -102,6 +102,15 @@ export default function ProgressPanel({ progress, isLoading }) {
   const percent = calcPercent(progress.current, progress.total);
   const isDone = !isLoading && progress.current === progress.total && progress.total > 0;
 
+  // Satu baris info dinamis di bawah progress bar
+  const infoLine = isDone
+    ? `Selesai dalam ${formatDuration(progress.actualDurationMs)}${typeof progress.etaDeltaMs === "number" ? ` · ${formatDelta(progress.etaDeltaMs)} dari estimasi` : ""}`
+    : progress.currentCode
+    ? `${progress.current}/${progress.total} · ${formatHsCode(String(progress.currentCode))} · ${labelMode(progress.currentMode)}`
+    : progress.etaTotalMs !== null
+    ? `Estimasi selesai pukul ${formatEtaClock(progress.startedAt, progress.etaTotalMs)}`
+    : "Memulai proses...";
+
   return (
     <div className="overflow-hidden rounded-2xl border border-sky-100 bg-white p-4 shadow-sm sm:p-5">
       <div className="flex items-center justify-between gap-3">
@@ -109,7 +118,7 @@ export default function ProgressPanel({ progress, isLoading }) {
           {isDone ? "Selesai" : "Sedang Memproses..."}
         </p>
         <p className="text-sm font-semibold text-zinc-900">
-          {progress.current} / {progress.total} HS code
+          {progress.current} / {progress.total}
         </p>
       </div>
 
@@ -119,52 +128,11 @@ export default function ProgressPanel({ progress, isLoading }) {
           style={{ width: `${percent}%` }}
         />
       </div>
-      <p className="mt-1 text-right text-xs font-medium text-zinc-500">{percent}%</p>
 
-      {/* Satu info waktu utama: selesai jam berapa */}
-      {!isDone && progress.etaTotalMs !== null ? (
-        <p className="mt-3 text-sm text-zinc-600">
-          Estimasi selesai pukul{" "}
-          <span className="font-semibold text-zinc-900">
-            {formatEtaClock(progress.startedAt, progress.etaTotalMs)}
-          </span>
-        </p>
-      ) : null}
-
-      {/* Setelah selesai: ringkasan singkat */}
-      {isDone && progress.actualDurationMs !== null ? (
-        <div className="mt-3 rounded-xl border border-sky-100 bg-sky-50/40 p-3 text-sm">
-          <p className="text-zinc-700">
-            Selesai dalam{" "}
-            <span className="font-semibold text-zinc-900">{formatDuration(progress.actualDurationMs)}</span>
-            {typeof progress.etaDeltaMs === "number" ? (
-              <span className="ml-2 text-xs text-zinc-500">
-                ({formatDelta(progress.etaDeltaMs)} dari estimasi)
-              </span>
-            ) : null}
-          </p>
-        </div>
-      ) : null}
-
-      {/* HS code aktif saat proses berjalan */}
-      {isLoading && progress.currentCode ? (
-        <p className="mt-2 text-xs text-zinc-500">
-          Sedang memproses:{" "}
-          <span className="font-medium text-zinc-700">{formatHsCode(String(progress.currentCode))}</span>
-          {" "}({labelMode(progress.currentMode)})
-        </p>
-      ) : null}
-
-      {/* Log aktivitas */}
-      {progress.logs.length > 0 ? (
-        <div className="mt-3 max-h-28 space-y-1 overflow-y-auto rounded-xl border border-zinc-100 bg-zinc-50 p-3">
-          {progress.logs.map((log, idx) => (
-            <p key={`${log}-${idx}`} className="break-words text-xs text-zinc-500">
-              {log}
-            </p>
-          ))}
-        </div>
-      ) : null}
+      {/* Satu baris info — berubah selaras dengan progress */}
+      <p className="mt-2 truncate text-xs text-zinc-500 transition-all duration-200">
+        {infoLine}
+      </p>
     </div>
   );
 }
