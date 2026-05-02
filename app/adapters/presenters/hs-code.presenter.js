@@ -78,3 +78,102 @@ export function toTableRow(hsCode, index) {
 function formatForDisplay(code) {
   return String(code).replace(/(\d{4})(\d{2})(\d{2})/, "$1.$2.$3");
 }
+
+// ─── Task 1.1: Helpers untuk parseHsCodeApiResponse ───────────────────────────
+
+/**
+ * Memeriksa apakah value adalah plain object (bukan null, array, atau primitif).
+ *
+ * @param {unknown} value
+ * @returns {boolean}
+ *
+ * @example
+ * isPlainObject({})          // => true
+ * isPlainObject({ a: 1 })   // => true
+ * isPlainObject(null)        // => false
+ * isPlainObject([1, 2])      // => false
+ * isPlainObject("string")    // => false
+ * isPlainObject(42)          // => false
+ */
+export function isPlainObject(value) {
+  return (
+    value !== null &&
+    typeof value === "object" &&
+    !Array.isArray(value)
+  );
+}
+
+/**
+ * Normalisasi array detail LARTAS.
+ * Kembalikan array apa adanya jika valid, atau `[]` jika bukan array.
+ *
+ * @param {unknown} value
+ * @returns {Array}
+ *
+ * @example
+ * parseDetailArray([{ namaIzin: "PI" }])  // => [{ namaIzin: "PI" }]
+ * parseDetailArray([])                     // => []
+ * parseDetailArray(null)                   // => []
+ * parseDetailArray(undefined)              // => []
+ * parseDetailArray("bukan array")          // => []
+ */
+export function parseDetailArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+// ─── Task 1.2: parseHsCodeApiResponse ─────────────────────────────────────────
+
+/**
+ * Mem-parse satu objek respons mentah dari API /api/hs-code atau stream /api/hs-code/progress
+ * menjadi LartasResult yang tervalidasi.
+ * Tidak pernah throw — error dikembalikan sebagai { ok: false, error }.
+ *
+ * @param {unknown} raw - Objek mentah dari API
+ * @returns {{ ok: true, data: import('./types').LartasResult } | { ok: false, error: string }}
+ *
+ * @example
+ * parseHsCodeApiResponse({ hsCode: "84713090", bm: "0%", hasLartasImport: false })
+ * // => { ok: true, data: { hsCode: "84713090", bm: "0%", hasLartasImport: false, lartasImportDetails: [], ... } }
+ *
+ * @example
+ * parseHsCodeApiResponse(null)
+ * // => { ok: false, error: "Response tidak valid: bukan objek" }
+ *
+ * @example
+ * parseHsCodeApiResponse({ bm: "5%" })
+ * // => { ok: false, error: "Field wajib tidak ada: hsCode" }
+ */
+export function parseHsCodeApiResponse(raw) {
+  // Validasi: harus plain object
+  if (!isPlainObject(raw)) {
+    return { ok: false, error: "Response tidak valid: bukan objek" };
+  }
+
+  // Validasi: field wajib hsCode
+  if (raw.hsCode === undefined || raw.hsCode === null || raw.hsCode === "") {
+    return { ok: false, error: "Field wajib tidak ada: hsCode" };
+  }
+
+  // Normalisasi string-or-null helper
+  const toStringOrNull = (v) =>
+    v !== undefined && v !== null ? String(v) : null;
+
+  /** @type {import('./types').LartasResult} */
+  const data = {
+    hsCode: String(raw.hsCode),
+    bm: toStringOrNull(raw.bm),
+    ppn: toStringOrNull(raw.ppn),
+    pph: toStringOrNull(raw.pph),
+    pphNonApi: toStringOrNull(raw.pphNonApi),
+    hasLartasImport: Boolean(raw.hasLartasImport),
+    hasLartasBorder: Boolean(raw.hasLartasBorder),
+    hasLartasPostBorder: Boolean(raw.hasLartasPostBorder),
+    hasLartasExport: Boolean(raw.hasLartasExport),
+    lartasImportDetails: parseDetailArray(raw.lartasImportDetails),
+    lartasBorderDetails: parseDetailArray(raw.lartasBorderDetails),
+    lartasPostBorderDetails: parseDetailArray(raw.lartasPostBorderDetails),
+    lartasExportDetails: parseDetailArray(raw.lartasExportDetails),
+  };
+
+  return { ok: true, data };
+}
