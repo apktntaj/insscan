@@ -42,13 +42,19 @@ export default function Navbar({ links = [] }) {
                             return (
                                 <li key={link.href}>
                                     <Link
-                                        className={`rounded-lg ${
+                                        className={`relative rounded-lg ${
                                             isActive
-                                                ? "bg-gradient-to-r from-sky-700 to-cyan-600 text-white"
+                                                ? "text-sky-800 font-medium"
                                                 : "text-zinc-700"
                                         }`}
                                         href={link.href}
                                     >
+                                        {isActive && (
+                                            <span
+                                                aria-hidden="true"
+                                                className="pointer-events-none absolute inset-0 -z-10 rounded-lg bg-gradient-to-br from-sky-300/50 via-cyan-200/40 to-sky-400/30 blur-md"
+                                            />
+                                        )}
                                         {link.label}
                                     </Link>
                                 </li>
@@ -80,13 +86,19 @@ export default function Navbar({ links = [] }) {
                     return (
                         <Link
                             key={link.href}
-                            className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                            className={`relative px-4 py-2 text-sm font-medium transition ${
                                 isActive
-                                    ? "bg-gradient-to-r from-sky-700 to-cyan-600 text-white shadow-[0_8px_20px_rgba(2,132,199,0.25)]"
-                                    : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+                                    ? "text-sky-800"
+                                    : "text-zinc-500 hover:text-zinc-800"
                             }`}
                             href={link.href}
                         >
+                            {isActive && (
+                                <span
+                                    aria-hidden="true"
+                                    className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-gradient-to-br from-sky-300/50 via-cyan-200/40 to-sky-400/30 blur-md"
+                                />
+                            )}
                             {link.label}
                         </Link>
                     );
