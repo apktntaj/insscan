@@ -7,6 +7,9 @@ export { default as Row } from "./common/Row";
 export { default as Navbar } from "./common/Navbar";
 
 // Feature Components
+export { default as CekLartasScanner } from "./features/CekLartasScanner";
+export { default as LartasResultTable } from "./features/LartasResultTable";
+// Legacy exports for backward compatibility
 export { default as HsCodeScanner } from "./features/HsCodeScanner";
 export { default as HsCodeTable } from "./features/HsCodeTable";
 export { default as ShipmentManager } from "./features/ShipmentManager";

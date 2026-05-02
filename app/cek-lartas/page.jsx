@@ -1,20 +1,20 @@
-import { Title, HsCodeScanner } from "../presentation/components";
+import { Title, CekLartasScanner } from "../presentation/components";
 
-const PAGE_TITLE = "INScann";
+const PAGE_TITLE = "CEK LARTAS";
 const PAGE_DESCRIPTION = [
-  "Pilih mode Single Input untuk cek satu HS code dengan tampilan card yang mudah dibaca.",
-  "Gunakan mode File / Multiple untuk memproses banyak HS code dengan hasil tabel LARTAS.",
+  "Pilih mode Input Tunggal untuk cek satu HS code dengan tampilan card yang mudah dibaca.",
+  "Gunakan mode Input File / Banyak HS Code untuk memproses banyak HS code dengan hasil tabel matriks LARTAS.",
 ];
 
 /**
- * INScann Page
- * @description Main page for INScann feature
+ * Cek Lartas Page
+ * @description Halaman utama untuk fitur Cek Lartas
  */
-export default function InscannPage() {
+export default function CekLartasPage() {
   return (
     <div className="mx-auto w-full max-w-6xl space-y-6 pb-8 sm:space-y-8">
-      <Title title={PAGE_TITLE} descs={PAGE_DESCRIPTION} variant="modern" eyebrow="INScann" />
-      <HsCodeScanner />
+      <Title title={PAGE_TITLE} descs={PAGE_DESCRIPTION} variant="modern" eyebrow="Pesisir" />
+      <CekLartasScanner />
     </div>
   );
 }
