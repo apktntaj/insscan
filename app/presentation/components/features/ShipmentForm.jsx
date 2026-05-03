@@ -10,7 +10,7 @@
  * - Immutable fields (blNumber) are read-only in edit mode.
  */
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { extractConsigneeInitials, generateShipmentNumber } from "../../../core/entities/shipment";
 
 const MONTH_ABBR = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
@@ -49,17 +49,58 @@ function previewShipmentNumber(consigneeName) {
  *   onSubmit: (data: Object) => Promise<{ok: boolean, error?: Object}>,
  *   initialData?: Object|null,
  *   isEditMode?: boolean,
+ *   autoFillData?: Object|null,
+ *   isAutoFilled?: boolean,
+ *   embedded?: boolean,
+ *   onFieldFocus?: (fieldName: string, event: Event) => void,
+ *   onFieldBlur?: () => void,
+ *   activeField?: string|null,
+ *   clipboardBuffer?: string[],
  * }} props
  */
-export default function ShipmentForm({ isOpen, onClose, onSubmit, initialData = null, isEditMode = false }) {
+export default function ShipmentForm({ 
+  isOpen, 
+  onClose, 
+  onSubmit, 
+  initialData = null, 
+  isEditMode = false,
+  autoFillData = null,
+  isAutoFilled = false,
+  embedded = false,
+  onFieldFocus = null,
+  onFieldBlur = null,
+  activeField = null,
+  clipboardBuffer = []
+}) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
+  const formContainerRef = useRef(null);
+
+  // Generate unique datalist ID for clipboard suggestions
+  const datalistId = "clipboard-suggestions";
 
   useEffect(() => {
     if (isOpen) {
-      if (initialData && isEditMode) {
+      // Priority: autoFillData > initialData (edit mode) > EMPTY_FORM
+      if (autoFillData && isAutoFilled) {
+        // Auto-fill mode: use data from PDF extraction (disabled for now)
+        setForm({
+          blNumber: autoFillData.blNumber || "",
+          shipperName: autoFillData.shipperName || "",
+          consigneeName: autoFillData.consigneeName || "",
+          vesselName: autoFillData.vesselName || "",
+          voyage: autoFillData.voyage || "",
+          portOfLoading: autoFillData.portOfLoading || "",
+          portOfDischarge: autoFillData.portOfDischarge || "",
+          eta: autoFillData.eta || "",
+          customNotificationDate: "",
+          alias: "",
+          notes: "",
+        });
+      } else if (initialData && isEditMode) {
+        // Edit mode: use existing shipment data
         setForm({
           blNumber: initialData.blNumber || "",
           shipperName: initialData.shipperName || "",
@@ -74,12 +115,13 @@ export default function ShipmentForm({ isOpen, onClose, onSubmit, initialData = 
           notes: initialData.notes || "",
         });
       } else {
+        // Create mode: empty form
         setForm(EMPTY_FORM);
       }
       setErrors({});
       setSubmitError(null);
     }
-  }, [isOpen, initialData, isEditMode]);
+  }, [isOpen, initialData, isEditMode, autoFillData, isAutoFilled]);
 
   /** Handles text input changes — auto-uppercases all text values */
   function handleChange(e) {
@@ -135,55 +177,48 @@ export default function ShipmentForm({ isOpen, onClose, onSubmit, initialData = 
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
-      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border border-zinc-200 bg-white shadow-xl">
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-zinc-100 bg-white px-6 py-4">
-          <h2 className="text-base font-semibold text-zinc-900">
-            {isEditMode ? "Edit Shipment" : "New Shipment"}
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg p-1.5 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900"
-            aria-label="Close"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+  // Form content (shared between modal and embedded modes)
+  const formContent = (
+    <>
+      {/* Datalist for clipboard buffer suggestions */}
+      {clipboardBuffer.length > 0 && (
+        <datalist id={datalistId}>
+          {clipboardBuffer.map((item, index) => (
+            <option key={index} value={item} />
+          ))}
+        </datalist>
+      )}
 
-        <form onSubmit={handleSubmit} className="space-y-5 p-6">
+      {/* B/L Number */}
+      <FormField
+        label="B/L Number"
+        name="blNumber"
+        value={form.blNumber}
+        onChange={handleChange}
+        readOnly={isEditMode}
+        required={!isEditMode}
+        error={errors.blNumber}
+        placeholder="E.G. MSKU1234567"
+        onFocus={onFieldFocus}
+        onBlur={onFieldBlur}
+        isActive={activeField === "blNumber"}
+        datalistId={clipboardBuffer.length > 0 ? datalistId : undefined}
+      />
 
-          {/* Shipment number — auto-generated preview (create) or read-only display (edit) */}
-          <div className="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-            <p className="text-xs font-medium text-zinc-500">Shipment Number (auto-generated)</p>
-            <p className="mt-0.5 font-mono text-sm font-semibold text-zinc-800">
-              {isEditMode
-                ? initialData?.shipmentNumber || "—"
-                : previewShipmentNumber(form.consigneeName)}
-            </p>
-            {!isEditMode && form.consigneeName.trim() && (
-              <p className="mt-0.5 text-[11px] text-zinc-400">
-                Serial number assigned on save. Format: initials + month + year + sequence.
-              </p>
-            )}
-          </div>
+      {/* Alias - moved here below B/L Number */}
+      <FormField
+        label="Alias"
+        name="alias"
+        value={form.alias}
+        onChange={handleChange}
+        placeholder="SHORT FRIENDLY NAME FOR QUICK RECALL"
+        onFocus={onFieldFocus}
+        onBlur={onFieldBlur}
+        isActive={activeField === "alias"}
+        datalistId={clipboardBuffer.length > 0 ? datalistId : undefined}
+      />
 
-          {/* B/L Number */}
-          <FormField
-            label="B/L Number"
-            name="blNumber"
-            value={form.blNumber}
-            onChange={handleChange}
-            readOnly={isEditMode}
-            required={!isEditMode}
-            error={errors.blNumber}
-            placeholder="E.G. MSKU1234567"
-          />
-
-          {/* Required mutable fields */}
+      {/* Required mutable fields */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <FormField
               label="Shipper Name"
@@ -193,6 +228,10 @@ export default function ShipmentForm({ isOpen, onClose, onSubmit, initialData = 
               required
               error={errors.shipperName}
               placeholder="SHIPPER COMPANY NAME"
+              onFocus={onFieldFocus}
+              onBlur={onFieldBlur}
+              isActive={activeField === "shipperName"}
+              datalistId={clipboardBuffer.length > 0 ? datalistId : undefined}
             />
             <FormField
               label="Consignee Name"
@@ -202,6 +241,10 @@ export default function ShipmentForm({ isOpen, onClose, onSubmit, initialData = 
               required
               error={errors.consigneeName}
               placeholder="CONSIGNEE COMPANY NAME"
+              onFocus={onFieldFocus}
+              onBlur={onFieldBlur}
+              isActive={activeField === "consigneeName"}
+              datalistId={clipboardBuffer.length > 0 ? datalistId : undefined}
             />
           </div>
 
@@ -213,6 +256,10 @@ export default function ShipmentForm({ isOpen, onClose, onSubmit, initialData = 
               value={form.vesselName}
               onChange={handleChange}
               placeholder="E.G. MV EVER GIVEN"
+              onFocus={onFieldFocus}
+              onBlur={onFieldBlur}
+              isActive={activeField === "vesselName"}
+              datalistId={clipboardBuffer.length > 0 ? datalistId : undefined}
             />
             <FormField
               label="Voyage"
@@ -220,6 +267,10 @@ export default function ShipmentForm({ isOpen, onClose, onSubmit, initialData = 
               value={form.voyage}
               onChange={handleChange}
               placeholder="E.G. 025W"
+              onFocus={onFieldFocus}
+              onBlur={onFieldBlur}
+              isActive={activeField === "voyage"}
+              datalistId={clipboardBuffer.length > 0 ? datalistId : undefined}
             />
           </div>
 
@@ -231,6 +282,10 @@ export default function ShipmentForm({ isOpen, onClose, onSubmit, initialData = 
               value={form.portOfLoading}
               onChange={handleChange}
               placeholder="E.G. SHANGHAI"
+              onFocus={onFieldFocus}
+              onBlur={onFieldBlur}
+              isActive={activeField === "portOfLoading"}
+              datalistId={clipboardBuffer.length > 0 ? datalistId : undefined}
             />
             <FormField
               label="Port of Discharge"
@@ -238,6 +293,10 @@ export default function ShipmentForm({ isOpen, onClose, onSubmit, initialData = 
               value={form.portOfDischarge}
               onChange={handleChange}
               placeholder="E.G. TANJUNG PRIOK"
+              onFocus={onFieldFocus}
+              onBlur={onFieldBlur}
+              isActive={activeField === "portOfDischarge"}
+              datalistId={clipboardBuffer.length > 0 ? datalistId : undefined}
             />
           </div>
 
@@ -251,6 +310,9 @@ export default function ShipmentForm({ isOpen, onClose, onSubmit, initialData = 
               onChange={handleChange}
               required
               error={errors.eta}
+              onFocus={onFieldFocus}
+              onBlur={onFieldBlur}
+              isActive={activeField === "eta"}
             />
             <FormField
               label="Custom Notification Date"
@@ -259,17 +321,13 @@ export default function ShipmentForm({ isOpen, onClose, onSubmit, initialData = 
               value={form.customNotificationDate}
               onChange={handleChange}
               error={errors.customNotificationDate}
+              onFocus={onFieldFocus}
+              onBlur={onFieldBlur}
+              isActive={activeField === "customNotificationDate"}
             />
           </div>
 
-          {/* Alias & Notes */}
-          <FormField
-            label="Alias"
-            name="alias"
-            value={form.alias}
-            onChange={handleChange}
-            placeholder="SHORT FRIENDLY NAME FOR QUICK RECALL"
-          />
+          {/* Notes */}
           <div>
             <label className="mb-1.5 block text-xs font-medium text-zinc-700">Notes</label>
             <textarea
@@ -310,34 +368,103 @@ export default function ShipmentForm({ isOpen, onClose, onSubmit, initialData = 
               {submitting ? "Saving..." : isEditMode ? "Save Changes" : "Create Shipment"}
             </button>
           </div>
+    </>
+  );
+
+  // If embedded mode, render without modal wrapper
+  if (embedded) {
+    return (
+      <div className="h-full overflow-y-auto" ref={formContainerRef}>
+        <div className="mb-4">
+          <h2 className="text-base font-semibold text-zinc-900">
+            {isEditMode ? "Edit Shipment" : "New Shipment"}
+          </h2>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {formContent}
+        </form>
+      </div>
+    );
+  }
+
+  // Regular modal mode
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border border-zinc-200 bg-white shadow-xl">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-zinc-100 bg-white px-6 py-4">
+          <h2 className="text-base font-semibold text-zinc-900">
+            {isEditMode ? "Edit Shipment" : "New Shipment"}
+          </h2>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg p-1.5 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900"
+            aria-label="Close"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-5 p-6">
+          {formContent}
         </form>
       </div>
     </div>
   );
 }
 
-function FormField({ label, name, value, onChange, readOnly, required, error, placeholder, type = "text" }) {
+function FormField({ 
+  label, 
+  name, 
+  value, 
+  onChange, 
+  readOnly, 
+  required, 
+  error, 
+  placeholder, 
+  type = "text",
+  onFocus,
+  onBlur,
+  isActive,
+  datalistId
+}) {
   return (
     <div>
       <label className="mb-1.5 block text-xs font-medium text-zinc-700">
         {label}
         {required && <span className="ml-0.5 text-red-500">*</span>}
         {readOnly && <span className="ml-1.5 text-xs font-normal text-zinc-400">(read-only)</span>}
+        {isActive && datalistId && (
+          <span className="ml-2 inline-flex items-center gap-1 rounded-full border border-blue-300 bg-blue-100 px-2 py-0.5 text-[10px] font-medium text-blue-700">
+            💡 Suggestion tersedia
+          </span>
+        )}
       </label>
       <input
         type={type}
         name={name}
         value={value}
         onChange={onChange}
+        onFocus={(e) => onFocus?.(name, e)}
+        onBlur={() => onBlur?.()}
         readOnly={readOnly}
         placeholder={placeholder}
-        className={`block w-full rounded-xl border px-3 py-2 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 ${
+        list={datalistId}
+        autoComplete="on"
+        className={`block w-full rounded-xl border px-3 py-2 text-sm focus:outline-none focus-visible:ring-2 ${
+          isActive && datalistId ? "ring-2 ring-blue-400 border-blue-400" : "focus-visible:ring-zinc-400"
+        } ${
           type !== "date" ? "uppercase" : ""
         } ${
           readOnly
             ? "border-zinc-200 bg-zinc-100 text-zinc-500 cursor-not-allowed"
             : error
             ? "border-red-300 bg-red-50 text-zinc-700"
+            : isActive && datalistId
+            ? "border-blue-400 bg-blue-50 text-zinc-700"
             : "border-zinc-200 bg-zinc-50 text-zinc-700"
         }`}
       />
