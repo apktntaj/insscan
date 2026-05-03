@@ -16,6 +16,8 @@ import ShipmentTable from "./ShipmentTable";
 import ShipmentForm from "./ShipmentForm";
 import ShipmentExportButton from "./ShipmentExportButton";
 import DashboardSection from "./DashboardSection";
+import ShipmentInputModeSelector from "./ShipmentInputModeSelector";
+import ShipmentFormWithPDF from "./ShipmentFormWithPDF";
 import { shipmentController } from "../../../adapters/controllers/shipment.controller";
 import { MAX_RECORD_LIMIT } from "../../../core/use-cases/create-shipment";
 
@@ -37,6 +39,8 @@ export default function ShipmentManager() {
 
   const { alertsByShipmentId } = useDashboard({ shipments, loading, refresh });
 
+  const [modeSelectorOpen, setModeSelectorOpen] = useState(false);
+  const [selectedMode, setSelectedMode] = useState(null);
   const [formOpen, setFormOpen] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
@@ -57,6 +61,11 @@ export default function ShipmentManager() {
 
   function handleOpenCreate() {
     setEditTarget(null);
+    setModeSelectorOpen(true);
+  }
+
+  function handleSelectMode(mode) {
+    setSelectedMode(mode);
     setFormOpen(true);
   }
 
@@ -217,12 +226,39 @@ export default function ShipmentManager() {
       />
 
       {/* Create / Edit form modal */}
-      <ShipmentForm
-        isOpen={formOpen}
-        onClose={() => setFormOpen(false)}
-        onSubmit={handleFormSubmit}
-        initialData={editTarget}
-        isEditMode={!!editTarget}
+      {editTarget ? (
+        <ShipmentForm
+          isOpen={formOpen}
+          onClose={() => setFormOpen(false)}
+          onSubmit={handleFormSubmit}
+          initialData={editTarget}
+          isEditMode={true}
+        />
+      ) : selectedMode === "manual" ? (
+        <ShipmentForm
+          isOpen={formOpen}
+          onClose={() => {
+            setFormOpen(false);
+            setSelectedMode(null);
+          }}
+          onSubmit={handleFormSubmit}
+        />
+      ) : selectedMode === "with-pdf" ? (
+        <ShipmentFormWithPDF
+          isOpen={formOpen}
+          onClose={() => {
+            setFormOpen(false);
+            setSelectedMode(null);
+          }}
+          onSubmit={handleFormSubmit}
+        />
+      ) : null}
+
+      {/* Mode selector modal */}
+      <ShipmentInputModeSelector
+        isOpen={modeSelectorOpen}
+        onClose={() => setModeSelectorOpen(false)}
+        onSelectMode={handleSelectMode}
       />
     </div>
   );

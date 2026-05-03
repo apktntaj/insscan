@@ -4,6 +4,12 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
+import { parsePDF } from "../../../infrastructure/services/pdf-parser.service";
+import { extractBLFields } from "../../../core/services/bl-extractor.service";
+import { toFormData } from "../../../adapters/services/form-filler.service";
+import ShipmentForm from "./ShipmentForm";
+import { useShipments } from "../../hooks/useShipments";
+import { useRouter } from "next/navigation";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
     "pdfjs-dist/build/pdf.worker.min.js",
@@ -16,6 +22,9 @@ const MAX_ZOOM = 2;
 const AUTO_COPY_GAP_MS = 100;
 
 export default function BlScanner() {
+    const router = useRouter();
+    const { createShipment } = useShipments();
+    
     const [file, setFile] = useState(null);
     const [fileUrl, setFileUrl] = useState("");
     const [numPages, setNumPages] = useState(0);
@@ -25,11 +34,32 @@ export default function BlScanner() {
     const [lastCopiedValue, setLastCopiedValue] = useState("");
     const [showCopiedPopup, setShowCopiedPopup] = useState(false);
     const [popupSeed, setPopupSeed] = useState(0);
+    
+    // Auto-fill mode state
+    const [mode, setMode] = useState("auto-fill"); // "auto-fill" | "click-to-copy"
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [extractionResult, setExtractionResult] = useState(null);
+    const [showForm, setShowForm] = useState(false);
+    const [formInitialData, setFormInitialData] = useState(null);
+    
     const lastCopyTextRef = useRef("");
     const lastCopyTsRef = useRef(0);
     const chainBufferRef = useRef("");
     const ctrlPressedRef = useRef(false);
     const popupTimerRef = useRef(null);
+
+    // Load mode preference from localStorage on mount
+    useEffect(() => {
+        const savedMode = localStorage.getItem("blScannerMode");
+        if (savedMode === "click-to-copy" || savedMode === "auto-fill") {
+            setMode(savedMode);
+        }
+    }, []);
+
+    // Save mode preference to localStorage when changed
+    useEffect(() => {
+        localStorage.setItem("blScannerMode", mode);
+    }, [mode]);
 
     useEffect(() => {
         if (!file) {
@@ -105,7 +135,7 @@ export default function BlScanner() {
         };
     }, [fileUrl]);
 
-    const handleFileChange = useCallback((event) => {
+    const handleFileChange = useCallback(async (event) => {
         const nextFile = event.target.files?.[0];
 
         if (!nextFile) return;
@@ -120,6 +150,73 @@ export default function BlScanner() {
         }
 
         setFile(nextFile);
+        
+        // If in auto-fill mode, trigger extraction workflow
+        if (mode === "auto-fill") {
+            await processAutoFill(nextFile);
+        }
+    }, [mode]);
+
+    /**
+     * Processes PDF for auto-fill workflow.
+     * Parses PDF → Extracts fields → Opens form with data.
+     */
+    const processAutoFill = useCallback(async (pdfFile) => {
+        setIsProcessing(true);
+        setStatus("Memproses PDF...");
+        
+        try {
+            // Step 1: Parse PDF to extract text
+            const parseResult = await parsePDF(pdfFile);
+            
+            if (!parseResult.ok) {
+                // Parsing failed - show error and fallback to click-to-copy
+                setStatus(parseResult.message || "Gagal memproses PDF.");
+                setMode("click-to-copy");
+                setStatus("Auto-fill gagal. Beralih ke mode click-to-copy.");
+                setIsProcessing(false);
+                return;
+            }
+            
+            setStatus("Mengekstrak field shipment...");
+            
+            // Step 2: Extract shipment fields from text
+            const extraction = extractBLFields(parseResult.text);
+            setExtractionResult(extraction);
+            
+            // Clear extracted text from memory after extraction
+            parseResult.text = null;
+            
+            // Check if any fields were found
+            if (extraction.foundFieldsCount === 0) {
+                setStatus("Tidak dapat menemukan field shipment di PDF.");
+                setMode("click-to-copy");
+                setStatus("Auto-fill gagal. Beralih ke mode click-to-copy.");
+                setIsProcessing(false);
+                return;
+            }
+            
+            // Step 3: Convert to form data
+            const formData = toFormData(extraction);
+            setFormInitialData(formData);
+            
+            // Step 4: Show success and open form
+            if (extraction.overallConfidence < 0.5) {
+                setStatus("Ekstraksi berhasil tapi confidence rendah. Periksa data dengan teliti.");
+            } else {
+                setStatus("Ekstraksi selesai. Form akan dibuka otomatis.");
+            }
+            
+            setShowForm(true);
+            setIsProcessing(false);
+            
+        } catch (error) {
+            console.error("Auto-fill error:", error);
+            setStatus("Gagal memproses PDF. Pastikan file valid dan berbasis teks.");
+            setMode("click-to-copy");
+            setStatus("Auto-fill gagal. Beralih ke mode click-to-copy.");
+            setIsProcessing(false);
+        }
     }, []);
 
     const handleDocumentSuccess = useCallback(({ numPages: totalPages }) => {
@@ -207,15 +304,59 @@ export default function BlScanner() {
     return (
         <div className="space-y-6">
             <section className="overflow-hidden rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-4">
+                    {/* Mode toggle */}
+                    <div className="flex items-center justify-between">
+                        <p className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-500">Mode</p>
+                        <div className="flex gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setMode("auto-fill")}
+                                disabled={isProcessing}
+                                className={`rounded-lg px-4 py-2 text-xs font-medium transition ${
+                                    mode === "auto-fill"
+                                        ? "bg-zinc-900 text-white"
+                                        : "border border-zinc-300 text-zinc-700 hover:bg-zinc-100"
+                                } disabled:opacity-50`}
+                            >
+                                Auto-Fill
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setMode("click-to-copy")}
+                                disabled={isProcessing}
+                                className={`rounded-lg px-4 py-2 text-xs font-medium transition ${
+                                    mode === "click-to-copy"
+                                        ? "bg-zinc-900 text-white"
+                                        : "border border-zinc-300 text-zinc-700 hover:bg-zinc-100"
+                                } disabled:opacity-50`}
+                            >
+                                Click-to-Copy
+                            </button>
+                        </div>
+                    </div>
+                    
                     <p className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-500">Upload dokumen Bill of Lading berformat pdf</p>
                     <input
                         type="file"
                         accept="application/pdf"
                         onChange={handleFileChange}
-                        className="file-input file-input-bordered w-full max-w-xl border-zinc-300 bg-white"
+                        disabled={isProcessing}
+                        className="file-input file-input-bordered w-full max-w-xl border-zinc-300 bg-white disabled:opacity-50"
                     />
                 </div>
+                
+                {/* Loading indicator */}
+                {isProcessing && (
+                    <div className="mt-4 flex items-center gap-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3">
+                        <svg className="h-5 w-5 animate-spin text-blue-600" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                        </svg>
+                        <span className="text-sm font-medium text-blue-900">Memproses PDF...</span>
+                    </div>
+                )}
+                
                 <p className="mt-4 break-words text-xs leading-6 text-zinc-600 sm:text-sm">{status}</p>
             </section>
 
@@ -300,6 +441,35 @@ export default function BlScanner() {
                     </p>
                 </div>
             </div>
+
+            {/* ShipmentForm modal for auto-fill */}
+            {showForm && formInitialData && (
+                <ShipmentForm
+                    isOpen={showForm}
+                    onClose={() => {
+                        setShowForm(false);
+                        setFormInitialData(null);
+                        setExtractionResult(null);
+                        // Clear extraction result from memory
+                    }}
+                    onSubmit={async (data) => {
+                        const result = await createShipment(data);
+                        if (result.ok) {
+                            setStatus("Shipment berhasil disimpan!");
+                            // Clear form data from memory after successful save
+                            setFormInitialData(null);
+                            setExtractionResult(null);
+                            // Redirect to shipments page after successful save
+                            setTimeout(() => {
+                                router.push("/shipments");
+                            }, 1000);
+                        }
+                        return result;
+                    }}
+                    autoFillData={formInitialData}
+                    isAutoFilled={true}
+                />
+            )}
         </div>
     );
 }
