@@ -7,11 +7,11 @@ const productCards = [
   {
     title: "Cek Lartas",
     description:
-      "Cek LARTAS dari daftar HS code dari invoice langsung.",
+      "Tidak perlu buka INSW satu per satu. Upload Excel, semua HS code langsung dicek sekaligus.",
     points: [
-      "Tidak perlu cek satu persatu HS code",
-      "Unggah file excel yang berisi daftar HS code.",
-      "Periksa status LARTAS dan detail regulasi impor.",
+      "Proses puluhan HS code dari invoice dalam sekali klik.",
+      "Lihat status LARTAS, tarif BM, PPN, dan PPh impor sekaligus.",
+      "Hasil bisa diekspor kembali ke Excel untuk dokumentasi.",
     ],
     href: "/cek-lartas",
     cta: "Buka Cek Lartas",
@@ -21,11 +21,11 @@ const productCards = [
   {
     title: "Shipments",
     description:
-      "Kelola data pengiriman dan pantau status shipment dalam satu tempat.",
+      "Semua data pengiriman dalam satu dashboard — tidak ada lagi BL yang tercecer di email atau WhatsApp.",
     points: [
-      "Pantau status dan estimasi kedatangan shipment.",
-      "Ekspor data ke Excel untuk keperluan arsip dan pelaporan.",
-      "Data aman karena tersimpan di browser (bukan di server pihak ketiga)."
+      "Catat nomor BL, shipper, dan ETA dalam satu tempat.",
+      "Dashboard status membantu kamu prioritas shipment yang perlu ditangani duluan.",
+      "Data tersimpan di browser kamu sendiri, tidak melewati server manapun.",
     ],
     href: "/shipments",
     cta: "Lihat Shipments",
@@ -135,37 +135,55 @@ export default function Home() {
 
   return (
     <div className="space-y-12 pb-8 sm:space-y-16">
-      <section className="relative overflow-hidden rounded-[2rem] border border-sky-100/90 bg-gradient-to-br from-sky-50 via-white to-cyan-50 px-6 py-10 shadow-sm sm:px-10 sm:py-14">
-        <div className="pointer-events-none absolute -top-16 right-8 h-44 w-44 rounded-full bg-sky-300/35 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-20 left-6 h-52 w-52 rounded-full bg-cyan-300/35 blur-3xl" />
 
-        <div className="relative max-w-4xl">
+      {/* Hero */}
+      <section className="relative -mx-5 -mt-8 flex min-h-screen items-start justify-center overflow-hidden bg-gradient-to-br from-sky-50 via-white to-cyan-50 px-6 pt-[22vh] sm:-mx-8 sm:px-10 lg:-mx-12">
+        <div className="pointer-events-none absolute -top-16 right-8 h-72 w-72 rounded-full bg-sky-300/35 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-20 left-6 h-80 w-80 rounded-full bg-cyan-300/35 blur-3xl" />
+        <div className="relative mx-auto max-w-3xl text-center">
           <p className="inline-flex rounded-full border border-cyan-200/80 bg-white/75 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.18em] text-cyan-700">
             Pesisir
           </p>
           <h1 className="mt-6 bg-gradient-to-r from-sky-900 to-cyan-700 bg-clip-text text-4xl font-semibold tracking-tight text-transparent sm:text-5xl lg:text-6xl">
-            Platform operasional untuk tim ekspor impor.
+            Kerja lebih cepat dan tepat.
           </h1>
-          <p className="mt-5 max-w-3xl text-base leading-8 text-zinc-700">
-            Hemat waktumu dari input satu persatu HS code untuk mencari informasi LARTAS dan pantau status shipment melalui dashboard bukan tabel.
+          <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-zinc-600">
+            Pesisir adalah platform operasional untuk staf PPJK dan freight forwarder.
           </p>
-          <div className="mt-9 flex flex-wrap gap-3">
-            <Link
-              href="/cek-lartas"
+          <div className="mt-9 flex flex-wrap justify-center gap-3">
+            <a
+              href="#why"
               className="rounded-xl bg-zinc-900 px-5 py-3 text-sm font-medium text-zinc-50 transition hover:bg-zinc-800"
             >
-              Buka Cek Lartas
-            </Link>
-            <Link
-              href="/shipments"
+              Kenapa Pesisir?
+            </a>
+            <a
+              href="#fitur"
               className="rounded-xl border border-zinc-300 px-5 py-3 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100"
             >
-              Lihat Shipments
-            </Link>
+              Lihat Fitur
+            </a>
           </div>
         </div>
       </section>
 
+      {/* Why */}
+      <section id="why" className="rounded-3xl border border-zinc-200 bg-white px-7 py-8 shadow-sm sm:px-9">
+        <p className="text-xs font-medium uppercase tracking-widest text-cyan-600">Kenapa Pesisir?</p>
+        <h3 className="mt-2 text-lg font-semibold text-zinc-900 sm:text-xl">
+          Dibuat untuk mengurangi kerja manual yang tidak perlu.
+        </h3>
+        <div className="mt-7 grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {whyReasons.map((item) => (
+            <div key={item.pain} className="rounded-2xl border border-zinc-100 bg-zinc-50 p-5">
+              <p className="text-sm font-semibold text-zinc-800">{item.pain}</p>
+              <p className="mt-2 text-sm leading-7 text-zinc-500">{item.solve}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Fitur */}
       <section id="fitur" className="grid grid-cols-1 gap-5 md:grid-cols-2">
         {productCards.map((card) => (
           <article
@@ -193,26 +211,9 @@ export default function Home() {
         ))}
       </section>
 
+      {/* FAQ */}
       <section className="rounded-3xl border border-zinc-200 bg-white px-7 py-8 shadow-sm sm:px-9">
-        <p className="text-xs font-medium uppercase tracking-widest text-cyan-600">Kenapa Pesisir?</p>
-        <h3 className="mt-2 text-lg font-semibold text-zinc-900 sm:text-xl">
-          Dibuat untuk mengurangi kerja manual yang tidak perlu.
-        </h3>
-        <div className="mt-7 grid grid-cols-1 gap-6 sm:grid-cols-2">
-          {whyReasons.map((item) => (
-            <div key={item.pain} className="flex gap-4">
-              <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-cyan-400" />
-              <div>
-                <p className="text-sm font-medium text-zinc-800">{item.pain}</p>
-                <p className="mt-1.5 text-sm leading-7 text-zinc-500">{item.solve}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="rounded-3xl border border-zinc-200 bg-white px-7 py-8 shadow-sm sm:px-9">
-        <h3 className="text-2xl text-center font-semibold text-zinc-900">FAQ</h3>
+        <h3 className="text-lg font-semibold text-zinc-900">Pertanyaan Umum</h3>
         <div className="mt-4">
           {faqs.map((faq, index) => (
             <FaqItem
@@ -225,6 +226,7 @@ export default function Home() {
           ))}
         </div>
       </section>
+
     </div>
   );
 }
