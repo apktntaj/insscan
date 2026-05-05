@@ -12,10 +12,10 @@ export default function RootLayout({ children }) {
   return (
     <html data-theme="light" lang="en" className="scroll-smooth">
       <body className="min-h-screen bg-zinc-50 text-zinc-900 antialiased [font-family:ui-sans-serif,system-ui,-apple-system,Segoe_UI,Roboto,Helvetica,Arial,sans-serif]">
-        <header className="sticky top-0 z-40 border-b border-zinc-200/70 bg-zinc-50/85 backdrop-blur-xl">
+        <header className="fixed top-0 left-0 right-0 z-40 border-b border-zinc-200/70 bg-zinc-50/85 backdrop-blur-xl">
           <Navbar links={navLinks} />
         </header>
-        <main className="min-h-[82vh]">
+        <main className="min-h-[82vh] pt-16">
           <div className="mx-auto w-full max-w-7xl px-5 pb-8 pt-6 sm:px-8 lg:px-12">
             {children}
             <Analytics />
