@@ -332,6 +332,7 @@ export function useCekLartasFile() {
   const [status, setStatus] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(createInitialProgressState());
+  const [viewMode, setViewMode] = useState("lartas");
 
   /**
    * Membaca file Excel dari event input, memperbarui fileData.
@@ -366,6 +367,7 @@ export function useCekLartasFile() {
       setResultData(null);
       setStatus("");
       setProgress(createInitialProgressState());
+      setViewMode("lartas");
     } catch (error) {
       console.error("Error reading file:", error);
       setStatus("Gagal membaca file.");
@@ -619,7 +621,7 @@ export function useCekLartasFile() {
   }, [fileData]);
 
   /**
-   * Mengunduh resultData sebagai file Excel.
+   * Mengunduh resultData sebagai file Excel dalam format matriks LARTAS.
    * Jika resultData kosong atau null: tidak melakukan aksi.
    * Nama file: lartas-hasil-{YYYYMMDD}.xlsx
    *
@@ -627,8 +629,71 @@ export function useCekLartasFile() {
    */
   const handleExportResult = useCallback(() => {
     if (!resultData || resultData.length === 0) return;
-    downloadAsExcel(resultData, buildResultExcelFilename());
-  }, [resultData]);
+    
+    // Build matrix rows
+    const matrixRows = resultData.map((row, idx) => {
+      const details = extractSectionDetailsForExport(row);
+      const detailsByDocCode = new Map();
+
+      for (const detail of details) {
+        const docCodes = Array.isArray(detail.dokumenPabean) ? detail.dokumenPabean : [];
+
+        for (const docCode of docCodes) {
+          const normalizedCode = String(docCode);
+          const existing = detailsByDocCode.get(normalizedCode) || [];
+          existing.push(detail);
+          detailsByDocCode.set(normalizedCode, existing);
+        }
+      }
+
+      return {
+        referenceNo: idx + 1,
+        hsCode: row.hsCode,
+        hasLartas: details.length > 0,
+        detailsByDocCode,
+      };
+    });
+
+    // Collect document codes
+    const docCodesSet = new Set();
+    for (const row of matrixRows) {
+      for (const code of row.detailsByDocCode.keys()) {
+        docCodesSet.add(String(code));
+      }
+    }
+    const docCodes = Array.from(docCodesSet).sort((a, b) => {
+      const aNum = Number(a);
+      const bNum = Number(b);
+      if (Number.isFinite(aNum) && Number.isFinite(bNum)) {
+        return aNum - bNum;
+      }
+      return a.localeCompare(b);
+    });
+    
+    // Filter rows based on view mode
+    const filteredRows = matrixRows.filter((item) => 
+      viewMode === "all" ? true : item.hasLartas
+    );
+
+    // Convert to Excel format
+    const excelData = filteredRows.map((row) => {
+      const excelRow = {
+        NO: row.referenceNo,
+        "HS CODE": row.hsCode,
+      };
+
+      for (const docCode of docCodes) {
+        const cellDetails = row.detailsByDocCode.get(docCode) || [];
+        excelRow[`DOK ${docCode}`] = cellDetails.length > 0 
+          ? `Ada (${cellDetails.length})` 
+          : "—";
+      }
+
+      return excelRow;
+    });
+
+    downloadAsExcel(excelData, buildResultExcelFilename());
+  }, [resultData, viewMode]);
 
   return {
     fileData,
@@ -636,8 +701,35 @@ export function useCekLartasFile() {
     status,
     isLoading,
     progress,
+    viewMode,
+    setViewMode,
     handleFileChange,
     handleFetch,
     handleExportResult,
   };
+}
+
+/**
+ * Helper function to extract LARTAS details for export
+ * @param {object} row
+ * @returns {Array<object & { category: string }>}
+ */
+function extractSectionDetailsForExport(row) {
+  const sections = [
+    { category: "Impor Border", details: row.lartasBorderDetails || [] },
+    { category: "Impor Post Border", details: row.lartasPostBorderDetails || [] },
+    { category: "Ekspor Border", details: row.lartasExportDetails || [] },
+  ];
+  const result = [];
+
+  for (const section of sections) {
+    for (const detail of section.details) {
+      result.push({
+        ...detail,
+        category: section.category,
+      });
+    }
+  }
+
+  return result;
 }

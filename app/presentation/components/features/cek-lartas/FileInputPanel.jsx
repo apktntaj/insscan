@@ -47,6 +47,8 @@ export default function FileInputPanel() {
     status,
     isLoading,
     progress,
+    viewMode,
+    setViewMode,
     handleFileChange,
     handleFetch,
     handleExportResult,
@@ -54,37 +56,49 @@ export default function FileInputPanel() {
 
   const alertVariant = resolveAlertVariant(status);
 
+  // Determine button state
+  const hasResult = resultData && resultData.length > 0;
+  const canFetch = fileData && !hasResult && !isLoading;
+  
+  const buttonLabel = hasResult 
+    ? `Ekspor ${viewMode === "lartas" ? "LARTAS" : "Semua"}`
+    : isLoading 
+    ? "Loading..." 
+    : "Tarik Data";
+  
+  const buttonAction = hasResult ? handleExportResult : handleFetch;
+  const buttonDisabled = isLoading || (!fileData && !hasResult);
+
   return (
     <div className="space-y-4">
       {/* Input card */}
       <div className="overflow-hidden rounded-3xl border border-sky-100 bg-white p-5 shadow-sm sm:p-6">
-        <div className="grid min-w-0 gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
-          <div className="min-w-0 space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700">Input File</p>
-            <Input handleChange={handleFileChange} className="max-w-2xl" />
-            <p className="text-xs leading-6 text-zinc-500 sm:text-sm">
-              Gunakan file{" "}
-              <span className="font-medium text-zinc-700">.xls / .xlsx</span>{" "}
-              berisi HS code 8 digit.
-            </p>
-          </div>
-          <div className="flex min-w-0 w-full flex-col items-start gap-3 lg:w-auto lg:justify-self-end lg:items-end">
+        <div className="space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700">Input File</p>
+          
+          <div className="flex items-center gap-3">
+            <div className="min-w-0 flex-1">
+              <Input handleChange={handleFileChange} className="w-full" />
+            </div>
             <Button
-              onClick={handleFetch}
-              disabled={isLoading || !fileData}
-              className="w-full px-6 sm:w-auto !border-cyan-700 !bg-gradient-to-r !from-sky-900 !to-cyan-700 hover:!from-sky-800 hover:!to-cyan-600"
+              onClick={buttonAction}
+              disabled={buttonDisabled}
+              variant={hasResult ? "secondary" : "primary"}
+              className={`shrink-0 px-6 ${
+                hasResult 
+                  ? "!border-sky-200 hover:!bg-sky-50" 
+                  : "!border-cyan-700 !bg-gradient-to-r !from-sky-900 !to-cyan-700 hover:!from-sky-800 hover:!to-cyan-600"
+              }`}
             >
-              {isLoading ? "Loading..." : "Tarik Data"}
-            </Button>
-            <Button
-              onClick={handleExportResult}
-              disabled={!resultData || resultData.length === 0}
-              variant="secondary"
-              className="w-full px-6 sm:w-auto !border-sky-200 hover:!bg-sky-50"
-            >
-              Ekspor Hasil
+              {buttonLabel}
             </Button>
           </div>
+          
+          <p className="text-xs leading-6 text-zinc-500 sm:text-sm">
+            Gunakan file{" "}
+            <span className="font-medium text-zinc-700">.xls / .xlsx</span>{" "}
+            berisi HS code 8 digit.
+          </p>
         </div>
 
         {/* Status Alert */}
@@ -108,7 +122,7 @@ export default function FileInputPanel() {
       ) : null}
 
       {/* Results table */}
-      <LartasResultTable fileData={fileData} resultData={resultData} />
+      <LartasResultTable fileData={fileData} resultData={resultData} viewMode={viewMode} setViewMode={setViewMode} />
     </div>
   );
 }
