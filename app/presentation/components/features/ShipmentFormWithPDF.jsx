@@ -7,7 +7,7 @@
  * 
  * Flow:
  * 1. User upload PDF
- * 2. Otomatis Smart-Scan (auto-extract)
+ * 2. Otomatis Smart-Scan (auto-extract with Gemini AI)
  * 3. User klik teks di PDF → masuk ke Clipboard Buffer (max 20 items)
  * 4. User fokus ke field form → popup buffer muncul
  * 5. User pilih item dari buffer → otomatis terisi ke field
@@ -18,6 +18,10 @@ import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
 import ShipmentForm from "./ShipmentForm";
+import { createGeminiService } from "../../../infrastructure/services/gemini.service";
+import { createUsageTrackerService } from "../../../infrastructure/services/usage-tracker.service";
+import { createExtractBLWithGeminiUseCase } from "../../../core/use-cases/extract-bl-with-gemini";
+import { toFormDataFromGemini } from "../../../adapters/services/form-filler.service";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   "pdfjs-dist/build/pdf.worker.min.js",
@@ -34,6 +38,8 @@ export default function ShipmentFormWithPDF({
   onClose, 
   onSubmit
 }) {
+  console.log('[ShipmentFormWithPDF] Component mounted/rendered');
+  
   const [file, setFile] = useState(null);
   const [fileUrl, setFileUrl] = useState("");
   const [numPages, setNumPages] = useState(0);
@@ -41,10 +47,12 @@ export default function ShipmentFormWithPDF({
   const [scale, setScale] = useState(1.0);
   const [status, setStatus] = useState("");
   
-  // Smart-Scan state (disabled for now - clipboard buffer is sufficient)
-  const [isProcessing] = useState(false);
-  const [autoFillData] = useState(null);
-  const [isAutoFilled] = useState(false);
+  // Smart-Scan state (Gemini AI extraction)
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [autoFillData, setAutoFillData] = useState(null);
+  const [isAutoFilled, setIsAutoFilled] = useState(false);
+  const [extractionMethod, setExtractionMethod] = useState(null);
+  const [remainingUploads, setRemainingUploads] = useState(5);
   
   // Clipboard Buffer state
   const [clipboardBuffer, setClipboardBuffer] = useState([]);
@@ -54,8 +62,136 @@ export default function ShipmentFormWithPDF({
   const lastCopyTextRef = useRef("");
   const formRef = useRef(null);
   
-  // processSmartScan function removed - Smart-Scan disabled for MVP
-  // Clipboard buffer is sufficient for now
+  // Initialize services
+  const usageTracker = useRef(createUsageTrackerService());
+  const geminiService = useRef(null);
+  const extractBLUseCase = useRef(null);
+  
+  // Initialize Gemini service on mount
+  useEffect(() => {
+    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    console.log('[ShipmentFormWithPDF] ========== INITIALIZATION ==========');
+    console.log('[ShipmentFormWithPDF] API Key present:', !!apiKey);
+    console.log('[ShipmentFormWithPDF] API Key length:', apiKey?.length || 0);
+    console.log('[ShipmentFormWithPDF] API Key first 10 chars:', apiKey?.substring(0, 10) || 'N/A');
+    
+    if (apiKey) {
+      geminiService.current = createGeminiService(apiKey);
+      extractBLUseCase.current = createExtractBLWithGeminiUseCase(
+        geminiService.current,
+        usageTracker.current
+      );
+      console.log('[ShipmentFormWithPDF] Gemini service initialized');
+    } else {
+      console.log('[ShipmentFormWithPDF] No API key found - will use rule-based extraction');
+    }
+    console.log('[ShipmentFormWithPDF] ==========================================');
+    
+    // Load remaining uploads
+    loadRemainingUploads();
+  }, []);
+  
+  const loadRemainingUploads = async () => {
+    const usageData = await usageTracker.current.getUsageData();
+    setRemainingUploads(usageData.limit - usageData.count);
+  };
+  
+  const processSmartScan = async (pdfFile) => {
+    if (!extractBLUseCase.current) {
+      setStatus("Smart-Scan tidak tersedia. Gunakan clipboard buffer.");
+      return;
+    }
+    
+    setIsProcessing(true);
+    setStatus("Memproses PDF dengan AI...");
+    
+    try {
+      // Extract text from PDF
+      const pdfData = await pdfFile.arrayBuffer();
+      const pdf = await pdfjs.getDocument({ data: pdfData }).promise;
+      
+      let fullText = "";
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items.map(item => item.str).join(" ");
+        fullText += pageText + "\n";
+      }
+      
+      console.log('[ShipmentFormWithPDF] ========== PDF TEXT EXTRACTED ==========');
+      console.log('[ShipmentFormWithPDF] Text Length:', fullText.length);
+      console.log('[ShipmentFormWithPDF] First 500 chars:', fullText.substring(0, 500));
+      console.log('[ShipmentFormWithPDF] ==========================================');
+      
+      // Extract with Gemini (pass both text and PDF file for better accuracy)
+      const result = await extractBLUseCase.current.execute(fullText, pdfFile);
+      
+      console.log('[ShipmentFormWithPDF] ========== EXTRACTION RESULT ==========');
+      console.log('[ShipmentFormWithPDF] Success:', result.ok);
+      if (result.ok) {
+        console.log('[ShipmentFormWithPDF] Extraction Method:', result.data.extractionMethod);
+        console.log('[ShipmentFormWithPDF] Overall Confidence:', result.data.overallConfidence);
+        console.log('[ShipmentFormWithPDF] Found Fields:', result.data.foundFieldsCount);
+        console.log('[ShipmentFormWithPDF] Raw Data:', result.data);
+      } else {
+        console.log('[ShipmentFormWithPDF] Error:', result.error);
+      }
+      console.log('[ShipmentFormWithPDF] ==========================================');
+      
+      if (!result.ok) {
+        handleExtractionError(result.error);
+        return;
+      }
+      
+      // Transform to form data
+      const formData = toFormDataFromGemini(result.data);
+      
+      console.log('[ShipmentFormWithPDF] ========== FORM DATA ==========');
+      console.log('[ShipmentFormWithPDF] Form Data:', formData);
+      console.log('[ShipmentFormWithPDF] Confidence Scores:', formData._confidenceScores);
+      console.log('[ShipmentFormWithPDF] Extraction Method:', formData._extractionMethod);
+      console.log('[ShipmentFormWithPDF] =====================================');
+      
+      setAutoFillData(formData);
+      setIsAutoFilled(true);
+      setExtractionMethod(result.data.extractionMethod);
+      
+      // Update remaining uploads
+      await loadRemainingUploads();
+      
+      // Display success message based on confidence
+      if (result.data.overallConfidence >= 0.5) {
+        setStatus("Berhasil! Form akan terbuka otomatis.");
+      } else {
+        setStatus("Data berhasil diambil. Tolong cek lagi ya, mungkin ada yang kurang tepat.");
+      }
+      
+    } catch (error) {
+      console.error('[ShipmentFormWithPDF] Smart-Scan error:', error);
+      setStatus("File tidak bisa dibaca. Coba file lain atau isi manual.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+  
+  const handleExtractionError = (error) => {
+    const errorMessages = {
+      'INVALID_API_KEY': 'Ada masalah dengan sistem. Silakan hubungi admin.',
+      'TIMEOUT': 'Koneksi terputus. Coba lagi atau isi manual ya.',
+      'RATE_LIMIT_EXCEEDED': 'Terlalu banyak permintaan. Tunggu sebentar ya.',
+      'DAILY_LIMIT_REACHED': 'Batas harian tercapai (5 BL per hari). Coba lagi besok ya.',
+      'INVALID_RESPONSE_FORMAT': 'File tidak bisa dibaca. Coba file lain atau isi manual.',
+      'API_ERROR': 'Koneksi terputus. Coba lagi atau isi manual ya.'
+    };
+    
+    const message = errorMessages[error.code] || 'File tidak bisa dibaca. Coba file lain atau isi manual.';
+    setStatus(message);
+    
+    // Log technical details for debugging
+    if (error.technicalDetails) {
+      console.error('[ShipmentFormWithPDF] Extraction error:', error.technicalDetails);
+    }
+  };
 
   useEffect(() => {
     if (!file) {
@@ -87,7 +223,10 @@ export default function ShipmentFormWithPDF({
     }
 
     setFile(nextFile);
-    setStatus("PDF berhasil dimuat. Klik teks di PDF untuk menambah ke clipboard buffer.");
+    setStatus("PDF berhasil dimuat. Memproses dengan AI...");
+    
+    // Trigger auto-extraction
+    await processSmartScan(nextFile);
   }, []);
 
   const handleTextClick = useCallback((event) => {
@@ -159,16 +298,24 @@ export default function ShipmentFormWithPDF({
               <div className="text-center">
                 <p className="text-sm font-medium text-zinc-700">Upload PDF Bill of Lading</p>
                 <p className="mt-1 text-xs text-zinc-500">
-                  Klik teks di PDF untuk menambah ke clipboard buffer
+                  Otomatis ekstraksi dengan AI
+                </p>
+                <p className="mt-2 text-xs text-zinc-400">
+                  Sisa upload hari ini: {remainingUploads}/5
                 </p>
               </div>
               <input
                 type="file"
                 accept="application/pdf"
                 onChange={handleFileChange}
-                disabled={isProcessing}
+                disabled={isProcessing || remainingUploads <= 0}
                 className="file-input file-input-bordered file-input-sm w-full max-w-xs border-zinc-300 bg-white"
               />
+              {remainingUploads <= 0 && (
+                <p className="text-xs text-red-500">
+                  Batas harian tercapai. Coba lagi besok ya.
+                </p>
+              )}
             </div>
           )}
 
@@ -213,7 +360,20 @@ export default function ShipmentFormWithPDF({
               </div>
 
               {status && (
-                <p className="text-xs text-zinc-600">{status}</p>
+                <div className="flex items-center gap-2">
+                  {isProcessing && (
+                    <svg className="h-4 w-4 animate-spin text-blue-500" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  )}
+                  <p className="text-xs text-zinc-600">{status}</p>
+                  {extractionMethod && (
+                    <span className="text-xs text-zinc-400">
+                      ({extractionMethod === 'gemini' ? 'AI' : 'Pattern'})
+                    </span>
+                  )}
+                </div>
               )}
 
               <div className="flex-1 overflow-auto rounded-xl border border-zinc-200 bg-white p-2">
