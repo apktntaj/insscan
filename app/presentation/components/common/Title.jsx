@@ -12,9 +12,6 @@ export default function Title({ title, descs = [], variant = "default", eyebrow 
     if (isModern) {
         return (
             <section className="relative px-6 py-6 text-center sm:px-10 sm:py-8">
-                <div className="pointer-events-none fixed right-[14%] top-[15vh] h-40 w-40 rounded-full bg-sky-300/40 blur-3xl" />
-                <div className="pointer-events-none fixed left-[7%] top-[15vh] h-48 w-48 rounded-full bg-cyan-300/40 blur-3xl" />
-
                 <div className="relative">
                     {eyebrow ? (
                         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-700">{eyebrow}</p>
