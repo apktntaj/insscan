@@ -77,6 +77,15 @@ export default function ShipmentForm({
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const formContainerRef = useRef(null);
+  
+  // Confidence scores from auto-fill
+  const confidenceScores = autoFillData?._confidenceScores || {};
+  const extractionMethod = autoFillData?._extractionMethod || null;
+  const overallConfidence = useMemo(() => {
+    if (!isAutoFilled || Object.keys(confidenceScores).length === 0) return null;
+    const scores = Object.values(confidenceScores);
+    return scores.reduce((sum, score) => sum + score, 0) / scores.length;
+  }, [isAutoFilled, confidenceScores]);
 
   // Generate unique datalist ID for clipboard suggestions
   const datalistId = "clipboard-suggestions";
@@ -180,6 +189,32 @@ export default function ShipmentForm({
   // Form content (shared between modal and embedded modes)
   const formContent = (
     <>
+      {/* Overall confidence indicator */}
+      {isAutoFilled && overallConfidence !== null && (
+        <div className={`rounded-xl border px-4 py-3 ${
+          overallConfidence >= 0.5 
+            ? 'border-green-200 bg-green-50' 
+            : 'border-yellow-200 bg-yellow-50'
+        }`}>
+          <div className="flex items-center gap-2">
+            <svg className="h-5 w-5 text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-zinc-900">
+                Data diekstrak otomatis {extractionMethod === 'gemini' ? 'dengan AI' : 'dengan pattern matching'}
+              </p>
+              <p className="text-xs text-zinc-600">
+                Tingkat kepercayaan: {(overallConfidence * 100).toFixed(0)}% — 
+                {overallConfidence >= 0.5 
+                  ? ' Silakan cek kembali sebelum menyimpan' 
+                  : ' Mohon periksa dengan teliti, beberapa field mungkin kurang akurat'}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+    
       {/* Datalist for clipboard buffer suggestions */}
       {clipboardBuffer.length > 0 && (
         <datalist id={datalistId}>
@@ -203,6 +238,7 @@ export default function ShipmentForm({
         onBlur={onFieldBlur}
         isActive={activeField === "blNumber"}
         datalistId={clipboardBuffer.length > 0 ? datalistId : undefined}
+        confidence={isAutoFilled ? confidenceScores.blNumber : null}
       />
 
       {/* Alias - moved here below B/L Number */}
@@ -216,6 +252,7 @@ export default function ShipmentForm({
         onBlur={onFieldBlur}
         isActive={activeField === "alias"}
         datalistId={clipboardBuffer.length > 0 ? datalistId : undefined}
+        confidence={null}
       />
 
       {/* Required mutable fields */}
@@ -232,6 +269,7 @@ export default function ShipmentForm({
               onBlur={onFieldBlur}
               isActive={activeField === "shipperName"}
               datalistId={clipboardBuffer.length > 0 ? datalistId : undefined}
+              confidence={isAutoFilled ? confidenceScores.shipperName : null}
             />
             <FormField
               label="Consignee Name"
@@ -245,6 +283,7 @@ export default function ShipmentForm({
               onBlur={onFieldBlur}
               isActive={activeField === "consigneeName"}
               datalistId={clipboardBuffer.length > 0 ? datalistId : undefined}
+              confidence={isAutoFilled ? confidenceScores.consigneeName : null}
             />
           </div>
 
@@ -260,6 +299,7 @@ export default function ShipmentForm({
               onBlur={onFieldBlur}
               isActive={activeField === "vesselName"}
               datalistId={clipboardBuffer.length > 0 ? datalistId : undefined}
+              confidence={isAutoFilled ? confidenceScores.vesselName : null}
             />
             <FormField
               label="Voyage"
@@ -271,6 +311,7 @@ export default function ShipmentForm({
               onBlur={onFieldBlur}
               isActive={activeField === "voyage"}
               datalistId={clipboardBuffer.length > 0 ? datalistId : undefined}
+              confidence={isAutoFilled ? confidenceScores.voyage : null}
             />
           </div>
 
@@ -286,6 +327,7 @@ export default function ShipmentForm({
               onBlur={onFieldBlur}
               isActive={activeField === "portOfLoading"}
               datalistId={clipboardBuffer.length > 0 ? datalistId : undefined}
+              confidence={isAutoFilled ? confidenceScores.portOfLoading : null}
             />
             <FormField
               label="Port of Discharge"
@@ -297,6 +339,7 @@ export default function ShipmentForm({
               onBlur={onFieldBlur}
               isActive={activeField === "portOfDischarge"}
               datalistId={clipboardBuffer.length > 0 ? datalistId : undefined}
+              confidence={isAutoFilled ? confidenceScores.portOfDischarge : null}
             />
           </div>
 
@@ -313,6 +356,7 @@ export default function ShipmentForm({
               onFocus={onFieldFocus}
               onBlur={onFieldBlur}
               isActive={activeField === "eta"}
+              confidence={isAutoFilled ? confidenceScores.eta : null}
             />
             <FormField
               label="Custom Notification Date"
@@ -324,6 +368,7 @@ export default function ShipmentForm({
               onFocus={onFieldFocus}
               onBlur={onFieldBlur}
               isActive={activeField === "customNotificationDate"}
+              confidence={null}
             />
           </div>
 
@@ -429,8 +474,19 @@ function FormField({
   onFocus,
   onBlur,
   isActive,
-  datalistId
+  datalistId,
+  confidence = null
 }) {
+  // Determine confidence level styling
+  const getConfidenceColor = () => {
+    if (confidence === null || confidence === undefined) return null;
+    if (confidence < 0.3) return 'red';
+    if (confidence < 0.5) return 'yellow';
+    return 'green';
+  };
+  
+  const confidenceColor = getConfidenceColor();
+  
   return (
     <div>
       <label className="mb-1.5 block text-xs font-medium text-zinc-700">
@@ -440,6 +496,26 @@ function FormField({
         {isActive && datalistId && (
           <span className="ml-2 inline-flex items-center gap-1 rounded-full border border-blue-300 bg-blue-100 px-2 py-0.5 text-[10px] font-medium text-blue-700">
             💡 Suggestion tersedia
+          </span>
+        )}
+        {confidence !== null && confidence !== undefined && (
+          <span 
+            className={`ml-2 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium ${
+              confidenceColor === 'red' 
+                ? 'border-red-300 bg-red-100 text-red-700' 
+                : confidenceColor === 'yellow'
+                ? 'border-yellow-300 bg-yellow-100 text-yellow-700'
+                : 'border-green-300 bg-green-100 text-green-700'
+            }`}
+            title={`Tingkat kepercayaan: ${(confidence * 100).toFixed(0)}% — ${
+              confidence < 0.3 
+                ? 'Rendah, mohon periksa dengan teliti' 
+                : confidence < 0.5
+                ? 'Sedang, mohon verifikasi'
+                : 'Tinggi, kemungkinan akurat'
+            }`}
+          >
+            {confidence < 0.3 ? '⚠️' : confidence < 0.5 ? '⚡' : '✓'} {(confidence * 100).toFixed(0)}%
           </span>
         )}
       </label>
@@ -465,6 +541,10 @@ function FormField({
             ? "border-red-300 bg-red-50 text-zinc-700"
             : isActive && datalistId
             ? "border-blue-400 bg-blue-50 text-zinc-700"
+            : confidenceColor === 'red'
+            ? "border-red-300 bg-red-50 text-zinc-700"
+            : confidenceColor === 'yellow'
+            ? "border-yellow-300 bg-yellow-50 text-zinc-700"
             : "border-zinc-200 bg-zinc-50 text-zinc-700"
         }`}
       />

@@ -8,9 +8,9 @@
 
 # ── Environment & Secrets ─────────────────────────────────────────────────────
 # Never commit real credentials or tokens
-#.env
-#.env.*
-#!.env.example
+.env
+.env.*
+!.env.example
 
 # ── Next.js ───────────────────────────────────────────────────────────────────
 /.next/

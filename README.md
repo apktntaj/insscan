@@ -44,6 +44,22 @@ cp .env.example .env
 | `INSW_PUBLIC_ONLY_MODE` | `true` untuk skip endpoint CMS, pakai endpoint publik saja |
 | `INSW_USE_LOCAL_MOCK` | `true` untuk pakai data mock lokal |
 | `INSW_MOCK_ONLY_MODE` | `true` untuk hanya pakai mock, tanpa fetch live |
+| `NEXT_PUBLIC_GEMINI_API_KEY` | API key untuk Google Gemini AI (untuk ekstraksi BL otomatis) |
+
+### Mendapatkan Gemini API Key
+
+1. Kunjungi [Google AI Studio](https://makersuite.google.com/app/apikey)
+2. Login dengan akun Google
+3. Klik "Create API Key"
+4. Salin API key dan tambahkan ke file `.env`:
+   ```
+   NEXT_PUBLIC_GEMINI_API_KEY=your_api_key_here
+   ```
+
+**Catatan**: 
+- Gemini API memiliki free tier dengan limit harian
+- Jika API key tidak dikonfigurasi, sistem akan fallback ke ekstraksi berbasis pattern matching
+- Daily limit: 5 ekstraksi BL per hari per browser (untuk mengelola biaya API)
 
 ## Struktur Project
 
