@@ -87,8 +87,8 @@ export function sortByStatus(items) {
 }
 
 /**
- * Merender daftar Feature_Item yang diurutkan berdasarkan status.
- * Setiap item ditampilkan dengan nama, deskripsi, dan badge status berwarna.
+ * Merender daftar Feature_Item yang diurutkan berdasarkan status menggunakan timeline DaisyUI.
+ * Setiap item ditampilkan dengan nama, deskripsi, dan badge status berwarna dalam format timeline.
  *
  * @param {{ items: import("../../config/feedback-config").FeatureItem[] }} props
  * @returns {JSX.Element}
@@ -96,7 +96,7 @@ export function sortByStatus(items) {
  * @example
  * // Render dengan satu item "live"
  * <RoadmapBoard items={[{ id: "x", name: "Fitur X", description: "Desc.", status: "live" }]} />
- * // => menampilkan "Fitur X", "Desc.", badge "Tersedia"
+ * // => menampilkan "Fitur X", "Desc.", badge "Tersedia" dalam timeline
  *
  * @example
  * // Render dengan items campuran — urutan output: live dulu, lalu planned
@@ -104,7 +104,7 @@ export function sortByStatus(items) {
  *   { id: "p", name: "Planned", description: "...", status: "planned" },
  *   { id: "l", name: "Live",    description: "...", status: "live" },
  * ]} />
- * // => "Live" muncul sebelum "Planned" di DOM
+ * // => "Live" muncul sebelum "Planned" di timeline
  */
 export default function RoadmapBoard({ items }) {
   const sorted = sortByStatus(items);
@@ -113,41 +113,41 @@ export default function RoadmapBoard({ items }) {
     <section aria-labelledby="roadmap-heading">
       <h2
         id="roadmap-heading"
-        className="text-lg font-semibold text-zinc-900"
+        className="text-3xl text-center font-semibold text-zinc-900"
       >
-        Roadmap Fitur
+        Roadmap Pesisir
       </h2>
-      <p className="mt-1 text-sm text-zinc-500">
-        Status pengerjaan fitur-fitur di Pesisir Platform.
-      </p>
 
-      <ul className="mt-5 space-y-3" role="list">
-        {sorted.map((item) => {
+      <ul className="timeline timeline-vertical mt-5" role="list">
+        {sorted.map((item, index) => {
           const style = getStatusStyle(item.status);
           const label = getStatusLabel(item.status);
+          const isFirst = index === 0;
+          const isLast = index === sorted.length - 1;
+          const isEven = index % 2 === 0;
 
           return (
-            <li
-              key={item.id}
-              className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm"
-            >
-              <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
-                <h3 className="text-sm font-semibold text-zinc-900">
-                  {item.name}
-                </h3>
+            <li key={item.id}>
+              {!isFirst && <hr />}
+              <div className="timeline-middle">
                 <span
-                  className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${style.badge}`}
-                >
-                  <span
-                    className={`h-1.5 w-1.5 rounded-full ${style.dot}`}
-                    aria-hidden="true"
-                  />
-                  {label}
-                </span>
+                  className={`h-3 w-3 rounded-full ${style.dot}`}
+                  aria-hidden="true"
+                />
               </div>
-              <p className="mt-2 text-sm leading-6 text-zinc-600">
-                {item.description}
-              </p>
+              <div className={`${isEven ? 'timeline-start' : 'timeline-end'} mb-10`}>
+                <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
+                  <h3 className="text-sm font-semibold text-zinc-900">
+                    {item.name}
+                  </h3>
+                  <span
+                    className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${style.badge}`}
+                  >
+                    {label}
+                  </span>
+                </div>
+              </div>
+              {!isLast && <hr />}
             </li>
           );
         })}
