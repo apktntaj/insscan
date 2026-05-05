@@ -42,37 +42,44 @@
 /** @type {string} Nomor WhatsApp tanpa "+" atau spasi */
 export const WHATSAPP_NUMBER = "6281510093866";
 
-/** @type {string} Path QRIS image relatif dari folder public/ */
-export const QRIS_IMAGE_PATH = "/qris-pesisir.png";
+/** @type {string} Path foto developer relatif dari folder public/ */
+export const DEVELOPER_PHOTO_PATH = "/me-at-33.jpg";
 
 /** @type {FeatureItem[]} Daftar fitur untuk Roadmap Board */
 export const roadmapItems = [
   {
     id: "cek-lartas",
     name: "Cek Lartas",
-    description:
-      "Verifikasi HS code, tarif bea masuk, pajak, dan status LARTAS langsung dari INSW. Mendukung pengecekan single maupun batch dari file Excel.",
     status: "live",
   },
   {
     id: "shipments",
     name: "Shipments",
-    description:
-      "Kelola data pengiriman dan pantau status shipment dalam satu tampilan terpusat. Ekspor data ke Excel untuk dokumentasi bea cukai.",
     status: "live",
   },
   {
     id: "bl-scanner",
-    name: "BL Scanner",
-    description:
-      "Parsing otomatis dokumen Bill of Lading untuk mengisi data pengiriman tanpa input manual. Mengurangi waktu entry dari 15 menit menjadi hitungan detik.",
+    name: "Automate filling form once B/L uploaded ",
     status: "in-progress",
   },
   {
-    id: "notifikasi-eta",
-    name: "Notifikasi ETA",
-    description:
-      "Notifikasi otomatis saat estimasi kedatangan kapal berubah atau mendekati tanggal tiba. Tidak perlu cek manual setiap hari.",
+    id: "automate-eta",
+    name: "Automating ETA from shipping line",
+    status: "planned",
+  },
+  {
+    id: "doc-drafter",
+    name: "Draft pabean document",
+    status: "planned",
+  },
+{
+    id: "learn-pabean",
+    name: "Materi pembelajaran pabean",
+    status: "planned",
+  },
+  {
+    id: "hs-code-finder",
+    name: "HS code finder",
     status: "planned",
   },
 ];

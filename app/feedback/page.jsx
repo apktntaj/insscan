@@ -1,6 +1,5 @@
-import { roadmapItems, WHATSAPP_NUMBER, QRIS_IMAGE_PATH } from "../presentation/config/feedback-config";
+import { roadmapItems, WHATSAPP_NUMBER, DEVELOPER_PHOTO_PATH } from "../presentation/config/feedback-config";
 import RoadmapBoard from "../presentation/components/features/RoadmapBoard";
-import SuggestionForm from "../presentation/components/features/SuggestionForm";
 import SupportSection from "../presentation/components/features/SupportSection";
 
 export const metadata = {
@@ -60,18 +59,13 @@ export default function FeedbackPage() {
       </div>
 
       {/* Section 1: Roadmap Board */}
-      <section className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">
+      <section>
         <RoadmapBoard items={roadmapItems} />
       </section>
 
-      {/* Section 2: Suggestion Form */}
+      {/* Section 3: About Developer */}
       <section className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">
-        <SuggestionForm waNumber={WHATSAPP_NUMBER} />
-      </section>
-
-      {/* Section 3: Support Section */}
-      <section className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">
-        <SupportSection qrisImagePath={QRIS_IMAGE_PATH} />
+        <SupportSection developerPhotoPath={DEVELOPER_PHOTO_PATH} />
       </section>
     </div>
   );
