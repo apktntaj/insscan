@@ -64,7 +64,7 @@ export default function SuggestionForm({ waNumber }) {
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Kirim saran via WhatsApp ke developer Pesisir Platform"
-          className="inline-flex items-center gap-2 rounded-xl bg-zinc-900 px-5 py-3 text-sm font-medium text-zinc-50 transition hover:bg-zinc-800 active:scale-95"
+          className="inline-flex items-center gap-2 rounded-xl bg-[#25D366] px-5 py-3 text-sm font-medium text-white transition hover:bg-[#20BA5A] active:scale-95"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
