@@ -15,11 +15,11 @@ import FileInputPanel from "./cek-lartas/FileInputPanel";
  * @returns {JSX.Element}
  */
 export default function CekLartasScanner() {
-  const [mode, setMode] = useState("single");
+  const [mode, setMode] = useState("file");
   const isFile = mode === "file";
 
   return (
-    <div className="space-y-4 overflow-x-clip">
+    <div className="space-y-3 overflow-x-clip">
       {/* Toggle button — centered */}
       <div className="flex justify-center">
         <button
