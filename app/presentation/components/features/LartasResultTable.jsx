@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useCallback } from "react";
 import Alert from "../common/Alert";
 import { formatHsCode, isValidHsCode } from "../../../core/entities/hs-code";
 import LartasDocModal from "./cek-lartas/LartasDocModal";
@@ -9,10 +9,9 @@ import LartasDocModal from "./cek-lartas/LartasDocModal";
  * LartasMatrixTable Component
  * Inner component that renders the LARTAS matrix table with document codes as columns.
  *
- * @param {{ rows: object[] }} props
+ * @param {{ rows: object[], viewMode: string, setViewMode: (mode: string) => void }} props
  */
-function LartasMatrixTable({ rows }) {
-  const [viewMode, setViewMode] = useState("lartas");
+function LartasMatrixTable({ rows, viewMode, setViewMode }) {
   const [activeCell, setActiveCell] = useState(null);
   const matrixRows = useMemo(() => buildMatrixRows(rows), [rows]);
   const docCodes = useMemo(() => collectDocumentCodes(matrixRows), [matrixRows]);
@@ -232,11 +231,11 @@ function extractValidHsCodes(fileData) {
  * Shows a preview table when only fileData is available, or the full LARTAS
  * matrix when resultData is present.
  *
- * @param {{ fileData: Array<Array> | null, resultData: object[] | null }} props
+ * @param {{ fileData: Array<Array> | null, resultData: object[] | null, viewMode: string, setViewMode: (mode: string) => void }} props
  */
-export default function LartasResultTable({ fileData, resultData }) {
+export default function LartasResultTable({ fileData, resultData, viewMode = "lartas", setViewMode = () => {} }) {
   if (Array.isArray(resultData) && resultData.length > 0) {
-    return <LartasMatrixTable rows={resultData} />;
+    return <LartasMatrixTable rows={resultData} viewMode={viewMode} setViewMode={setViewMode} />;
   }
 
   if (!fileData) {
