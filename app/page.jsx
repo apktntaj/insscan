@@ -36,24 +36,22 @@ const productCards = [
 
 const whyReasons = [
   {
-    pain: "Cek LARTAS satu per satu",
+    pain: "Ambil data dari dokumen secara manual itu melelahkan dan rawan salah.",
     solve:
-      "Invoice bisa punya puluhan HS code. Cek manual ke situs INSW satu per satu bisa makan waktu berjam-jam. Pesisir memproses semuanya sekaligus dari file Excel yang sudah kamu punya.",
+      "Invoive, B/L dan dokumen lain langsung diproses. Tidak perlu copy-paste manual yang rawan salah dan memakan waktu.",
   },
   {
-    pain: "Data shipment tersebar di mana-mana",
+    pain: "Workflow jelas dan UI yang mendukung.",
     solve:
-      "Nomor BL di email, ETA di WhatsApp, status di spreadsheet berbeda. Pesisir menyatukan semua data shipment dalam satu tempat — bisa dicari, diedit, dan diekspor kapan saja.",
+      "Tidak perlu input satu-persatu untuk mendapat informasi LARTAS. Cukup upload file Excel, semua HS code langsung dicek sekaligus. Hasilnya bisa diekspor kembali ke Excel untuk dokumentasi.",
   },
   {
-    pain: "Keputusan shipment dibuat tanpa gambaran yang jelas",
-    solve:
-      "Sulit prioritas mana shipment yang perlu ditangani duluan kalau datanya tersebar. Dashboard Pesisir menyajikan status dan ETA semua shipment dalam satu tampilan — supaya kamu bisa ambil keputusan lebih cepat dan lebih tepat.",
+    pain: "Data shipment bersifat sensitif dari sisi bisnis.",
+    solve: "Pesisir dirancang untuk workflow yang membutuhkan kontrol penuh atas data tanpa sistem eksternal. Semua data shipment disimpan secara lokal di browser, export kapan saja untuk backup.",
   },
   {
-    pain: "Tools yang ada terasa kaku dan lambat",
-    solve:
-      "Spreadsheet dan sistem internal PPJK sering kali tidak dirancang untuk kecepatan kerja harian. Pesisir didesain khusus untuk alur kerja operasional — antarmuka yang bersih, responsif, dan tidak membuang klik.",
+    pain: "Salah ketik data shipment bisa berujung denda dan keterlambatan proses",
+    solve: "Pesisir mengekstrak data langsung dari dokumen dan mengisi form secara otomatis, mengurangi ketergantungan pada input manual yang rawan error."
   },
 ];
 
@@ -171,7 +169,7 @@ export default function Home() {
       <section id="why" className="rounded-3xl border border-zinc-200 bg-white px-7 py-8 shadow-sm sm:px-9">
         <p className="text-xs font-medium uppercase tracking-widest text-cyan-600">Kenapa Pesisir?</p>
         <h3 className="mt-2 text-lg font-semibold text-zinc-900 sm:text-xl">
-          Dibuat untuk mengurangi kerja manual yang tidak perlu.
+          Dari dokumen ke keputusan — tanpa input manual.
         </h3>
         <div className="mt-7 grid grid-cols-2 gap-4 lg:grid-cols-4">
           {whyReasons.map((item) => (
