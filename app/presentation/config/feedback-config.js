@@ -63,6 +63,11 @@ export const roadmapItems = [
     status: "in-progress",
   },
   {
+    id: "quiz",
+    name: "Practice quiz pabean",
+    status: "planned",
+  },
+  {
     id: "automate-eta",
     name: "Automating ETA from shipping line",
     status: "planned",
