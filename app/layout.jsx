@@ -4,8 +4,11 @@ import { Navbar } from "./presentation/components";
 import { navLinks } from "./presentation/config/nav-links";
 
 export const metadata = {
-  title: "Pesisir | BL Scanner & INScann",
-  description: "Klik untuk salin data BL dan validasi HS code dalam satu workspace.",
+  title: "Pesisir",
+  description: "Workspace untuk cek lartas dan tracking shipment.",
+  icons: {
+    icon: "logo-container.svg",
+  },
 };
 
 export default function RootLayout({ children }) {

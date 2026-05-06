@@ -3,6 +3,12 @@ import { Title, CekLartasScanner } from "../presentation/components";
 const PAGE_TITLE = "CEK LARTAS";
 const PAGE_DESCRIPTION = [];
 
+export const metadata = {
+  title: "Cek Lartas | Pesisir Platform",
+  description:
+    "Cek lartas dalam jumlah besar dalam satu kali klik.",
+};
+
 /**
  * Cek Lartas Page
  * @description Halaman utama untuk fitur Cek Lartas
