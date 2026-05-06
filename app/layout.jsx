@@ -6,9 +6,9 @@ import { navLinks } from "./presentation/config/nav-links";
 export const metadata = {
   title: "Pesisir",
   description: "Workspace untuk cek lartas dan tracking shipment.",
-  icons: {
-    icon: "logo-container.svg",
-  },
+  // icons: {
+  //   icon: "logo-container.svg",
+  // },
 };
 
 export default function RootLayout({ children }) {
