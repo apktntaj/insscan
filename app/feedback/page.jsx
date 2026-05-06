@@ -38,7 +38,7 @@ export default function FeedbackPage() {
         </p>
         <div className="mt-5">
         <a
-          href={WHATSAPP_NUMBER}
+          href={`https://wa.me/${WHATSAPP_NUMBER}`}
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Kirim saran via WhatsApp ke developer Pesisir Platform"
