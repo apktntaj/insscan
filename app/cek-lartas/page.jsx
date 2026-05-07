@@ -1,7 +1,4 @@
-import { Title, CekLartasScanner } from "../presentation/components";
-
-const PAGE_TITLE = "CEK LARTAS";
-const PAGE_DESCRIPTION = [];
+import CekLartasPageClient from "../presentation/components/features/CekLartasPage";
 
 export const metadata = {
   title: "Cek Lartas",
@@ -29,14 +26,10 @@ export const metadata = {
 };
 
 /**
- * Cek Lartas Page
- * @description Halaman utama untuk fitur Cek Lartas
+ * Cek Lartas Page (Server Component)
+ * Metadata diekspor dari sini, konten didelegasikan ke Client Component
+ * agar maintenance window check bisa menggunakan hooks.
  */
 export default function CekLartasPage() {
-  return (
-    <div className="mx-auto w-full max-w-6xl space-y-4">
-      <Title title={PAGE_TITLE} descs={PAGE_DESCRIPTION} variant="modern" eyebrow="Pesisir" />
-      <CekLartasScanner />
-    </div>
-  );
+  return <CekLartasPageClient />;
 }
