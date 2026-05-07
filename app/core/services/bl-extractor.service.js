@@ -138,24 +138,15 @@ export { FIELD_PATTERNS };
  */
 function extractField(text, fieldConfig, fieldName = '') {
   const candidates = [];
-  
-  console.log(`[BL Extractor] Extracting field: ${fieldName}`);
-  
-  // Try all patterns for this field
+
   for (const patternConfig of fieldConfig.patterns) {
     const match = text.match(patternConfig.regex);
-    
+
     if (match && match[1]) {
       const rawValue = match[1].trim();
       const normalizedValue = rawValue.toUpperCase();
       const confidence = calculateConfidence(normalizedValue, patternConfig.keyword, text, fieldName);
-      
-      console.log(`[BL Extractor] ${fieldName} - Pattern "${patternConfig.keyword}" matched:`, {
-        rawValue: rawValue.substring(0, 50) + (rawValue.length > 50 ? '...' : ''),
-        confidence: confidence.toFixed(2),
-        priority: patternConfig.priority
-      });
-      
+
       candidates.push({
         value: normalizedValue,
         confidence,
@@ -164,33 +155,16 @@ function extractField(text, fieldConfig, fieldName = '') {
       });
     }
   }
-  
-  // If no matches found, return null field
+
   if (candidates.length === 0) {
-    console.log(`[BL Extractor] ${fieldName} - No matches found`);
-    return {
-      value: null,
-      confidence: 0,
-      matchedPattern: null
-    };
+    return { value: null, confidence: 0, matchedPattern: null };
   }
-  
-  // Select candidate: prioritize by confidence, then by pattern priority
+
   candidates.sort((a, b) => {
-    // First sort by confidence (descending)
-    if (Math.abs(a.confidence - b.confidence) > 0.1) {
-      return b.confidence - a.confidence;
-    }
-    // If confidence is similar, use pattern priority (ascending)
+    if (Math.abs(a.confidence - b.confidence) > 0.1) return b.confidence - a.confidence;
     return a.priority - b.priority;
   });
-  
-  console.log(`[BL Extractor] ${fieldName} - Selected:`, {
-    value: candidates[0].value.substring(0, 50) + (candidates[0].value.length > 50 ? '...' : ''),
-    confidence: candidates[0].confidence.toFixed(2),
-    pattern: candidates[0].matchedPattern
-  });
-  
+
   return candidates[0];
 }
 
@@ -209,11 +183,6 @@ function extractField(text, fieldConfig, fieldName = '') {
  * // }
  */
 export function extractBLFields(text) {
-  console.log('[BL Extractor] Starting extraction...');
-  console.log('[BL Extractor] Text length:', text.length);
-  console.log('[BL Extractor] First 200 chars:', text.substring(0, 200));
-  
-  // Extract each field with field name for better confidence scoring
   const blNumber = extractField(text, FIELD_PATTERNS.blNumber, 'blNumber');
   const shipperName = extractField(text, FIELD_PATTERNS.shipperName, 'shipperName');
   const consigneeName = extractField(text, FIELD_PATTERNS.consigneeName, 'consigneeName');
@@ -221,35 +190,17 @@ export function extractBLFields(text) {
   const voyage = extractField(text, FIELD_PATTERNS.voyage, 'voyage');
   const portOfLoading = extractField(text, FIELD_PATTERNS.portOfLoading, 'portOfLoading');
   const portOfDischarge = extractField(text, FIELD_PATTERNS.portOfDischarge, 'portOfDischarge');
-  
-  // Extract and normalize ETA date
+
   const etaRaw = extractField(text, FIELD_PATTERNS.eta, 'eta');
   const eta = etaRaw.value ? normalizeDate(etaRaw.value) : etaRaw;
-  
-  // Calculate overall metrics
+
   const fields = [blNumber, shipperName, consigneeName, vesselName, voyage, portOfLoading, portOfDischarge, eta];
   const foundFieldsCount = fields.filter(f => f.value !== null).length;
   const overallConfidence = foundFieldsCount > 0
     ? fields.reduce((sum, f) => sum + f.confidence, 0) / fields.length
     : 0;
-  
-  console.log('[BL Extractor] Extraction complete:', {
-    foundFieldsCount,
-    overallConfidence: overallConfidence.toFixed(2)
-  });
-  
-  return {
-    blNumber,
-    shipperName,
-    consigneeName,
-    vesselName,
-    voyage,
-    portOfLoading,
-    portOfDischarge,
-    eta,
-    overallConfidence,
-    foundFieldsCount
-  };
+
+  return { blNumber, shipperName, consigneeName, vesselName, voyage, portOfLoading, portOfDischarge, eta, overallConfidence, foundFieldsCount };
 }
 
 /**
