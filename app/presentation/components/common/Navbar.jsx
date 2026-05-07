@@ -56,7 +56,7 @@ export default function Navbar({ links = [] }) {
                                 {isActive && (
                                     <span
                                         aria-hidden="true"
-                                        className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-gradient-to-br from-sky-300/50 via-cyan-200/40 to-sky-400/30 blur-md"
+                                        className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-gradient-to-br from-sky-300/50 via-cyan-200/40 to-sky-400/30"
                                     />
                                 )}
                                 {link.label}
@@ -87,7 +87,7 @@ export default function Navbar({ links = [] }) {
             {/* Backdrop */}
             {menuOpen && (
                 <div
-                    className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm"
+                    className="fixed inset-0 z-40 bg-black/20"
                     onClick={() => setMenuOpen(false)}
                     aria-hidden="true"
                 />
