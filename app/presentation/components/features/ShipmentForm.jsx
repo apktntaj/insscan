@@ -178,6 +178,9 @@ export default function ShipmentForm({
   }
   const extractionMethod = autoFillData?._extractionMethod || null;
 
+  // Confidence scores dari smart fill
+  const confidenceScores = smartFillData?._confidenceScores || {};
+
   // Generate unique datalist ID for clipboard suggestions
   const datalistId = "clipboard-suggestions";
 
@@ -377,9 +380,10 @@ export default function ShipmentForm({
         onBlur={onFieldBlur}
         isActive={activeField === "blNumber"}
         datalistId={clipboardBuffer.length > 0 ? datalistId : undefined}
+        confidence={confidenceScores.blNumber ?? null}
       />
 
-      {/* Alias - moved here below B/L Number */}
+      {/* Alias */}
       <FormField
         label="Alias"
         name="alias"
@@ -406,6 +410,7 @@ export default function ShipmentForm({
               onBlur={onFieldBlur}
               isActive={activeField === "shipperName"}
               datalistId={clipboardBuffer.length > 0 ? datalistId : undefined}
+              confidence={confidenceScores.shipperName ?? null}
             />
             <FormField
               label="Consignee Name"
@@ -419,6 +424,7 @@ export default function ShipmentForm({
               onBlur={onFieldBlur}
               isActive={activeField === "consigneeName"}
               datalistId={clipboardBuffer.length > 0 ? datalistId : undefined}
+              confidence={confidenceScores.consigneeName ?? null}
             />
           </div>
 
@@ -434,6 +440,7 @@ export default function ShipmentForm({
               onBlur={onFieldBlur}
               isActive={activeField === "vesselName"}
               datalistId={clipboardBuffer.length > 0 ? datalistId : undefined}
+              confidence={confidenceScores.vesselName ?? null}
             />
             <FormField
               label="Voyage"
@@ -445,6 +452,7 @@ export default function ShipmentForm({
               onBlur={onFieldBlur}
               isActive={activeField === "voyage"}
               datalistId={clipboardBuffer.length > 0 ? datalistId : undefined}
+              confidence={confidenceScores.voyage ?? null}
             />
           </div>
 
@@ -460,6 +468,7 @@ export default function ShipmentForm({
               onBlur={onFieldBlur}
               isActive={activeField === "portOfLoading"}
               datalistId={clipboardBuffer.length > 0 ? datalistId : undefined}
+              confidence={confidenceScores.portOfLoading ?? null}
             />
             <FormField
               label="Port of Discharge"
@@ -471,6 +480,7 @@ export default function ShipmentForm({
               onBlur={onFieldBlur}
               isActive={activeField === "portOfDischarge"}
               datalistId={clipboardBuffer.length > 0 ? datalistId : undefined}
+              confidence={confidenceScores.portOfDischarge ?? null}
             />
           </div>
 
@@ -487,6 +497,7 @@ export default function ShipmentForm({
               onFocus={onFieldFocus}
               onBlur={onFieldBlur}
               isActive={activeField === "eta"}
+              confidence={confidenceScores.eta ?? null}
             />
             <FormField
               label="Custom Notification Date"
