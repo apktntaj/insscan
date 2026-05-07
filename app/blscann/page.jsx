@@ -1,3 +1,19 @@
+export const metadata = {
+  title: "BL Scanner",
+  description:
+    "Ekstrak data Bill of Lading dari PDF secara otomatis. Klik untuk salin satu nilai, atau tahan Ctrl untuk menggabungkan beberapa nilai sekaligus.",
+  openGraph: {
+    title: "BL Scanner — Ekstrak Data Bill of Lading | Pesisir",
+    description:
+      "Ekstrak data Bill of Lading dari PDF secara otomatis. Klik untuk salin satu nilai, atau tahan Ctrl untuk menggabungkan beberapa nilai sekaligus.",
+    url: "https://pesisir.id/blscann",
+  },
+  alternates: {
+    canonical: "https://pesisir.id/blscann",
+  },
+};
+
+
 import Title from "../presentation/components/common/Title";
 import BlScanner from "../presentation/components/features/BlScanner";
 
