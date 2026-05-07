@@ -90,7 +90,7 @@ export default function ShipmentFormWithPDF({
     }
     
     setIsProcessing(true);
-    setStatus("Memproses PDF dengan AI...");
+    setStatus("Smart scan processing...");
     
     try {
       // Extract text from PDF
@@ -177,7 +177,7 @@ export default function ShipmentFormWithPDF({
     }
 
     setFile(nextFile);
-    setStatus("PDF berhasil dimuat. Memproses dengan AI...");
+    setStatus("PDF berhasil dimuat. Smart scan berjalan...");
     
     // Trigger auto-extraction
     await processSmartScan(nextFile);
