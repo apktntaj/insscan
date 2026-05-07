@@ -220,7 +220,7 @@ export default function Home() {
               href="#fitur"
               className="rounded-xl border border-zinc-300 px-5 py-3 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100"
             >
-              Lihat Fitur
+              Lihat Menu
             </a>
           </div>
         </div>
@@ -277,7 +277,7 @@ export default function Home() {
 
       {/* FAQ */}
       <section className="rounded-3xl border border-zinc-200 bg-white px-7 py-8 shadow-sm sm:px-9">
-        <h3 className="text-lg font-semibold text-zinc-900">Pertanyaan Umum</h3>
+        <h3 className="text-3xl text-center font-bold text-zinc-900">FAQ</h3>
         <div className="mt-4">
           {faqs.map((faq, index) => (
             <FaqItem
