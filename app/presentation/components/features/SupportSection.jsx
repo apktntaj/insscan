@@ -44,12 +44,11 @@ export default function SupportSection({ developerPhotoPath }) {
         {/* Personal introduction */}
         <div className="space-y-2 text-sm leading-6 text-zinc-600">
           <p>
-            Saya memiliki pengalaman di bidang kepabeanan dan mengikuti ujian pabean beberapa waktu lalu. Dari pengalaman tersebut, saya melihat langsung bagaimana proses operasional berjalan—termasuk tantangan dalam pengelolaan data, proses yang repetitif, dan kebutuhan akan visibilitas yang lebih baik.
+            Kedekatan saya dengan industri kepabeanan tumbuh dari lingkungan keluarga dan pengalaman langsung terlibat di dalamnya — cukup untuk memahami bagaimana operasional PPJK berjalan di lapangan.
           </p>
           <p>
-            Selain itu, saya juga banyak belajar dari lingkungan sekitar, di mana praktik kerja sehari-hari memberikan gambaran nyata tentang kebutuhan di lapangan.
+            Pesisir bermula dari kebutuhan nyata: mencari data lartas dan bea masuk untuk sejumlah besar HS Code dengan tenggat waktu singkat (waktu itu). Proses yang sebelumnya memakan waktu berjam-jam jika dilakukan secara manual. Dari situ, pengembangan berlanjut berdasarkan observasi terhadap tantangan operasional yang umum dihadapi oleh tim kepabeanan.
 
-            Pesisir saya bangun sebagai upaya untuk menjawab sebagian dari kebutuhan tersebut.
           </p>
           <p>
             Saya terbuka untuk kolaborasi maupun pengembangan solusi serupa sesuai kebutuhan internal tim atau perusahaan. Jika relevan, silakan hubungi saya melalui WhatsApp.

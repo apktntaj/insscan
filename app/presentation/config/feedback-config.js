@@ -60,11 +60,16 @@ export const roadmapItems = [
   {
     id: "bl-scanner",
     name: "Automate filling form once B/L uploaded ",
-    status: "in-progress",
+    status: "live"
   },
   {
     id: "quiz",
     name: "Practice quiz pabean",
+    status: "in-progress",
+  },
+  {
+    id: "power-bi",
+    name: "power-bi like feature on lartas chekcer",
     status: "planned",
   },
   {
