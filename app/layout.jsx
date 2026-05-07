@@ -9,6 +9,27 @@ export const metadata = {
   icons: {
     icon: "logo-container.svg",
   },
+  openGraph: {
+    title: "Pesisir",
+    description: "Workspace untuk cek lartas dan tracking shipment.",
+    url: "https://pesisir.id",
+    siteName: "Pesisir",
+    images: [
+      {
+        url: "https://pesisir.id/logo-pesisir.png",
+        width: 1200,
+        height: 630,
+        alt: "Pesisir — Platform operasional PPJK dan freight forwarder",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Pesisir",
+    description: "Workspace untuk cek lartas dan tracking shipment.",
+    images: ["https://pesisir.id/logo-pesisir.png"],
+  },
 };
 
 export default function RootLayout({ children }) {
