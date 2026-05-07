@@ -21,9 +21,9 @@ const productCards = [
   {
     title: "Shipments",
     description:
-      "Semua data pengiriman dalam satu dashboard — tidak ada lagi BL yang tercecer di email atau WhatsApp.",
+      "Tidak perlu ketik ulang data dari BL. Upload dokumen, data langsung terisi — tinggal periksa dan simpan.",
     points: [
-      "Catat nomor BL, shipper, dan ETA dalam satu tempat.",
+      "Scan BL PDF, nomor BL dan shipper terisi otomatis tanpa copy-paste.",
       "Dashboard status membantu kamu prioritas shipment yang perlu ditangani duluan.",
       "Data tersimpan di browser kamu sendiri, tidak melewati server manapun.",
     ],
@@ -36,22 +36,22 @@ const productCards = [
 
 const whyReasons = [
   {
-    pain: "Ambil data dari dokumen secara manual itu melelahkan dan rawan salah.",
+    pain: "Ketik ulang data BL itu buang waktu — dan satu angka salah bisa berujung masalah.",
     solve:
-      "Invoive, B/L dan dokumen lain langsung diproses. Tidak perlu copy-paste manual yang rawan salah dan memakan waktu.",
+      "Upload BL PDF, data langsung terbaca dan terisi otomatis. Tidak ada lagi copy-paste nomor kontainer satu per satu.",
   },
   {
-    pain: "Workflow jelas dan UI yang mendukung.",
+    pain: "Cek LARTAS satu per satu di INSW itu melelahkan kalau invoice-nya panjang.",
     solve:
-      "Tidak perlu input satu-persatu untuk mendapat informasi LARTAS. Cukup upload file Excel, semua HS code langsung dicek sekaligus. Hasilnya bisa diekspor kembali ke Excel untuk dokumentasi.",
+      "Upload Excel dengan semua HS code sekaligus. Pesisir cek ke INSW satu per satu untuk kamu, hasilnya langsung bisa diekspor.",
   },
   {
-    pain: "Data shipment bersifat sensitif dari sisi bisnis.",
-    solve: "Pesisir dirancang untuk workflow yang membutuhkan kontrol penuh atas data tanpa sistem eksternal. Semua data shipment disimpan secara lokal di browser, export kapan saja untuk backup.",
+    pain: "Data shipper itu sensitif — tidak semua orang boleh tahu.",
+    solve: "Semua data shipment disimpan di browser kamu sendiri, tidak melewati server manapun. Kamu yang pegang kendali penuh.",
   },
   {
-    pain: "Salah ketik data shipment bisa berujung denda dan keterlambatan proses",
-    solve: "Pesisir mengekstrak data langsung dari dokumen dan mengisi form secara otomatis, mengurangi ketergantungan pada input manual yang rawan error."
+    pain: "Informasi shipment tercecer di email, WhatsApp, dan Excel yang berbeda-beda.",
+    solve: "Satu dashboard untuk semua shipment aktif. Status, ETA, dan shipper ada di satu tempat — tidak perlu buka-tutup aplikasi lain."
   },
 ];
 
