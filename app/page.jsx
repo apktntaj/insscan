@@ -65,7 +65,7 @@ const faqs = [
     a: "Ya, aman. IndexedDB bersifat persisten — data tetap ada selama kamu tidak menghapus data browser secara manual atau berpindah perangkat atau berganti browser.",
   },
   {
-    q: "Kenapa fitur Cek Lartas hanya bisa digunakan dari jam 06.00 sampai 22.00?",
+    q: "Kenapa fitur Cek Lartas hanya bisa digunakan dari jam 06.00 sampai 23.50?",
     a: "Pesisir mengambil data langsung dari situs INSW (Indonesia National Single Window). Di luar jam tersebut, INSW cenderung tidak responsif. Daripada kamu menunggu tanpa kepastian, kami batasi jam operasional agar pengalaman penggunaannya tetap konsisten.",
   },
   {
