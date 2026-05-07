@@ -15,7 +15,7 @@ export default function RootLayout({ children }) {
   return (
     <html data-theme="light" lang="en" className="scroll-smooth">
       <body className="min-h-screen bg-zinc-50 text-zinc-900 antialiased [font-family:ui-sans-serif,system-ui,-apple-system,Segoe_UI,Roboto,Helvetica,Arial,sans-serif]">
-        <header className="fixed top-0 left-0 right-0 z-40 border-b border-zinc-200/70 bg-zinc-50/85 backdrop-blur-xl">
+        <header className="fixed top-0 left-0 right-0 z-40 border-b border-zinc-200/70 bg-zinc-50/85">
           <Navbar links={navLinks} />
         </header>
         <main className="min-h-[82vh] pt-16">

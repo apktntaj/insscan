@@ -1,7 +1,7 @@
 "use client";
 
+import React, { useState } from "react";
 import Link from "next/link";
-import { useState } from "react";
 
 const productCards = [
   {
@@ -124,6 +124,67 @@ function FaqItem({ q, a, open, onToggle }) {
   );
 }
 
+/**
+ * Carousel pagination untuk why section di mobile.
+ * @param {{ items: typeof whyReasons }} props
+ */
+function WhyCarousel({ items }) {
+  const [current, setCurrent] = useState(0);
+  const startX = React.useRef(null);
+
+  function handleTouchStart(e) {
+    startX.current = e.touches[0].clientX;
+  }
+
+  function handleTouchEnd(e) {
+    if (startX.current === null) return;
+    const diff = startX.current - e.changedTouches[0].clientX;
+    if (diff > 40 && current < items.length - 1) setCurrent((c) => c + 1);
+    if (diff < -40 && current > 0) setCurrent((c) => c - 1);
+    startX.current = null;
+  }
+
+  return (
+    <div className="mt-7 sm:hidden">
+      {/* Card */}
+      <div
+        className="overflow-hidden"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
+        <div
+          className="flex transition-transform duration-300 ease-in-out"
+          style={{ transform: `translateX(-${current * 100}%)` }}
+        >
+          {items.map((item) => (
+            <div
+              key={item.pain}
+              className="w-full shrink-0 rounded-2xl border border-zinc-100 bg-zinc-50 p-5"
+            >
+              <p className="text-sm font-semibold text-zinc-800">{item.pain}</p>
+              <p className="mt-2 text-sm leading-7 text-zinc-500">{item.solve}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Dot indicators */}
+      <div className="mt-4 flex justify-center gap-2">
+        {items.map((_, i) => (
+          <button
+            key={i}
+            aria-label={`Slide ${i + 1}`}
+            onClick={() => setCurrent(i)}
+            className={`h-2 rounded-full transition-all duration-200 ${
+              i === current ? "w-5 bg-cyan-500" : "w-2 bg-zinc-300"
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
   const [activeIndex, setActiveIndex] = useState(null);
 
@@ -136,7 +197,7 @@ export default function Home() {
 
       {/* Hero */}
       <section className="relative -mx-5 -mt-8 flex min-h-screen items-start justify-center overflow-hidden bg-gradient-to-br from-sky-50 via-white to-cyan-50 px-6 pt-[22vh] sm:-mx-8 sm:px-10 lg:-mx-12">
-        <div className="pointer-events-none absolute -top-16 right-8 h-72 w-72 rounded-full bg-sky-300/35 blur-3xl" />
+        <div className="pointer-events-none absolute -top-16 right-8 h-72 w-72 rounded-full bg-sky-300/35" />
         <div className="pointer-events-none absolute -bottom-20 left-6 h-80 w-80 rounded-full bg-cyan-300/35 blur-3xl" />
         <div className="relative mx-auto max-w-3xl text-center">
           <p className="inline-flex rounded-full border border-cyan-200/80 bg-white/75 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.18em] text-cyan-700">
@@ -171,7 +232,12 @@ export default function Home() {
         <h3 className="mt-2 text-lg font-semibold text-zinc-900 sm:text-xl">
           Dari dokumen ke keputusan — tanpa input manual.
         </h3>
-        <div className="mt-7 grid grid-cols-2 gap-4 lg:grid-cols-4">
+
+        {/* Mobile: carousel */}
+        <WhyCarousel items={whyReasons} />
+
+        {/* Desktop: grid */}
+        <div className="mt-7 hidden grid-cols-2 gap-4 sm:grid lg:grid-cols-4">
           {whyReasons.map((item) => (
             <div key={item.pain} className="rounded-2xl border border-zinc-100 bg-zinc-50 p-5">
               <p className="text-sm font-semibold text-zinc-800">{item.pain}</p>
