@@ -37,6 +37,9 @@ Thumbs.db
 .vscode/launch.json
 .idea/
 
+# ── Kiro IDE ──────────────────────────────────────────────────────────────────
+.db-profiles.local.json
+
 # ── Debug logs ────────────────────────────────────────────────────────────────
 npm-debug.log*
 yarn-debug.log*

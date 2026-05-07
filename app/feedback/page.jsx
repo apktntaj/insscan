@@ -3,9 +3,18 @@ import RoadmapBoard from "../presentation/components/features/RoadmapBoard";
 import SupportSection from "../presentation/components/features/SupportSection";
 
 export const metadata = {
-  title: "Feedback & Roadmap | Pesisir Platform",
+  title: "Feedback & Roadmap",
   description:
-    "Lihat roadmap fitur Pesisir Platform dan kirim saran pengembangan langsung via WhatsApp.",
+    "Lihat roadmap pengembangan fitur Pesisir dan kirim saran langsung via WhatsApp. Pesisir dikembangkan secara independen dan terus ditingkatkan berdasarkan masukan pengguna.",
+  openGraph: {
+    title: "Feedback & Roadmap | Pesisir",
+    description:
+      "Lihat roadmap pengembangan fitur Pesisir dan kirim saran langsung via WhatsApp.",
+    url: "https://pesisir.id/feedback",
+  },
+  alternates: {
+    canonical: "https://pesisir.id/feedback",
+  },
 };
 
 /**
