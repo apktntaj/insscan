@@ -38,8 +38,6 @@ export default function ShipmentFormWithPDF({
   onClose, 
   onSubmit
 }) {
-  console.log('[ShipmentFormWithPDF] Component mounted/rendered');
-  
   const [file, setFile] = useState(null);
   const [fileUrl, setFileUrl] = useState("");
   const [numPages, setNumPages] = useState(0);
@@ -70,24 +68,13 @@ export default function ShipmentFormWithPDF({
   // Initialize Gemini service on mount
   useEffect(() => {
     const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-    console.log('[ShipmentFormWithPDF] ========== INITIALIZATION ==========');
-    console.log('[ShipmentFormWithPDF] API Key present:', !!apiKey);
-    console.log('[ShipmentFormWithPDF] API Key length:', apiKey?.length || 0);
-    console.log('[ShipmentFormWithPDF] API Key first 10 chars:', apiKey?.substring(0, 10) || 'N/A');
-    
     if (apiKey) {
       geminiService.current = createGeminiService(apiKey);
       extractBLUseCase.current = createExtractBLWithGeminiUseCase(
         geminiService.current,
         usageTracker.current
       );
-      console.log('[ShipmentFormWithPDF] Gemini service initialized');
-    } else {
-      console.log('[ShipmentFormWithPDF] No API key found - will use rule-based extraction');
     }
-    console.log('[ShipmentFormWithPDF] ==========================================');
-    
-    // Load remaining uploads
     loadRemainingUploads();
   }, []);
   
@@ -117,49 +104,22 @@ export default function ShipmentFormWithPDF({
         const pageText = textContent.items.map(item => item.str).join(" ");
         fullText += pageText + "\n";
       }
-      
-      console.log('[ShipmentFormWithPDF] ========== PDF TEXT EXTRACTED ==========');
-      console.log('[ShipmentFormWithPDF] Text Length:', fullText.length);
-      console.log('[ShipmentFormWithPDF] First 500 chars:', fullText.substring(0, 500));
-      console.log('[ShipmentFormWithPDF] ==========================================');
-      
-      // Extract with Gemini (pass both text and PDF file for better accuracy)
+
       const result = await extractBLUseCase.current.execute(fullText, pdfFile);
-      
-      console.log('[ShipmentFormWithPDF] ========== EXTRACTION RESULT ==========');
-      console.log('[ShipmentFormWithPDF] Success:', result.ok);
-      if (result.ok) {
-        console.log('[ShipmentFormWithPDF] Extraction Method:', result.data.extractionMethod);
-        console.log('[ShipmentFormWithPDF] Overall Confidence:', result.data.overallConfidence);
-        console.log('[ShipmentFormWithPDF] Found Fields:', result.data.foundFieldsCount);
-        console.log('[ShipmentFormWithPDF] Raw Data:', result.data);
-      } else {
-        console.log('[ShipmentFormWithPDF] Error:', result.error);
-      }
-      console.log('[ShipmentFormWithPDF] ==========================================');
-      
+
       if (!result.ok) {
         handleExtractionError(result.error);
         return;
       }
-      
-      // Transform to form data
+
       const formData = toFormDataFromGemini(result.data);
-      
-      console.log('[ShipmentFormWithPDF] ========== FORM DATA ==========');
-      console.log('[ShipmentFormWithPDF] Form Data:', formData);
-      console.log('[ShipmentFormWithPDF] Confidence Scores:', formData._confidenceScores);
-      console.log('[ShipmentFormWithPDF] Extraction Method:', formData._extractionMethod);
-      console.log('[ShipmentFormWithPDF] =====================================');
-      
+
       setAutoFillData(formData);
       setIsAutoFilled(true);
       setExtractionMethod(result.data.extractionMethod);
-      
-      // Update remaining uploads
+
       await loadRemainingUploads();
-      
-      // Display success message based on confidence
+
       if (result.data.overallConfidence >= 0.5) {
         setStatus("Berhasil! Form akan terbuka otomatis.");
       } else {
@@ -167,7 +127,6 @@ export default function ShipmentFormWithPDF({
       }
       
     } catch (error) {
-      console.error('[ShipmentFormWithPDF] Smart-Scan error:', error);
       setStatus("File tidak bisa dibaca. Coba file lain atau isi manual.");
     } finally {
       setIsProcessing(false);
@@ -186,11 +145,6 @@ export default function ShipmentFormWithPDF({
     
     const message = errorMessages[error.code] || 'File tidak bisa dibaca. Coba file lain atau isi manual.';
     setStatus(message);
-    
-    // Log technical details for debugging
-    if (error.technicalDetails) {
-      console.error('[ShipmentFormWithPDF] Extraction error:', error.technicalDetails);
-    }
   };
 
   useEffect(() => {
