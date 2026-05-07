@@ -58,19 +58,19 @@ const whyReasons = [
 const faqs = [
   {
     q: "Kenapa data shipment disimpan di browser, bukan di server?",
-    a: "Privasi. Supaya data operasional kamu tidak melewati server pihak ketiga. Data shipment (terutama shipper) bersifat sensitif secara bisnis. Dengan menyimpannya di browser, kamu punya kendali penuh. Tidak ada yang bisa mengakses data kamu selain kamu sendiri.",
+    a: "Privasi. Data shipment (terutama shipper) bersifat sensitif secara bisnis. Dengan menyimpannya di browser, kamu punya kendali penuh. Tidak ada yang bisa mengakses data kamu selain kamu sendiri.",
   },
   {
     q: "Apakah data saya aman kalau browser-nya ditutup atau komputer di-restart?",
-    a: "Ya, aman. IndexedDB bersifat persisten — data tetap ada selama kamu tidak menghapus data browser secara manual atau berpindah perangkat atau berganti browser.",
+    a: "Ya, aman. Data shipment persisten selama tidak berpindah perangkat atau berganti browser.",
   },
   {
     q: "Kenapa fitur Cek Lartas hanya bisa digunakan dari jam 06.00 sampai 23.50?",
-    a: "Pesisir mengambil data langsung dari situs INSW (Indonesia National Single Window). Di luar jam tersebut, INSW cenderung tidak responsif. Daripada kamu menunggu tanpa kepastian, kami batasi jam operasional agar pengalaman penggunaannya tetap konsisten.",
+    a: "Pesisir mengambil data langsung dari situs INSW (Indonesia National Single Window). Di luar jam tersebut, tidak pengawasan dari developer sedangkan server pihak ketiga (INSW) cenderung unpredictable. Daripada kamu menunggu tanpa kepastian, kami batasi jam operasional agar pengalaman penggunaannya tetap konsisten.",
   },
   {
     q: "Apakah hasil Cek Lartas selalu akurat dan up-to-date?",
-    a: "Data yang ditampilkan berasal langsung dari INSW saat kamu melakukan pencarian — bukan dari cache atau database kami. Pesisir adalah platform yang berfokus pada efisiensi alur kerja. Bukan penyedia data. Akurasi bergantung pada data yang tersedia di INSW pada saat itu. Untuk keputusan kepabeanan penting, selalu verifikasi ulang ke sumber resmi.",
+    a: "Data yang ditampilkan berasal langsung dari INSW saat kamu melakukan pencarian — bukan dari cache atau database kami. Pesisir adalah platform yang berfokus pada efisiensi alur kerja bukan penyedia data. Untuk keputusan kepabeanan penting, selalu verifikasi ulang ke sumber resmi.",
   },
   {
     q: "Berapa banyak HS code yang bisa dicek sekaligus?",
@@ -82,7 +82,7 @@ const faqs = [
   },
   {
     q: "Apakah Pesisir gratis?",
-    a: "Ya, saat ini semua fitur Pesisir gratis digunakan tanpa perlu membuat akun.",
+    a: "Ya, saat ini semua fitur Pesisir gratis digunakan tanpa perlu membuat akun. ",
   },
   {
     q: "Apakah Pesisir terafiliasi dengan INSW atau instansi pemerintah?",
