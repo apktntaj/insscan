@@ -120,7 +120,7 @@ export default function ShipmentForm({
     }
 
     setSmartFillStatus("processing");
-    setSmartFillMessage("Memproses PDF dengan AI...");
+    setSmartFillMessage("Smart scan berjalan...");
 
     try {
       const pdfData = await file.arrayBuffer();
