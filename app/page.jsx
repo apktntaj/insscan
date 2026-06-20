@@ -6,20 +6,6 @@ import { CekLartasMockup, ShipmentMockup, BlScannerMockup } from "./presentation
 
 const productCards = [
   {
-    title: "Cek Lartas",
-    description:
-      "Tidak perlu buka INSW satu per satu. Upload Excel, semua HS code langsung dicek sekaligus.",
-    points: [
-      "Proses puluhan HS code dari invoice dalam sekali klik.",
-      "Lihat status LARTAS, tarif BM, PPN, dan PPh impor sekaligus.",
-      "Hasil bisa diekspor kembali ke Excel untuk dokumentasi.",
-    ],
-    href: "/cek-lartas",
-    cta: "Buka Cek Lartas",
-    accent: "from-cyan-500/20 to-sky-500/20",
-    dot: "bg-cyan-500",
-  },
-  {
     title: "Shipments",
     description:
       "Tidak perlu ketik ulang data dari BL. Upload dokumen, data langsung terisi — tinggal periksa dan simpan.",
@@ -32,6 +18,52 @@ const productCards = [
     cta: "Lihat Shipments",
     accent: "from-sky-500/20 to-cyan-500/20",
     dot: "bg-sky-500",
+    badge: null,
+  },
+  {
+    title: "Materi Kepabeanan",
+    description:
+      "Pelajari materi kepabeanan Indonesia langsung di Pesisir — dari terminologi, tata laksana ekspor impor, hingga ketentuan pidana.",
+    points: [
+      "Ringkasan materi diklat kepabeanan dalam format yang mudah dibaca.",
+      "Navigasi per topik — cari materi yang kamu butuhkan tanpa scroll panjang.",
+      "Terus diperbarui seiring pengembangan konten.",
+    ],
+    href: "/learn",
+    cta: "Buka Materi",
+    accent: "from-violet-500/20 to-purple-500/20",
+    dot: "bg-violet-500",
+    badge: "Baru",
+  },
+  {
+    title: "Latihan Soal",
+    description:
+      "Uji pemahaman materi kepabeanan dengan soal pilihan ganda yang diambil secara acak dari bank soal diklat.",
+    points: [
+      "10 soal acak per sesi — urutan pilihan jawaban juga diacak.",
+      "Feedback langsung setiap soal: tahu mana yang benar dan penjelasannya.",
+      "Skor akhir dengan grade untuk ukur tingkat pemahaman.",
+    ],
+    href: "/exercise",
+    cta: "Mulai Latihan",
+    accent: "from-emerald-500/20 to-teal-500/20",
+    dot: "bg-emerald-500",
+    badge: "Baru",
+  },
+  {
+    title: "Cek Lartas",
+    description:
+      "Fitur ini sedang kami pindahkan ke ekstensi Chrome agar bisa terintegrasi langsung dengan portal INSW. Untuk sementara, hubungi developer untuk mendapatkan akses.",
+    points: [
+      "Akan hadir sebagai ekstensi Chrome — langsung terintegrasi dengan INSW.",
+      "Butuh akses sekarang? Hubungi developer via WhatsApp.",
+      "Proses puluhan HS code dari invoice dalam sekali klik.",
+    ],
+    href: "/cek-lartas",
+    cta: "Lihat Info",
+    accent: "from-amber-500/20 to-orange-500/20",
+    dot: "bg-amber-500",
+    badge: "Transisi",
   },
 ];
 
@@ -42,17 +74,18 @@ const whyReasons = [
       "Upload BL PDF, data langsung terbaca dan terisi otomatis. Tidak ada lagi copy-paste nomor kontainer satu per satu.",
   },
   {
-    pain: "Cek LARTAS satu per satu di INSW itu melelahkan kalau invoice-nya panjang.",
+    pain: "Materi kepabeanan tersebar di banyak dokumen dan sulit dicari saat dibutuhkan.",
     solve:
-      "Upload Excel dengan semua HS code sekaligus. Pesisir cek ke INSW satu per satu untuk kamu, hasilnya langsung bisa diekspor.",
+      "Semua ringkasan materi diklat kepabeanan tersedia di satu tempat, ternavigasi per topik — buka kapan pun kamu butuh referensi cepat.",
+  },
+  {
+    pain: "Susah tahu sejauh mana pemahaman materi kalau tidak ada cara mengukurnya.",
+    solve:
+      "Latihan soal dari bank soal diklat dengan soal acak setiap sesi. Jawab, lihat feedback langsung, dan ukur skor kamu.",
   },
   {
     pain: "Data shipper itu sensitif — tidak semua orang boleh tahu.",
     solve: "Semua data shipment disimpan di browser kamu sendiri, tidak melewati server manapun. Kamu yang pegang kendali penuh.",
-  },
-  {
-    pain: "Informasi shipment tercecer di email, WhatsApp, dan Excel yang berbeda-beda.",
-    solve: "Satu dashboard untuk semua shipment aktif. Status, ETA, dan shipper ada di satu tempat — tidak perlu buka-tutup aplikasi lain."
   },
 ];
 
@@ -66,24 +99,20 @@ const faqs = [
     a: "Ya, aman. Data shipment persisten selama tidak berpindah perangkat atau berganti browser.",
   },
   {
-    q: "Kenapa fitur Cek Lartas hanya bisa digunakan dari jam 06.00 sampai 23.50?",
-    a: "Pesisir mengambil data langsung dari situs INSW (Indonesia National Single Window). Di luar jam tersebut, tidak pengawasan dari developer sedangkan server pihak ketiga (INSW) cenderung unpredictable. Daripada kamu menunggu tanpa kepastian, kami batasi jam operasional agar pengalaman penggunaannya tetap konsisten.",
+    q: "Kenapa fitur Cek Lartas sedang tidak aktif?",
+    a: "Cek Lartas sedang kami pindahkan ke ekstensi Google Chrome agar bisa terintegrasi langsung dengan portal INSW tanpa perlu berpindah tab. Kalau kamu butuh akses sekarang, hubungi developer via WhatsApp — kami bisa membukakan aksesnya.",
   },
   {
-    q: "Apakah hasil Cek Lartas selalu akurat dan up-to-date?",
-    a: "Data yang ditampilkan berasal langsung dari INSW saat kamu melakukan pencarian — bukan dari cache atau database kami. Pesisir adalah platform yang berfokus pada efisiensi alur kerja bukan penyedia data. Untuk keputusan kepabeanan penting, selalu verifikasi ulang ke sumber resmi.",
+    q: "Materi kepabeanan yang tersedia di Pesisir dari mana sumbernya?",
+    a: "Konten materi disusun berdasarkan materi diklat kepabeanan. Ini bukan pengganti sumber resmi — selalu verifikasi ke regulasi terbaru dari DJBC untuk keperluan profesional.",
   },
   {
-    q: "Berapa banyak HS code yang bisa dicek sekaligus?",
-    a: "Tidak ada batas jumlah baris di file Excel yang kamu unggah. Namun proses berjalan secara berurutan dengan jeda antar request untuk menghindari pemblokiran dari server INSW. Semakin banyak HS code, semakin lama prosesnya.",
-  },
-  {
-    q: "Format file apa yang didukung untuk Cek Lartas?",
-    a: "Saat ini hanya mendukung file Excel (.xlsx dan .xls). Kolom HS code harus ada di file tersebut — kamu bisa lihat contoh format yang diterima di halaman Cek Lartas.",
+    q: "Soal latihan di Pesisir dari mana?",
+    a: "Soal-soal diambil dari bank soal diklat kepabeanan. Setiap sesi menampilkan 10 soal yang dipilih secara acak, dengan urutan pilihan jawaban yang juga diacak agar kamu tidak menghafal posisi jawaban.",
   },
   {
     q: "Apakah Pesisir gratis?",
-    a: "Ya, saat ini semua fitur Pesisir gratis digunakan tanpa perlu membuat akun. ",
+    a: "Ya, saat ini semua fitur Pesisir gratis digunakan tanpa perlu membuat akun.",
   },
   {
     q: "Apakah Pesisir terafiliasi dengan INSW atau instansi pemerintah?",
@@ -208,7 +237,7 @@ export default function Home() {
             Kerja lebih cepat dan tepat.
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-zinc-600">
-            Pesisir adalah platform operasional untuk staf PPJK dan freight forwarder.
+            Pesisir adalah platform untuk staf PPJK dan freight forwarder — kelola shipment, pelajari materi kepabeanan, dan uji pemahaman, semua dalam satu tempat.
           </p>
           <div className="mt-9 flex flex-wrap justify-center gap-3">
             <a
@@ -301,12 +330,19 @@ export default function Home() {
             className="relative overflow-hidden rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm transition hover:border-cyan-300"
           >
             <div className={`pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-gradient-to-br ${card.accent} blur-2xl`} />
-            <h2 className="text-lg font-semibold text-zinc-900">{card.title}</h2>
+            <div className="flex items-start justify-between gap-2">
+              <h2 className="text-lg font-semibold text-zinc-900">{card.title}</h2>
+              {card.badge && (
+                <span className="shrink-0 rounded-full bg-cyan-100 px-2.5 py-0.5 text-xs font-semibold text-cyan-700">
+                  {card.badge}
+                </span>
+              )}
+            </div>
             <p className="mt-3 text-sm leading-7 text-zinc-600">{card.description}</p>
             <ul className="mt-4 space-y-2 text-sm text-zinc-600">
               {card.points.map((point) => (
                 <li key={point} className="flex gap-2">
-                  <span className={`mt-1 h-1.5 w-1.5 rounded-full ${card.dot}`} />
+                  <span className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${card.dot}`} />
                   <span>{point}</span>
                 </li>
               ))}
