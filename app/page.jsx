@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { CekLartasMockup, ShipmentMockup, BlScannerMockup } from "./presentation/components/common/ProductMockup";
 
 const productCards = [
   {
@@ -222,6 +223,51 @@ export default function Home() {
             >
               Lihat Menu
             </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Product Showcase */}
+      <section className="space-y-8">
+        <div className="text-center">
+          <p className="text-xs font-medium uppercase tracking-widest text-cyan-600">Lihat Langsung</p>
+          <h3 className="mt-2 text-lg font-semibold text-zinc-900 sm:text-xl">
+            Begini tampilan Pesisir saat dipakai
+          </h3>
+          <p className="mt-1 text-sm text-zinc-500">
+            Geser untuk lihat semua fitur
+          </p>
+        </div>
+
+        {/* Desktop: grid */}
+        <div className="hidden gap-6 md:grid md:grid-cols-2 lg:grid-cols-3">
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Cek Lartas</p>
+            <CekLartasMockup />
+          </div>
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Shipments Dashboard</p>
+            <ShipmentMockup />
+          </div>
+          <div className="space-y-2 md:col-span-2 lg:col-span-1">
+            <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">BL Scanner</p>
+            <BlScannerMockup />
+          </div>
+        </div>
+
+        {/* Mobile: horizontal scroll */}
+        <div className="flex gap-4 overflow-x-auto pb-4 md:hidden snap-x snap-mandatory scrollbar-none">
+          <div className="min-w-[85vw] snap-center space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Cek Lartas</p>
+            <CekLartasMockup />
+          </div>
+          <div className="min-w-[85vw] snap-center space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Shipments Dashboard</p>
+            <ShipmentMockup />
+          </div>
+          <div className="min-w-[85vw] snap-center space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">BL Scanner</p>
+            <BlScannerMockup />
           </div>
         </div>
       </section>

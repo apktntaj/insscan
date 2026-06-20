@@ -8,7 +8,7 @@ Read [](file:///home/aa/Projects/insscan/app/api)
 
 Read [](file:///home/aa/Projects/insscan/app/infrastructure/services/insw-api.service.js#1-1), lines 1 to 200
 
-Read [](file:///home/aa/Projects/insscan/app/core/use-cases/fetch-hs-code-data.js#1-1), lines 1 to 100
+Read [](file:///home/aa/Projects/insscan/app/core/use-cases/fetch-hs-code-data.js#1-1), lines 1 to 100JJJJJJJJ
 
 Read [](file:///home/aa/Projects/insscan/app/api/hs-code)
 
