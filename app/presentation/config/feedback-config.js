@@ -49,28 +49,23 @@ export const DEVELOPER_PHOTO_PATH = "/me-at-33.jpg";
 export const roadmapItems = [
   {
     id: "cek-lartas",
-    name: "Cek Lartas",
+    name: "Lartas checker",
     status: "live",
   },
   {
     id: "shipments",
-    name: "Shipments",
+    name: "Shipment tracking",
     status: "live",
   },
   {
     id: "bl-scanner",
-    name: "Automate filling form once B/L uploaded ",
-    status: "live"
+    name: "Auto-fill form once B/L uploaded ",
+    status: "live",
   },
   {
     id: "quiz",
     name: "Practice quiz pabean",
-    status: "in-progress",
-  },
-  {
-    id: "power-bi",
-    name: "power-bi like feature on lartas chekcer",
-    status: "planned",
+    status: "live",
   },
   {
     id: "automate-eta",
@@ -85,7 +80,7 @@ export const roadmapItems = [
 {
     id: "learn-pabean",
     name: "Materi pembelajaran pabean",
-    status: "planned",
+    status: "in-progress",
   },
   {
     id: "hs-code-finder",
