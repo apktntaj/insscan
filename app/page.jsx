@@ -2,125 +2,50 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { CekLartasMockup, ShipmentMockup, BlScannerMockup } from "./presentation/components/common/ProductMockup";
-
-const productCards = [
-  {
-    title: "Shipments",
-    description:
-      "Tidak perlu ketik ulang data dari BL. Upload dokumen, data langsung terisi — tinggal periksa dan simpan.",
-    points: [
-      "Scan BL PDF, nomor BL dan shipper terisi otomatis tanpa copy-paste.",
-      "Dashboard status membantu kamu prioritas shipment yang perlu ditangani duluan.",
-      "Data tersimpan di browser kamu sendiri, tidak melewati server manapun.",
-    ],
-    href: "/shipments",
-    cta: "Lihat Shipments",
-    accent: "from-sky-500/20 to-cyan-500/20",
-    dot: "bg-sky-500",
-    badge: null,
-  },
-  {
-    title: "Materi Kepabeanan",
-    description:
-      "Pelajari materi kepabeanan Indonesia langsung di Pesisir — dari terminologi, tata laksana ekspor impor, hingga ketentuan pidana.",
-    points: [
-      "Ringkasan materi diklat kepabeanan dalam format yang mudah dibaca.",
-      "Navigasi per topik — cari materi yang kamu butuhkan tanpa scroll panjang.",
-      "Terus diperbarui seiring pengembangan konten.",
-    ],
-    href: "/learn",
-    cta: "Buka Materi",
-    accent: "from-violet-500/20 to-purple-500/20",
-    dot: "bg-violet-500",
-    badge: "Baru",
-  },
-  {
-    title: "Latihan Soal",
-    description:
-      "Uji pemahaman materi kepabeanan dengan soal pilihan ganda yang diambil secara acak dari bank soal diklat.",
-    points: [
-      "10 soal acak per sesi — urutan pilihan jawaban juga diacak.",
-      "Feedback langsung setiap soal: tahu mana yang benar dan penjelasannya.",
-      "Skor akhir dengan grade untuk ukur tingkat pemahaman.",
-    ],
-    href: "/exercise",
-    cta: "Mulai Latihan",
-    accent: "from-emerald-500/20 to-teal-500/20",
-    dot: "bg-emerald-500",
-    badge: "Baru",
-  },
-  {
-    title: "Cek Lartas",
-    description:
-      "Fitur ini sedang kami pindahkan ke ekstensi Chrome agar bisa terintegrasi langsung dengan portal INSW. Untuk sementara, hubungi developer untuk mendapatkan akses.",
-    points: [
-      "Akan hadir sebagai ekstensi Chrome — langsung terintegrasi dengan INSW.",
-      "Butuh akses sekarang? Hubungi developer via WhatsApp.",
-      "Proses puluhan HS code dari invoice dalam sekali klik.",
-    ],
-    href: "/cek-lartas",
-    cta: "Lihat Info",
-    accent: "from-amber-500/20 to-orange-500/20",
-    dot: "bg-amber-500",
-    badge: "Transisi",
-  },
-];
+import { CekLartasMockup } from "./presentation/components/common/ProductMockup";
 
 const whyReasons = [
   {
-    pain: "Ketik ulang data BL itu buang waktu — dan satu angka salah bisa berujung masalah.",
+    pain: "Cek LARTAS satu per satu di INSW itu lambat — apalagi kalau invoice-nya punya 30+ item.",
     solve:
-      "Upload BL PDF, data langsung terbaca dan terisi otomatis. Tidak ada lagi copy-paste nomor kontainer satu per satu.",
+      "Upload file Excel berisi HS code, semua data tarif dan status LARTAS langsung ditarik sekaligus. Tidak perlu buka INSW manual.",
   },
   {
-    pain: "Materi kepabeanan tersebar di banyak dokumen dan sulit dicari saat dibutuhkan.",
+    pain: "Salah baca status LARTAS bisa berujung denda atau barang tertahan di pelabuhan.",
     solve:
-      "Semua ringkasan materi diklat kepabeanan tersedia di satu tempat, ternavigasi per topik — buka kapan pun kamu butuh referensi cepat.",
+      "Data langsung dari INSW — BM MFN, PPN, PPh, dan detail regulasi impor/ekspor ditampilkan per HS code dengan jelas.",
   },
   {
-    pain: "Susah tahu sejauh mana pemahaman materi kalau tidak ada cara mengukurnya.",
+    pain: "Hasil cek LARTAS tersebar di tab browser, susah didokumentasikan.",
     solve:
-      "Latihan soal dari bank soal diklat dengan soal acak setiap sesi. Jawab, lihat feedback langsung, dan ukur skor kamu.",
-  },
-  {
-    pain: "Data shipper itu sensitif — tidak semua orang boleh tahu.",
-    solve: "Semua data shipment disimpan di browser kamu sendiri, tidak melewati server manapun. Kamu yang pegang kendali penuh.",
+      "Export hasil ke Excel dalam satu klik. Siap dilampirkan ke laporan atau dikirim ke tim.",
   },
 ];
 
 const faqs = [
   {
-    q: "Kenapa data shipment disimpan di browser, bukan di server?",
-    a: "Privasi. Data shipment (terutama shipper) bersifat sensitif secara bisnis. Dengan menyimpannya di browser, kamu punya kendali penuh. Tidak ada yang bisa mengakses data kamu selain kamu sendiri.",
+    q: "Data LARTAS dari mana?",
+    a: "Langsung dari API INSW (Indonesia National Single Window) — sumber resmi yang sama yang dipakai portal insw.go.id.",
   },
   {
-    q: "Apakah data saya aman kalau browser-nya ditutup atau komputer di-restart?",
-    a: "Ya, aman. Data shipment persisten selama tidak berpindah perangkat atau berganti browser.",
+    q: "Format file Excel-nya seperti apa?",
+    a: "Cukup satu kolom berisi HS code 8 digit. Tidak perlu header khusus — Pesisir akan membaca semua angka 8 digit yang ditemukan di file.",
   },
   {
-    q: "Kenapa fitur Cek Lartas sedang tidak aktif?",
-    a: "Cek Lartas sedang kami pindahkan ke ekstensi Google Chrome agar bisa terintegrasi langsung dengan portal INSW tanpa perlu berpindah tab. Kalau kamu butuh akses sekarang, hubungi developer via WhatsApp — kami bisa membukakan aksesnya.",
+    q: "Berapa banyak HS code yang bisa dicek sekaligus?",
+    a: "Paket gratis dibatasi 10 HS code per hari. Upgrade ke Pro (Rp26.000/bulan) untuk query unlimited tanpa batas harian.",
   },
   {
-    q: "Materi kepabeanan yang tersedia di Pesisir dari mana sumbernya?",
-    a: "Konten materi disusun berdasarkan materi diklat kepabeanan. Ini bukan pengganti sumber resmi — selalu verifikasi ke regulasi terbaru dari DJBC untuk keperluan profesional.",
-  },
-  {
-    q: "Soal latihan di Pesisir dari mana?",
-    a: "Soal-soal diambil dari bank soal diklat kepabeanan. Setiap sesi menampilkan 10 soal yang dipilih secara acak, dengan urutan pilihan jawaban yang juga diacak agar kamu tidak menghafal posisi jawaban.",
-  },
-  {
-    q: "Apakah Pesisir gratis?",
-    a: "Ya, saat ini semua fitur Pesisir gratis digunakan tanpa perlu membuat akun.",
+    q: "Apakah data saya dikirim ke server?",
+    a: "File Excel yang kamu upload diproses di browser — tidak disimpan di server manapun. Hanya HS code yang dikirim ke INSW untuk dicek.",
   },
   {
     q: "Apakah Pesisir terafiliasi dengan INSW atau instansi pemerintah?",
     a: "Tidak. Pesisir adalah tool independen yang dibuat untuk membantu staf operasional PPJK dan freight forwarder.",
   },
   {
-    q: "Bagaimana kalau saya menemukan bug atau ingin mengusulkan fitur?",
-    a: "Kamu bisa menyampaikannya langsung di halaman Feedback. Ada form saran dan kontak WhatsApp yang bisa kamu gunakan.",
+    q: "Bagaimana kalau hasil LARTAS tidak muncul untuk HS code tertentu?",
+    a: "Beberapa HS code memang tidak memiliki regulasi LARTAS aktif — artinya barang tersebut bebas tanpa persyaratan izin. Data tetap menampilkan tarif BM, PPN, dan PPh jika tersedia.",
   },
 ];
 
@@ -154,67 +79,6 @@ function FaqItem({ q, a, open, onToggle }) {
   );
 }
 
-/**
- * Carousel pagination untuk why section di mobile.
- * @param {{ items: typeof whyReasons }} props
- */
-function WhyCarousel({ items }) {
-  const [current, setCurrent] = useState(0);
-  const startX = React.useRef(null);
-
-  function handleTouchStart(e) {
-    startX.current = e.touches[0].clientX;
-  }
-
-  function handleTouchEnd(e) {
-    if (startX.current === null) return;
-    const diff = startX.current - e.changedTouches[0].clientX;
-    if (diff > 40 && current < items.length - 1) setCurrent((c) => c + 1);
-    if (diff < -40 && current > 0) setCurrent((c) => c - 1);
-    startX.current = null;
-  }
-
-  return (
-    <div className="mt-7 sm:hidden">
-      {/* Card */}
-      <div
-        className="overflow-hidden"
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-      >
-        <div
-          className="flex transition-transform duration-300 ease-in-out"
-          style={{ transform: `translateX(-${current * 100}%)` }}
-        >
-          {items.map((item) => (
-            <div
-              key={item.pain}
-              className="w-full shrink-0 rounded-2xl border border-zinc-100 bg-zinc-50 p-5"
-            >
-              <p className="text-sm font-semibold text-zinc-800">{item.pain}</p>
-              <p className="mt-2 text-sm leading-7 text-zinc-500">{item.solve}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Dot indicators */}
-      <div className="mt-4 flex justify-center gap-2">
-        {items.map((_, i) => (
-          <button
-            key={i}
-            aria-label={`Slide ${i + 1}`}
-            onClick={() => setCurrent(i)}
-            className={`h-2 rounded-full transition-all duration-200 ${
-              i === current ? "w-5 bg-cyan-500" : "w-2 bg-zinc-300"
-            }`}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
 export default function Home() {
   const [activeIndex, setActiveIndex] = useState(null);
 
@@ -234,85 +98,50 @@ export default function Home() {
             Pesisir
           </p>
           <h1 className="mt-6 bg-gradient-to-r from-sky-900 to-cyan-700 bg-clip-text text-4xl font-semibold tracking-tight text-transparent sm:text-5xl lg:text-6xl">
-            Kerja lebih cepat dan tepat.
+            Cek LARTAS puluhan HS code dalam sekali klik.
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-zinc-600">
-            Pesisir adalah platform untuk staf PPJK dan freight forwarder — kelola shipment, pelajari materi kepabeanan, dan uji pemahaman, semua dalam satu tempat.
+            Upload Excel berisi HS code dari invoice — Pesisir langsung tarik data tarif bea masuk, PPN, PPh, dan status LARTAS dari INSW. Tidak perlu buka portal satu per satu.
           </p>
           <div className="mt-9 flex flex-wrap justify-center gap-3">
-            <a
-              href="#why"
-              className="rounded-xl bg-zinc-900 px-5 py-3 text-sm font-medium text-zinc-50 transition hover:bg-zinc-800"
+            <Link
+              href="/cek-lartas"
+              className="rounded-xl bg-gradient-to-r from-sky-900 to-cyan-700 px-6 py-3 text-sm font-medium text-white transition hover:from-sky-800 hover:to-cyan-600"
             >
-              Kenapa Pesisir?
-            </a>
+              Coba Sekarang — Gratis
+            </Link>
             <a
-              href="#fitur"
+              href="#cara-kerja"
               className="rounded-xl border border-zinc-300 px-5 py-3 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100"
             >
-              Lihat Menu
+              Cara Kerja
             </a>
           </div>
+          <p className="mt-4 text-xs text-zinc-400">Gratis 10 query/hari · Tidak perlu daftar akun</p>
         </div>
       </section>
 
-      {/* Product Showcase */}
-      <section className="space-y-8">
+      {/* Product Mockup */}
+      <section className="space-y-6">
         <div className="text-center">
-          <p className="text-xs font-medium uppercase tracking-widest text-cyan-600">Lihat Langsung</p>
+          <p className="text-xs font-medium uppercase tracking-widest text-cyan-600">Tampilan</p>
           <h3 className="mt-2 text-lg font-semibold text-zinc-900 sm:text-xl">
-            Begini tampilan Pesisir saat dipakai
+            Hasil cek LARTAS langsung di browser
           </h3>
-          <p className="mt-1 text-sm text-zinc-500">
-            Geser untuk lihat semua fitur
-          </p>
         </div>
-
-        {/* Desktop: grid */}
-        <div className="hidden gap-6 md:grid md:grid-cols-2 lg:grid-cols-3">
-          <div className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Cek Lartas</p>
-            <CekLartasMockup />
-          </div>
-          <div className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Shipments Dashboard</p>
-            <ShipmentMockup />
-          </div>
-          <div className="space-y-2 md:col-span-2 lg:col-span-1">
-            <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">BL Scanner</p>
-            <BlScannerMockup />
-          </div>
-        </div>
-
-        {/* Mobile: horizontal scroll */}
-        <div className="flex gap-4 overflow-x-auto pb-4 md:hidden snap-x snap-mandatory scrollbar-none">
-          <div className="min-w-[85vw] snap-center space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Cek Lartas</p>
-            <CekLartasMockup />
-          </div>
-          <div className="min-w-[85vw] snap-center space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Shipments Dashboard</p>
-            <ShipmentMockup />
-          </div>
-          <div className="min-w-[85vw] snap-center space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">BL Scanner</p>
-            <BlScannerMockup />
-          </div>
+        <div className="mx-auto max-w-2xl">
+          <CekLartasMockup />
         </div>
       </section>
 
       {/* Why */}
-      <section id="why" className="rounded-3xl border border-zinc-200 bg-white px-7 py-8 shadow-sm sm:px-9">
+      <section id="cara-kerja" className="rounded-3xl border border-zinc-200 bg-white px-7 py-8 shadow-sm sm:px-9">
         <p className="text-xs font-medium uppercase tracking-widest text-cyan-600">Kenapa Pesisir?</p>
         <h3 className="mt-2 text-lg font-semibold text-zinc-900 sm:text-xl">
-          Dari dokumen ke keputusan — tanpa input manual.
+          Dari invoice ke data LARTAS — tanpa buka INSW manual.
         </h3>
 
-        {/* Mobile: carousel */}
-        <WhyCarousel items={whyReasons} />
-
-        {/* Desktop: grid */}
-        <div className="mt-7 hidden grid-cols-2 gap-4 sm:grid lg:grid-cols-4">
+        <div className="mt-7 grid grid-cols-1 gap-4 sm:grid-cols-3">
           {whyReasons.map((item) => (
             <div key={item.pain} className="rounded-2xl border border-zinc-100 bg-zinc-50 p-5">
               <p className="text-sm font-semibold text-zinc-800">{item.pain}</p>
@@ -322,39 +151,36 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Fitur */}
-      <section id="fitur" className="grid grid-cols-1 gap-5 md:grid-cols-2">
-        {productCards.map((card) => (
-          <article
-            key={card.title}
-            className="relative overflow-hidden rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm transition hover:border-cyan-300"
-          >
-            <div className={`pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-gradient-to-br ${card.accent} blur-2xl`} />
-            <div className="flex items-start justify-between gap-2">
-              <h2 className="text-lg font-semibold text-zinc-900">{card.title}</h2>
-              {card.badge && (
-                <span className="shrink-0 rounded-full bg-cyan-100 px-2.5 py-0.5 text-xs font-semibold text-cyan-700">
-                  {card.badge}
-                </span>
-              )}
+      {/* How it works */}
+      <section className="space-y-6">
+        <div className="text-center">
+          <p className="text-xs font-medium uppercase tracking-widest text-cyan-600">Cara Pakai</p>
+          <h3 className="mt-2 text-lg font-semibold text-zinc-900 sm:text-xl">Tiga langkah, selesai.</h3>
+        </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {[
+            { step: "1", title: "Upload Excel", desc: "Siapkan file .xls atau .xlsx berisi HS code 8 digit dari invoice kamu." },
+            { step: "2", title: "Tarik Data", desc: "Pesisir query ke INSW untuk setiap HS code — tarif dan status LARTAS langsung muncul." },
+            { step: "3", title: "Export Hasil", desc: "Download hasil sebagai Excel. Siap dilampirkan ke laporan atau dikirim ke tim." },
+          ].map((item) => (
+            <div key={item.step} className="relative overflow-hidden rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
+              <div className="pointer-events-none absolute -right-4 -top-4 flex h-16 w-16 items-center justify-center rounded-full bg-cyan-50 text-2xl font-bold text-cyan-200">
+                {item.step}
+              </div>
+              <p className="text-sm font-semibold text-zinc-900">{item.title}</p>
+              <p className="mt-2 text-sm leading-7 text-zinc-500">{item.desc}</p>
             </div>
-            <p className="mt-3 text-sm leading-7 text-zinc-600">{card.description}</p>
-            <ul className="mt-4 space-y-2 text-sm text-zinc-600">
-              {card.points.map((point) => (
-                <li key={point} className="flex gap-2">
-                  <span className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${card.dot}`} />
-                  <span>{point}</span>
-                </li>
-              ))}
-            </ul>
-            <Link
-              href={card.href}
-              className="mt-6 inline-flex rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100"
-            >
-              {card.cta}
-            </Link>
-          </article>
-        ))}
+          ))}
+        </div>
+
+        <div className="text-center">
+          <Link
+            href="/cek-lartas"
+            className="inline-flex rounded-xl bg-gradient-to-r from-sky-900 to-cyan-700 px-6 py-3 text-sm font-medium text-white transition hover:from-sky-800 hover:to-cyan-600"
+          >
+            Mulai Cek Sekarang
+          </Link>
+        </div>
       </section>
 
       {/* FAQ */}
