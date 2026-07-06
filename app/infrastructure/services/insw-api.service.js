@@ -30,15 +30,6 @@ const INSW_SSO_HEADERS = {
 };
 
 /**
- * @typedef {Object} InswTokenCache
- * @property {string} token - "Basic eyJ..." value for Authorization header
- * @property {number} expiresAt - Unix timestamp ms when token expires
- */
-
-/** @type {InswTokenCache|null} */
-let _tokenCache = null;
-
-/**
  * Fetches the JWKS key set from INSW SSO.
  * @returns {Promise<{isc: string}|null>}
  */
@@ -58,7 +49,7 @@ async function fetchJwks() {
 /**
  * Exchanges isc value for a short-lived CMS JWT token.
  * @param {string} isc - Value from JWKS response
- * @returns {Promise<InswTokenCache|null>}
+ * @returns {Promise<string|null>} Authorization header value or null
  */
 async function fetchTokenWithIsc(isc) {
   try {
@@ -74,39 +65,33 @@ async function fetchTokenWithIsc(isc) {
     if (!res.ok) return null;
     const json = await res.json();
     if (!json?.token) return null;
-
-    // tokenExpiresIn is in seconds — subtract 60s buffer
-    const expiresAt = Date.now() + (json.tokenExpiresIn - 60) * 1000;
-    return { token: `Basic ${json.token}`, expiresAt };
+    return `Basic ${json.token}`;
   } catch {
     return null;
   }
 }
 
 /**
- * Returns a valid CMS token, auto-refreshing when expired.
- * Flow: GET /jwks → isc → GET /token → cache result
+ * Fetches a fresh CMS token from INSW SSO on every call.
+ * Stateless — safe for serverless environments (Vercel, etc.) where
+ * module-level variables do not persist across invocations.
+ * Flow: GET /jwks → isc → GET /token
  * @returns {Promise<string|null>} Authorization header value or null
  */
 async function getCmsToken() {
-  if (_tokenCache && Date.now() < _tokenCache.expiresAt) {
-    return _tokenCache.token;
-  }
-
   const jwks = await fetchJwks();
   if (!jwks?.isc) {
     console.warn("INSW: failed to fetch JWKS, falling back to public endpoints");
     return null;
   }
 
-  const tokenCache = await fetchTokenWithIsc(jwks.isc);
-  if (!tokenCache) {
+  const token = await fetchTokenWithIsc(jwks.isc);
+  if (!token) {
     console.warn("INSW: failed to exchange isc for token, falling back to public endpoints");
     return null;
   }
 
-  _tokenCache = tokenCache;
-  return _tokenCache.token;
+  return token;
 }
 
 const INSW_PUBLIC_ONLY_MODE =
