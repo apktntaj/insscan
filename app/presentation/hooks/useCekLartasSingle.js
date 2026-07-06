@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { parseHsCodeApiResponse } from "../../adapters/presenters/hs-code.presenter";
 import { isValidHsCode } from "../../core/entities/hs-code";
 import { downloadAsExcel } from "../../infrastructure/excel/excel.service";
+import { useQueryLimit } from "./useQueryLimit";
 
 // ─── Internal Helpers ─────────────────────────────────────────────────────────
 
@@ -160,6 +161,7 @@ export function useCekLartasSingle() {
   const [singleResult, setSingleResult] = useState(null);
   const [singleStatus, setSingleStatus] = useState("");
   const [isSingleLoading, setIsSingleLoading] = useState(false);
+  const { remaining, isLimitReached, consume, activateKey } = useQueryLimit();
 
   /**
    * Validasi input, fetch ke /api/hs-code, parse respons, update state.
@@ -171,6 +173,17 @@ export function useCekLartasSingle() {
 
     if (!isValidHsCode(normalized)) {
       setSingleStatus("HS code harus 8 digit angka.");
+      return;
+    }
+
+    if (isLimitReached) {
+      setSingleStatus("Batas query harian tercapai.");
+      return;
+    }
+
+    const allowed = consume(1);
+    if (!allowed) {
+      setSingleStatus("Batas query harian tercapai.");
       return;
     }
 
@@ -240,5 +253,8 @@ export function useCekLartasSingle() {
     handleFetch,
     handleCopy,
     handleExportSingle,
+    remaining,
+    isLimitReached,
+    activateKey,
   };
 }

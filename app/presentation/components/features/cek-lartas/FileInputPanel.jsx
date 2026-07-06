@@ -6,6 +6,7 @@ import Alert from "../../common/Alert";
 import Button from "../../common/Button";
 import Input from "../../common/Input";
 import LartasResultTable from "../LartasResultTable";
+import PaywallBanner from "./PaywallBanner";
 
 /**
  * Resolve Alert variant based on status message content.
@@ -52,11 +53,13 @@ export default function FileInputPanel() {
     handleFileChange,
     handleFetch,
     handleExportResult,
+    remaining,
+    isLimitReached,
+    activateKey,
   } = useCekLartasFile();
 
   const alertVariant = resolveAlertVariant(status);
 
-  // Determine button state
   const hasResult = resultData && resultData.length > 0;
   const canFetch = fileData && !hasResult && !isLoading;
   
@@ -67,14 +70,22 @@ export default function FileInputPanel() {
     : "Tarik Data";
   
   const buttonAction = hasResult ? handleExportResult : handleFetch;
-  const buttonDisabled = isLoading || (!fileData && !hasResult);
+  const buttonDisabled = isLoading || (!fileData && !hasResult) || (!hasResult && isLimitReached);
 
   return (
     <div className="space-y-4">
+      {/* Paywall banner — tampil saat limit tercapai */}
+      {isLimitReached && !hasResult ? <PaywallBanner onActivate={activateKey} /> : null}
+
       {/* Input card */}
       <div className="overflow-hidden rounded-3xl border border-sky-100 bg-white p-5 shadow-sm sm:p-6">
         <div className="space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700">Input File</p>
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700">Input File</p>
+            {!isLimitReached ? (
+              <p className="text-xs text-zinc-400">Sisa kuota: {remaining} query</p>
+            ) : null}
+          </div>
           
           <div className="flex items-center gap-3">
             <div className="min-w-0 flex-1">
@@ -116,7 +127,7 @@ export default function FileInputPanel() {
         ) : null}
       </div>
 
-      {/* Progress panel — shown when progress.total > 0 */}
+      {/* Progress panel */}
       {progress.total > 0 ? (
         <ProgressPanel progress={progress} isLoading={isLoading} />
       ) : null}

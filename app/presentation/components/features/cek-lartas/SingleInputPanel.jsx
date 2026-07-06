@@ -4,6 +4,7 @@ import { useCekLartasSingle } from "../../../../presentation/hooks/useCekLartasS
 import SingleResultCard from "./SingleResultCard";
 import Alert from "../../common/Alert";
 import Button from "../../common/Button";
+import PaywallBanner from "./PaywallBanner";
 
 /**
  * Resolves the Alert variant from a status string.
@@ -33,12 +34,18 @@ export default function SingleInputPanel() {
     handleFetch,
     handleCopy,
     handleExportSingle,
+    remaining,
+    isLimitReached,
+    activateKey,
   } = useCekLartasSingle();
 
   const alertVariant = resolveAlertVariant(singleStatus);
 
   return (
     <div className="space-y-4">
+      {/* Paywall banner — tampil saat limit tercapai */}
+      {isLimitReached ? <PaywallBanner onActivate={activateKey} /> : null}
+
       {/* Input card */}
       <div className="overflow-hidden rounded-3xl border border-sky-100 bg-white p-5 shadow-sm sm:p-6">
         <div className="mx-auto max-w-2xl space-y-3">
@@ -51,13 +58,13 @@ export default function SingleInputPanel() {
               onChange={(e) => setSingleInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter") handleFetch(); }}
               placeholder="84713090"
-              disabled={isSingleLoading}
+              disabled={isSingleLoading || isLimitReached}
               className="block w-full rounded-xl border border-sky-100 bg-sky-50/40 py-3 pl-4 pr-11 text-sm text-zinc-700 placeholder:text-zinc-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
             />
             <button
               type="button"
               onClick={handleFetch}
-              disabled={isSingleLoading}
+              disabled={isSingleLoading || isLimitReached}
               className="absolute inset-y-0 right-0 flex items-center pr-4 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <svg className="h-5 w-5 text-cyan-600 transition hover:text-cyan-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -67,11 +74,15 @@ export default function SingleInputPanel() {
           </div>
           
           <p className="text-center text-xs leading-6 text-zinc-500 sm:text-sm">
-            {isSingleLoading ? "Sedang mencari..." : ""}
+            {isSingleLoading
+              ? "Sedang mencari..."
+              : !isLimitReached
+              ? `Sisa kuota hari ini: ${remaining} query`
+              : ""}
           </p>
         </div>
 
-        {/* Status Alert — shown when singleStatus is not empty */}
+        {/* Status Alert */}
         {singleStatus ? (
           <div className="mt-4">
             <Alert message={singleStatus} variant={alertVariant} />
@@ -79,7 +90,7 @@ export default function SingleInputPanel() {
         ) : null}
       </div>
 
-      {/* Result card — shown when singleResult is not null */}
+      {/* Result card */}
       {singleResult ? (
         <SingleResultCard
           row={singleResult}

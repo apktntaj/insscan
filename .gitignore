@@ -51,3 +51,4 @@ yarn-error.log*
 .vercel
 .github/
 materi-pabean/
+generate-unlock.js

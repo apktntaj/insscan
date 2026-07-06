@@ -9,6 +9,7 @@ import {
   isExcelFile,
   downloadAsExcel,
 } from "../../infrastructure/excel/excel.service";
+import { useQueryLimit } from "./useQueryLimit";
 
 // ─── Module-level Constants ───────────────────────────────────────────────────
 
@@ -333,6 +334,7 @@ export function useCekLartasFile() {
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(createInitialProgressState());
   const [viewMode, setViewMode] = useState("lartas");
+  const { remaining, isLimitReached, consume, activateKey } = useQueryLimit();
 
   /**
    * Membaca file Excel dari event input, memperbarui fileData.
@@ -385,12 +387,34 @@ export function useCekLartasFile() {
     if (!fileData) return;
 
     const startedAt = Date.now();
-    setIsLoading(true);
-    setStatus("Menyiapkan proses fetch serial...");
 
     const hsCodes = extractHsCodes(fileData);
     const uniqueHsCodes = [...new Set(hsCodes)];
-    const payload = uniqueHsCodes.map((hs) => ({ hs_code: hs }));
+
+    // Cek limit sebelum mulai — batasi ke sisa kuota
+    if (isLimitReached) {
+      setStatus("Batas query harian tercapai. Upgrade ke Pro untuk akses unlimited.");
+      return;
+    }
+
+    const allowedCount = Math.min(uniqueHsCodes.length, remaining);
+    const allowed = consume(allowedCount);
+    if (!allowed) {
+      setStatus("Batas query harian tercapai. Upgrade ke Pro untuk akses unlimited.");
+      return;
+    }
+
+    const limitedHsCodes = uniqueHsCodes.slice(0, allowedCount);
+    if (allowedCount < uniqueHsCodes.length) {
+      setStatus(`Kuota terbatas — hanya ${allowedCount} dari ${uniqueHsCodes.length} HS code yang diproses.`);
+    }
+
+    setIsLoading(true);
+    if (allowedCount === uniqueHsCodes.length) {
+      setStatus("Menyiapkan proses fetch serial...");
+    }
+
+    const payload = limitedHsCodes.map((hs) => ({ hs_code: hs }));
     const total = payload.length;
 
     if (total === 0) {
@@ -706,6 +730,9 @@ export function useCekLartasFile() {
     handleFileChange,
     handleFetch,
     handleExportResult,
+    remaining,
+    isLimitReached,
+    activateKey,
   };
 }
 
