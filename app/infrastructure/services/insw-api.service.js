@@ -16,11 +16,98 @@ const INSW_PUBLIC_DETAIL_ENDPOINTS = [
   "https://api.insw.go.id/api-prod/ref/hscode/komoditas",
 ];
 
-// 
+// SSO client credentials — embedded in INSW frontend JS bundle, no login required
+const INSW_SSO_BASE = "https://sso.insw.go.id";
+const INSW_CLIENT_ID = "a0ac09fa-5673-42c6-9fe1-411e6c93710a";
+const INSW_CLIENT_BEARER = "t-64KC2gZhwnuQJDYluz5xWbmlGLW8wGtMeUaiAefg_";
 
-// 
+const INSW_SSO_HEADERS = {
+  "Authorization": `Bearer ${INSW_CLIENT_BEARER}`,
+  "Origin": "https://www.insw.go.id",
+  "Referer": "https://www.insw.go.id/",
+  "Accept": "*/*",
+};
 
-const INSW_CMS_TOKEN = "Basic eyJhbGciOiJSUzI1NiIsInR5cCI6ImJzYStqd3QiLCJraWQiOiJYU1N0SFVmeGI1bzd4dTFmNWRwRXdad0MwOUFoaHU2WlE5LVVCc0lueEs0In0.eyJpYXQiOjE3NzgxOTIxMDksImV4cCI6MTc3ODI1OTU5OSwiYXVkIjoiaHR0cHM6Ly9pbnN3LmdvLmlkIiwiaXNzIjoiaHR0cHM6Ly9zc28uaW5zdy5nby5pZCIsInN1YiI6ImEwYWMwOWZhLTU2NzMtNDJjNi05ZmUxLTQxMWU2YzkzNzEwYSIsImp0aSI6IlUyRnNkR1ZrWDE5QzJmdzhFQnBtbnFqRWxBbDk0U1ZSOTh4Zm5aVUdpbGlEMnVpd28yT2t3NHNhOUFEeGNIMkl2SWt1VUZ6YnlnS04rRlF5dHNta1E4ZW9IaTNINUFVaGRQa1Awdnp3cFRqWHFJVzdaK2V3aTU1WnpTNkN3bXBmdW9xa2ROczBRMER6YVJWMnNsS3lnKzY3TE5VMlorRHhseFpNTFkybmdvc09aUC81bTVjMlF4Qm1LTEsyTlZrSC8vRDhpbU04Q3J4SE91VzhiWXZ3M0xpR21mcnlSN09KeDFGMHNlcTU3OTY4V3F4ZHpHcDFNU1JqdytGVkUybUgifQ.eHYfIK_WNo4qmLDcZu-ZLC7G4erRJ8XhDMeoQDnswhwImJEi5sCmzTqqUq1ZONZxb5LC6WMU8sIHEni4UxAete2QIEpkScyMMAQEN5v72alv26VbErlWfzVAJBnNyERNxmpRt9gY516rQkCKkGz-UXnmcrSk7Bp9AD1isE2ph7on-RUyW9crFaxaoii6cxEEO0wg4DEMIyrq-3hWWow4BMfiYLVkKw2H3xusCPIeyKtnb6LDByuR6wsK6OmzcibexQ_SFqfY_2h5OG-mXQ7zZZMupu8JjJkebBMARGSJ4PYBn0FnwTkTnkwK45Y01zZUy3FWuX0X-0di9ntoD27_ig"
+/**
+ * @typedef {Object} InswTokenCache
+ * @property {string} token - "Basic eyJ..." value for Authorization header
+ * @property {number} expiresAt - Unix timestamp ms when token expires
+ */
+
+/** @type {InswTokenCache|null} */
+let _tokenCache = null;
+
+/**
+ * Fetches the JWKS key set from INSW SSO.
+ * @returns {Promise<{isc: string}|null>}
+ */
+async function fetchJwks() {
+  try {
+    const res = await fetch(
+      `${INSW_SSO_BASE}/api/v1/client/${INSW_CLIENT_ID}/jwks`,
+      { headers: INSW_SSO_HEADERS }
+    );
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Exchanges isc value for a short-lived CMS JWT token.
+ * @param {string} isc - Value from JWKS response
+ * @returns {Promise<InswTokenCache|null>}
+ */
+async function fetchTokenWithIsc(isc) {
+  try {
+    const res = await fetch(
+      `${INSW_SSO_BASE}/api/v1/client/${INSW_CLIENT_ID}/token`,
+      {
+        headers: {
+          ...INSW_SSO_HEADERS,
+          "X-Sign-For": isc,
+        },
+      }
+    );
+    if (!res.ok) return null;
+    const json = await res.json();
+    if (!json?.token) return null;
+
+    // tokenExpiresIn is in seconds — subtract 60s buffer
+    const expiresAt = Date.now() + (json.tokenExpiresIn - 60) * 1000;
+    return { token: `Basic ${json.token}`, expiresAt };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Returns a valid CMS token, auto-refreshing when expired.
+ * Flow: GET /jwks → isc → GET /token → cache result
+ * @returns {Promise<string|null>} Authorization header value or null
+ */
+async function getCmsToken() {
+  if (_tokenCache && Date.now() < _tokenCache.expiresAt) {
+    return _tokenCache.token;
+  }
+
+  const jwks = await fetchJwks();
+  if (!jwks?.isc) {
+    console.warn("INSW: failed to fetch JWKS, falling back to public endpoints");
+    return null;
+  }
+
+  const tokenCache = await fetchTokenWithIsc(jwks.isc);
+  if (!tokenCache) {
+    console.warn("INSW: failed to exchange isc for token, falling back to public endpoints");
+    return null;
+  }
+
+  _tokenCache = tokenCache;
+  return _tokenCache.token;
+}
+
 const INSW_PUBLIC_ONLY_MODE =
   process.env.INSW_PUBLIC_ONLY_MODE === "true" ||
   process.env.INSW_DISABLE_AUTH_SOURCES === "true";
@@ -62,9 +149,9 @@ async function fetchByCode(hsCode) {
       }
     }
 
-    // Primary source for LARTAS + tariff details. Requires valid CMS token.
+    // Primary source for LARTAS + tariff details. Auto-refreshes token via SSO.
     // Two-step flow: Search first, then fetch details
-    if (!INSW_PUBLIC_ONLY_MODE && INSW_CMS_TOKEN) {
+    if (!INSW_PUBLIC_ONLY_MODE) {
       const detailData = await fetchCmsDetailWithSearch(normalizedCode);
 
       if (detailData) {
@@ -286,15 +373,10 @@ function hasMeaningfulData(raw) {
  * @returns {Promise<Array<Object>>} Array of matching HS code search results
  */
 async function fetchCmsSearchByKeyword(keyword, size = 200, from = 0) {
-  if (!INSW_CMS_TOKEN) {
+  const token = await getCmsToken();
+  if (!token) {
     return [];
   }
-
-  const token =
-    INSW_CMS_TOKEN.startsWith("Basic ") ||
-    INSW_CMS_TOKEN.startsWith("Bearer ")
-      ? INSW_CMS_TOKEN
-      : `Basic ${INSW_CMS_TOKEN}`;
 
   try {
     const searchUrl = `${INSW_CMS_SEARCH_URL}?keyword=${encodeURIComponent(keyword)}&size=${size}&from=${from}`;
@@ -367,15 +449,10 @@ async function fetchCmsDetailWithSearch(hsCode) {
  * @returns {Promise<Object|null>}
  */
 async function fetchCmsDetailByCode(hsCode) {
-  if (!INSW_CMS_TOKEN) {
+  const token = await getCmsToken();
+  if (!token) {
     return null;
   }
-
-  const token =
-    INSW_CMS_TOKEN.startsWith("Basic ") ||
-    INSW_CMS_TOKEN.startsWith("Bearer ")
-      ? INSW_CMS_TOKEN
-      : `Basic ${INSW_CMS_TOKEN}`;
 
   try {
     const response = await fetch(`${INSW_CMS_DETAIL_URL}?hsCode=${hsCode}`, {
