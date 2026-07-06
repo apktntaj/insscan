@@ -17,9 +17,10 @@ const INSW_PUBLIC_DETAIL_ENDPOINTS = [
 ];
 
 // SSO client credentials — embedded in INSW frontend JS bundle, no login required
+// Values are read from env so they never appear in source code
 const INSW_SSO_BASE = "https://sso.insw.go.id";
-const INSW_CLIENT_ID = "a0ac09fa-5673-42c6-9fe1-411e6c93710a";
-const INSW_CLIENT_BEARER = "t-64KC2gZhwnuQJDYluz5xWbmlGLW8wGtMeUaiAefg_";
+const INSW_CLIENT_ID = process.env.INSW_CLIENT_ID;
+const INSW_CLIENT_BEARER = process.env.INSW_CLIENT_BEARER;
 
 const INSW_SSO_HEADERS = {
   "Authorization": `Bearer ${INSW_CLIENT_BEARER}`,
