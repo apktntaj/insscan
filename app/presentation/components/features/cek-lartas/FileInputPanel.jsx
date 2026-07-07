@@ -90,10 +90,13 @@ export default function FileInputPanel() {
           
           <div className="flex items-center gap-3">
             <div className="min-w-0 flex-1">
-              <Input handleChange={handleFileChange} className="w-full" ariaLabel="Unggah file Excel (.xls, .xlsx)" />
-              <p className="mt-2 text-sm text-zinc-600">
-                {selectedFileName ? `File terpilih: ${selectedFileName}` : "Belum ada file dipilih"}
-              </p>
+              <Input
+                handleChange={handleFileChange}
+                className="w-full"
+                ariaLabel="Unggah file Excel (.xls, .xlsx)"
+                selectedFileName={selectedFileName}
+                placeholder="Masukkan invoice (file excel)"
+              />
             </div>
             <Button
               onClick={buttonAction}
@@ -108,12 +111,6 @@ export default function FileInputPanel() {
               {buttonLabel}
             </Button>
           </div>
-          
-          <p className="text-xs leading-6 text-zinc-500 sm:text-sm">
-            Gunakan file{" "}
-            <span className="font-medium text-zinc-700">.xls / .xlsx</span>{" "}
-            berisi HS code 8 digit.
-          </p>
         </div>
 
         {/* Status Alert */}

@@ -350,8 +350,12 @@ export function useCekLartasFile() {
     if (!file) return;
 
     if (!isExcelFile(file.name)) {
+      setFileData(null);
+      setResultData(null);
       setStatus("File harus berformat .xls atau .xlsx.");
       setSelectedFileName("");
+      setProgress(createInitialProgressState());
+      setViewMode("lartas");
       e.target.value = "";
       return;
     }
@@ -363,7 +367,11 @@ export function useCekLartasFile() {
 
       const hsCodes = extractHsCodes(jsonData);
       if (hsCodes.length === 0) {
+        setFileData(null);
+        setResultData(null);
         setStatus("Tidak ada HS code valid ditemukan di file.");
+        setProgress(createInitialProgressState());
+        setViewMode("lartas");
         return;
       }
 
@@ -374,8 +382,12 @@ export function useCekLartasFile() {
       setViewMode("lartas");
     } catch (error) {
       console.error("Error reading file:", error);
+      setFileData(null);
+      setResultData(null);
       setStatus("Gagal membaca file.");
       setSelectedFileName("");
+      setProgress(createInitialProgressState());
+      setViewMode("lartas");
     }
   }, []);
 
