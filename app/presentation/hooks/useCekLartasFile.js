@@ -14,10 +14,9 @@ import { useQueryLimit } from "./useQueryLimit";
 // ─── Module-level Constants ───────────────────────────────────────────────────
 
 const BASE_CHUNK_SIZE = resolveChunkSize(process.env.NEXT_PUBLIC_HS_CHUNK_SIZE);
-const MIN_CHUNK_SIZE = 1;
-const MAX_CHUNK_ATTEMPTS = 5;
-const CHUNK_RETRY_DELAY_MS = 900;
-const CHUNK_GROW_SUCCESS_STREAK = 3;
+const MIN_CHUNK_SIZE = BASE_CHUNK_SIZE;
+const MAX_CHUNK_ATTEMPTS = 3;
+const CHUNK_RETRY_DELAY_MS = 0;
 
 // ─── Internal Helpers ─────────────────────────────────────────────────────────
 
@@ -36,9 +35,9 @@ const CHUNK_GROW_SUCCESS_STREAK = 3;
 function resolveChunkSize(rawValue) {
   const parsed = Number(rawValue);
   if (!Number.isFinite(parsed) || parsed <= 0) {
-    return 3;
+    return 10;
   }
-  return Math.min(Math.max(Math.round(parsed), 1), 10);
+  return Math.min(Math.max(Math.round(parsed), 1), 50);
 }
 
 /**
@@ -451,7 +450,6 @@ export function useCekLartasFile() {
     let aggregatedRows = [];
     let processedGlobal = 0;
     let activeChunkSize = BASE_CHUNK_SIZE;
-    let stableSuccessStreak = 0;
     let requestCounter = 0;
 
     try {
@@ -569,60 +567,26 @@ export function useCekLartasFile() {
             chunkDone = true;
 
             if (isPartial) {
-              stableSuccessStreak = 0;
-
-              if (activeChunkSize > MIN_CHUNK_SIZE) {
-                activeChunkSize -= 1;
-                setStatus(
-                  `Koneksi tidak stabil. Chunk diturunkan ke ${activeChunkSize}...`
-                );
-              }
-            } else if (attempt === 1) {
-              stableSuccessStreak += 1;
-
-              if (
-                stableSuccessStreak >= CHUNK_GROW_SUCCESS_STREAK &&
-                activeChunkSize < BASE_CHUNK_SIZE
-              ) {
-                activeChunkSize += 1;
-                stableSuccessStreak = 0;
-                setStatus(
-                  `Koneksi stabil. Chunk dinaikkan ke ${activeChunkSize}...`
-                );
-              }
-            } else {
-              stableSuccessStreak = 0;
+              setStatus(
+                `Respons parsial diterima. Lanjutkan dengan batch ${activeChunkSize}...`
+              );
             }
           } catch (chunkError) {
             console.error(
               `Request ${requestCounter} attempt ${attempt} failed:`,
               chunkError
             );
-            stableSuccessStreak = 0;
 
             if (attempt >= MAX_CHUNK_ATTEMPTS) {
-              if (activeChunkSize > MIN_CHUNK_SIZE) {
-                activeChunkSize -= 1;
-                attempt = 0;
-                pendingChunk = payload.slice(
-                  processedGlobal,
-                  processedGlobal + activeChunkSize
-                );
-
-                setStatus(
-                  `Retry berulang gagal. Chunk diturunkan ke ${activeChunkSize} lalu lanjut...`
-                );
-                await sleep(CHUNK_RETRY_DELAY_MS);
-                continue;
-              }
-
               throw chunkError;
             }
 
             setStatus(
               `Request ${requestCounter} gagal. Retry ${attempt}/${MAX_CHUNK_ATTEMPTS}...`
             );
-            await sleep(CHUNK_RETRY_DELAY_MS);
+            if (CHUNK_RETRY_DELAY_MS > 0) {
+              await sleep(CHUNK_RETRY_DELAY_MS);
+            }
           }
         }
       }

@@ -13,16 +13,17 @@ import {
 
 const REQUEST_DELAY_MIN_MS = parseDelayMs(
   process.env.INSW_REQUEST_DELAY_MIN_MS,
-  560
+  0
 );
 const REQUEST_DELAY_MAX_MS = parseDelayMs(
   process.env.INSW_REQUEST_DELAY_MAX_MS,
-  1040
+  0
 );
 const REQUEST_ERROR_COOLDOWN_MS = parseDelayMs(
   process.env.INSW_REQUEST_ERROR_COOLDOWN_MS,
-  1680
+  0
 );
+const MAX_CONCURRENT_REQUESTS = 8;
 
 /**
  * @typedef {Object} HsCodeGateway
@@ -82,11 +83,11 @@ export function createFetchHsCodeDataUseCase(hsCodeGateway) {
 
     const list = Array.isArray(codes) ? codes.map((code) => String(code ?? "")) : [];
     const total = list.length;
-    const results = [];
+    const results = new Array(total);
     const cache = new Map();
+    const queue = [];
 
-    for (let index = 0; index < total; index += 1) {
-      const code = list[index];
+    const runTask = async (code, index) => {
       const progressBase = {
         current: index + 1,
         total,
@@ -111,12 +112,13 @@ export function createFetchHsCodeDataUseCase(hsCodeGateway) {
             mode = "error";
           }
 
-          // Add manual-like human pacing between real INSW calls.
-          await sleep(resolveRequestDelay(mode));
+          if (resolveRequestDelay(mode) > 0) {
+            await sleep(resolveRequestDelay(mode));
+          }
         }
       }
 
-      results.push(result);
+      results[index] = result;
 
       if (onProgress) {
         onProgress({
@@ -124,6 +126,15 @@ export function createFetchHsCodeDataUseCase(hsCodeGateway) {
           mode,
           result,
         });
+      }
+    };
+
+    for (let index = 0; index < total; index += 1) {
+      const code = list[index];
+      queue.push(runTask(code, index));
+
+      if (queue.length >= MAX_CONCURRENT_REQUESTS || index === total - 1) {
+        await Promise.all(queue.splice(0, queue.length));
       }
     }
 
@@ -163,3 +174,4 @@ function parseDelayMs(rawValue, fallback) {
   }
   return Math.round(parsed);
 }
+
