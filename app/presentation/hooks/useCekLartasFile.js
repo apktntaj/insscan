@@ -329,6 +329,7 @@ function buildResultExcelFilename() {
  */
 export function useCekLartasFile() {
   const [fileData, setFileData] = useState(null);
+  const [selectedFileName, setSelectedFileName] = useState("");
   const [resultData, setResultData] = useState(null);
   const [status, setStatus] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -351,11 +352,13 @@ export function useCekLartasFile() {
 
     if (!isExcelFile(file.name)) {
       setStatus("File harus berformat .xls atau .xlsx.");
+      setSelectedFileName("");
       e.target.value = "";
       return;
     }
 
     try {
+      setSelectedFileName(file.name);
       const buffer = await fileToArrayBuffer(file);
       const jsonData = bufferToJson(buffer);
 
@@ -373,6 +376,7 @@ export function useCekLartasFile() {
     } catch (error) {
       console.error("Error reading file:", error);
       setStatus("Gagal membaca file.");
+      setSelectedFileName("");
     }
   }, []);
 
@@ -721,6 +725,7 @@ export function useCekLartasFile() {
 
   return {
     fileData,
+    selectedFileName,
     resultData,
     status,
     isLoading,

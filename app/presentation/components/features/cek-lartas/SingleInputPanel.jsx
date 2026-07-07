@@ -57,7 +57,7 @@ export default function SingleInputPanel() {
               value={singleInput}
               onChange={(e) => setSingleInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter") handleFetch(); }}
-              placeholder="84713090"
+              placeholder="Masukkan HS code 8 digit, mis. 84713090"
               disabled={isSingleLoading || isLimitReached}
               className="block w-full rounded-xl border border-sky-100 bg-sky-50/40 py-3 pl-4 pr-11 text-sm text-zinc-700 placeholder:text-zinc-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
             />
@@ -65,6 +65,8 @@ export default function SingleInputPanel() {
               type="button"
               onClick={handleFetch}
               disabled={isSingleLoading || isLimitReached}
+              aria-label="Cari HS code"
+              title="Cari"
               className="absolute inset-y-0 right-0 flex items-center pr-4 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <svg className="h-5 w-5 text-cyan-600 transition hover:text-cyan-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -44,6 +44,7 @@ function resolveAlertVariant(status) {
 export default function FileInputPanel() {
   const {
     fileData,
+    selectedFileName,
     resultData,
     status,
     isLoading,
@@ -89,7 +90,10 @@ export default function FileInputPanel() {
           
           <div className="flex items-center gap-3">
             <div className="min-w-0 flex-1">
-              <Input handleChange={handleFileChange} className="w-full" />
+              <Input handleChange={handleFileChange} className="w-full" ariaLabel="Unggah file Excel (.xls, .xlsx)" />
+              <p className="mt-2 text-sm text-zinc-600">
+                {selectedFileName ? `File terpilih: ${selectedFileName}` : "Belum ada file dipilih"}
+              </p>
             </div>
             <Button
               onClick={buttonAction}

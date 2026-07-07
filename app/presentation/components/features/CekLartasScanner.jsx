@@ -25,6 +25,7 @@ export default function CekLartasScanner() {
         <button
           type="button"
           onClick={() => setMode(isFile ? "single" : "file")}
+          aria-label={isFile ? "Beralih ke mode tunggal" : "Beralih ke mode file"}
           className="rounded-full border border-sky-200 px-4 py-1.5 text-xs font-medium text-cyan-700 transition hover:bg-sky-50"
         >
           Klik untuk mode  {isFile ? "single" : "multiple"}
