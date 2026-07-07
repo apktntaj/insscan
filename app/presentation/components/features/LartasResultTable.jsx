@@ -9,9 +9,9 @@ import LartasDocModal from "./cek-lartas/LartasDocModal";
  * LartasMatrixTable Component
  * Inner component that renders the LARTAS matrix table with document codes as columns.
  *
- * @param {{ rows: object[], viewMode: string, setViewMode: (mode: string) => void }} props
+ * @param {{ rows: object[], viewMode: string, setViewMode: (mode: string) => void, fileStats?: object }} props
  */
-function LartasMatrixTable({ rows, viewMode, setViewMode }) {
+function LartasMatrixTable({ rows, viewMode, setViewMode, fileStats }) {
   const [activeCell, setActiveCell] = useState(null);
   const matrixRows = useMemo(() => buildMatrixRows(rows), [rows]);
   const docCodes = useMemo(() => collectDocumentCodes(matrixRows), [matrixRows]);
@@ -25,6 +25,15 @@ function LartasMatrixTable({ rows, viewMode, setViewMode }) {
 
   return (
     <div className="space-y-4 overflow-x-hidden">
+      {/* File statistics */}
+      {fileStats ? (
+        <div className="rounded-2xl border border-sky-100 bg-sky-50 px-5 py-3 sm:px-6">
+          <p className="text-sm text-zinc-700">
+            <span className="font-semibold text-cyan-700">{fileStats.summary}</span>
+          </p>
+        </div>
+      ) : null}
+
       {/* Header: ringkasan + toggle filter */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -224,6 +233,32 @@ function extractValidHsCodes(fileData) {
 }
 
 /**
+ * Generates statistics summary about the file.
+ * @param {Array<Array> | null} fileData - 2D array from Excel
+ * @param {number} sheetCount - Number of sheets in the file
+ * @returns {{ totalCodes: number, uniqueCodes: number, summary: string } | null}
+ */
+function generateFileStatistics(fileData, sheetCount) {
+  if (!fileData || !Array.isArray(fileData) || fileData.length === 0) {
+    return null;
+  }
+
+  const allCodes = extractValidHsCodes(fileData);
+  const totalCodes = allCodes.length;
+  const uniqueCodes = new Set(allCodes).size;
+
+  const sheetText = sheetCount === 1 ? "1 sheet" : `${sheetCount} sheet`;
+  const codeText = totalCodes === 1 ? "1 HS code" : `${totalCodes} HS code`;
+  const uniqueText = uniqueCodes === 1 ? "1 unik" : `${uniqueCodes} unik`;
+
+  return {
+    totalCodes,
+    uniqueCodes,
+    summary: `Dari ${sheetText} ditemukan ${codeText} dan ${uniqueText}.`,
+  };
+}
+
+/**
  * LartasResultTable Component
  * Presentation Layer - Feature-specific component
  *
@@ -231,11 +266,13 @@ function extractValidHsCodes(fileData) {
  * Shows a preview table when only fileData is available, or the full LARTAS
  * matrix when resultData is present.
  *
- * @param {{ fileData: Array<Array> | null, resultData: object[] | null, viewMode: string, setViewMode: (mode: string) => void }} props
+ * @param {{ fileData: Array<Array> | null, sheetCount: number, resultData: object[] | null, viewMode: string, setViewMode: (mode: string) => void }} props
  */
-export default function LartasResultTable({ fileData, resultData, viewMode = "lartas", setViewMode = () => {} }) {
+export default function LartasResultTable({ fileData, sheetCount = 0, resultData, viewMode = "lartas", setViewMode = () => {} }) {
+  const fileStats = generateFileStatistics(fileData, sheetCount);
+
   if (Array.isArray(resultData) && resultData.length > 0) {
-    return <LartasMatrixTable rows={resultData} viewMode={viewMode} setViewMode={setViewMode} />;
+    return <LartasMatrixTable rows={resultData} viewMode={viewMode} setViewMode={setViewMode} fileStats={fileStats} />;
   }
 
   if (!fileData) {
@@ -250,6 +287,15 @@ export default function LartasResultTable({ fileData, resultData, viewMode = "la
 
   return (
     <div className="space-y-4 overflow-x-hidden">
+      {/* File statistics */}
+      {fileStats ? (
+        <div className="rounded-2xl border border-sky-100 bg-sky-50 px-5 py-3 sm:px-6">
+          <p className="text-sm text-zinc-700">
+            <span className="font-semibold text-cyan-700">{fileStats.summary}</span>
+          </p>
+        </div>
+      ) : null}
+
       <Alert message="File terdeteksi. Klik 'Tarik Data' untuk melihat informasi LARTAS." />
       <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
         <div className="max-h-80 overflow-x-auto overflow-y-auto">

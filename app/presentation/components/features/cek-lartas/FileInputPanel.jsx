@@ -44,6 +44,7 @@ function resolveAlertVariant(status) {
 export default function FileInputPanel() {
   const {
     fileData,
+    sheetCount,
     selectedFileName,
     resultData,
     status,
@@ -134,7 +135,7 @@ export default function FileInputPanel() {
       ) : null}
 
       {/* Results table */}
-      <LartasResultTable fileData={fileData} resultData={resultData} viewMode={viewMode} setViewMode={setViewMode} />
+      <LartasResultTable fileData={fileData} sheetCount={sheetCount} resultData={resultData} viewMode={viewMode} setViewMode={setViewMode} />
     </div>
   );
 }

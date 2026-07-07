@@ -22,13 +22,14 @@ export function fileToArrayBuffer(file) {
 }
 
 /**
- * Converts buffer to JSON data
+ * Converts buffer to JSON data and returns sheet count
  * @param {ArrayBuffer} buffer - Excel file buffer
- * @returns {Array<Array>} 2D array of cell data
+ * @returns {{ data: Array<Array>, sheetCount: number }} Object with 2D array of cell data and sheet count
  */
 export function bufferToJson(buffer) {
   const result = [];
   const workbook = XLSX.read(buffer, { type: "buffer" });
+  const sheetCount = workbook.SheetNames.length;
 
   for (const sheetName of workbook.SheetNames) {
     const worksheet = workbook.Sheets[sheetName];
@@ -36,7 +37,7 @@ export function bufferToJson(buffer) {
     result.push(...sheetData);
   }
 
-  return result;
+  return { data: result, sheetCount };
 }
 
 /**

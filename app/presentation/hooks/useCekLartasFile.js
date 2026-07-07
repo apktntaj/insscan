@@ -328,6 +328,7 @@ function buildResultExcelFilename() {
  */
 export function useCekLartasFile() {
   const [fileData, setFileData] = useState(null);
+  const [sheetCount, setSheetCount] = useState(0);
   const [selectedFileName, setSelectedFileName] = useState("");
   const [resultData, setResultData] = useState(null);
   const [status, setStatus] = useState("");
@@ -351,6 +352,7 @@ export function useCekLartasFile() {
 
     if (!isExcelFile(file.name)) {
       setFileData(null);
+      setSheetCount(0);
       setResultData(null);
       setStatus("File harus berformat .xls atau .xlsx.");
       setSelectedFileName("");
@@ -363,11 +365,12 @@ export function useCekLartasFile() {
     try {
       setSelectedFileName(file.name);
       const buffer = await fileToArrayBuffer(file);
-      const jsonData = bufferToJson(buffer);
+      const { data: jsonData, sheetCount: sheets } = bufferToJson(buffer);
 
       const hsCodes = extractHsCodes(jsonData);
       if (hsCodes.length === 0) {
         setFileData(null);
+        setSheetCount(0);
         setResultData(null);
         setStatus("Tidak ada HS code valid ditemukan di file.");
         setProgress(createInitialProgressState());
@@ -376,6 +379,7 @@ export function useCekLartasFile() {
       }
 
       setFileData(jsonData);
+      setSheetCount(sheets);
       setResultData(null);
       setStatus("");
       setProgress(createInitialProgressState());
@@ -383,6 +387,7 @@ export function useCekLartasFile() {
     } catch (error) {
       console.error("Error reading file:", error);
       setFileData(null);
+      setSheetCount(0);
       setResultData(null);
       setStatus("Gagal membaca file.");
       setSelectedFileName("");
@@ -701,6 +706,7 @@ export function useCekLartasFile() {
 
   return {
     fileData,
+    sheetCount,
     selectedFileName,
     resultData,
     status,

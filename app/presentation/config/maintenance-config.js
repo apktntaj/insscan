@@ -32,7 +32,7 @@
  */
 export const maintenanceWindows = {
   "cek-lartas": {
-    enabled: true,
+    enabled: false,
     startTime: { hour: 23, minute: 50 },
     endTime: { hour: 6, minute: 0 },
     title: "Fitur Sedang Tidak Tersedia",
