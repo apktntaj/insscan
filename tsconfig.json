@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "strict": true,
+    "noEmit": true,
+    "allowJs": true,
+    "checkJs": false,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
+    "paths": {
+      "@core/*": ["core/*"]
+    },
+    "lib": ["ES2020", "DOM"],
+    "types": ["node", "jest"]
+  },
+  "include": ["core/**/*", "app/**/*.ts"],
+  "exclude": ["node_modules"]
+}

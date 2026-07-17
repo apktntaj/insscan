@@ -1,5 +1,7 @@
-export type HsCode = {
-  readonly code: string;
+declare const hsCodeBrand: unique symbol;
+
+export type HsCode = string & {
+  readonly [hsCodeBrand]: 'HsCode';
 };
 
 export type KategoriLartas = "border" | "post-border" | "ekspor";
@@ -15,16 +17,16 @@ export type LartasDetail = {
   link: string | null;
 };
 
-export type Tarif = {
-  bm: string | null;
-  ppn: string | null;
-  pph: string | null;
-  pphNonApi: string | null;
-};
+// export type Tarif = {
+//   bm: string | null;
+//   ppn: string | null;
+//   pph: string | null;
+//   pphNonApi: string | null;
+// };
 
 export type Lartas = {
   hsCode: HsCode;
-  tarif: Tarif;
+//   tarif: Tarif;
   regulasi: Map<KategoriLartas, LartasDetail[]>;
 };
 
