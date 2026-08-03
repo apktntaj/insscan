@@ -29,6 +29,7 @@
     "@jest/globals": "^30.3.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
+    "@types/react": "18.3.31",
     "daisyui": "^4.12.2",
     "fast-check": "^4.7.0",
     "jest": "^30.3.0",

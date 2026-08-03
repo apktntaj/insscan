@@ -1,0 +1,113 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1. Buat struktur direktori knowledge base": [
+      {
+        "executionId": "1e997abb-f05a-4193-9a2c-0912f585c75a",
+        "chatSessionId": "sess_2af5e556-27a6-42cb-aefd-d70c8dc3bf05",
+        "timestamp": 1785741753843
+      }
+    ],
+    "2. Generate draft ChapterNote via Gemini": [
+      {
+        "executionId": "361f733a-ca0b-450a-8291-9b9659e5fa0f",
+        "chatSessionId": "sess_1862cea7-2b08-4189-b21b-816ab8db6957",
+        "timestamp": 1785742435975
+      },
+      {
+        "executionId": "361f733a-ca0b-450a-8291-9b9659e5fa0f",
+        "chatSessionId": "sess_1862cea7-2b08-4189-b21b-816ab8db6957",
+        "timestamp": 1785742960139
+      }
+    ],
+    "3. Implementasi Core Entities": [
+      {
+        "executionId": "08e0bcb6-427d-4128-856d-5279c5441dc6",
+        "chatSessionId": "sess_53947177-de9f-49d5-845d-40ccfb87399e",
+        "timestamp": 1785743001358
+      },
+      {
+        "executionId": "08e0bcb6-427d-4128-856d-5279c5441dc6",
+        "chatSessionId": "sess_53947177-de9f-49d5-845d-40ccfb87399e",
+        "timestamp": 1785743727022
+      }
+    ],
+    "4. Implementasi Port Interface": [
+      {
+        "executionId": "609ea462-fe3c-4ea6-a590-e292844452e6",
+        "chatSessionId": "sess_7f634d83-b4ab-4615-b002-419d2733bce9",
+        "timestamp": 1785743836044
+      },
+      {
+        "executionId": "609ea462-fe3c-4ea6-a590-e292844452e6",
+        "chatSessionId": "sess_7f634d83-b4ab-4615-b002-419d2733bce9",
+        "timestamp": 1785743921717
+      }
+    ],
+    "5. Implementasi Chapter Note Loader Service": [
+      {
+        "executionId": "3a49d56e-1352-4288-ad10-77b885f807f1",
+        "chatSessionId": "sess_2e896848-b407-49d5-9564-a267677c8fb9",
+        "timestamp": 1785743970786
+      },
+      {
+        "executionId": "3a49d56e-1352-4288-ad10-77b885f807f1",
+        "chatSessionId": "sess_2e896848-b407-49d5-9564-a267677c8fb9",
+        "timestamp": 1785744407350
+      }
+    ],
+    "6. Implementasi HS Finder Gemini Service": [
+      {
+        "executionId": "a0275835-fd25-422a-9f34-5371015d7007",
+        "chatSessionId": "sess_9a943a96-290e-4f7a-a0f8-a71f9862b67e",
+        "timestamp": 1785744455193
+      },
+      {
+        "executionId": "5db098b3-6655-4a64-a6b7-ece0caa04e10",
+        "chatSessionId": "sess_81dc5c7c-8e02-4566-be7f-298f0482bcb4",
+        "timestamp": 1785746278311
+      },
+      {
+        "executionId": "5db098b3-6655-4a64-a6b7-ece0caa04e10",
+        "chatSessionId": "sess_81dc5c7c-8e02-4566-be7f-298f0482bcb4",
+        "timestamp": 1785746881567
+      }
+    ],
+    "7. Implementasi Use Case": [
+      {
+        "executionId": "c86f7af3-f9cb-498b-a6d4-b67cfc87dd99",
+        "chatSessionId": "sess_1688cda0-3753-4fc0-8750-85d02ee68913",
+        "timestamp": 1785746910526
+      },
+      {
+        "executionId": "c86f7af3-f9cb-498b-a6d4-b67cfc87dd99",
+        "chatSessionId": "sess_1688cda0-3753-4fc0-8750-85d02ee68913",
+        "timestamp": 1785747022300
+      }
+    ],
+    "8. Implementasi Adapters Layer": [
+      {
+        "executionId": "d6525495-e000-4276-9700-7ba11ceb00d8",
+        "chatSessionId": "sess_d15b1b86-edd2-4872-baed-73b4325f6005",
+        "timestamp": 1785747233521
+      },
+      {
+        "executionId": "1c7285bd-b990-4ebd-a011-0fe5a5b22d51",
+        "chatSessionId": "sess_d15b1b86-edd2-4872-baed-73b4325f6005",
+        "timestamp": 1785748123121
+      }
+    ],
+    "9. Implementasi API Route": [
+      {
+        "executionId": "0f41c326-3437-40ae-9f61-eb982b085736",
+        "chatSessionId": "sess_b890d58a-5a2e-4427-a2e3-e75d2adad81c",
+        "timestamp": 1785753168308
+      },
+      {
+        "executionId": "0f41c326-3437-40ae-9f61-eb982b085736",
+        "chatSessionId": "sess_b890d58a-5a2e-4427-a2e3-e75d2adad81c",
+        "timestamp": 1785753515229
+      }
+    ]
+  }
+}
