@@ -52,3 +52,4 @@ yarn-error.log*
 .github/
 materi-pabean/
 generate-unlock.js
+/core/
