@@ -335,7 +335,7 @@ export function useCekLartasFile() {
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(createInitialProgressState());
   const [viewMode, setViewMode] = useState("lartas");
-  const { remaining, isLimitReached, consume, activateKey } = useQueryLimit();
+  const { remaining, isLimitReached, isPro, consume, activateKey } = useQueryLimit();
 
   /**
    * Membaca file Excel dari event input, memperbarui fileData.
@@ -719,6 +719,7 @@ export function useCekLartasFile() {
     handleExportResult,
     remaining,
     isLimitReached,
+    isPro,
     activateKey,
   };
 }

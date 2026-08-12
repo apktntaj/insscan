@@ -36,6 +36,7 @@ export default function SingleInputPanel() {
     handleExportSingle,
     remaining,
     isLimitReached,
+    isPro,
     activateKey,
   } = useCekLartasSingle();
 
@@ -78,7 +79,7 @@ export default function SingleInputPanel() {
           <p className="text-center text-xs leading-6 text-zinc-500 sm:text-sm">
             {isSingleLoading
               ? "Sedang mencari..."
-              : !isLimitReached
+              : !isPro && !isLimitReached
               ? `Sisa kuota hari ini: ${remaining} query`
               : ""}
           </p>
