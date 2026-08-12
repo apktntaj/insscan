@@ -33,7 +33,7 @@ const faqs = [
   },
   {
     q: "Berapa banyak HS code yang bisa dicek sekaligus?",
-    a: "Paket gratis dibatasi 10 HS code per hari. Upgrade ke Pro (Rp26.000/bulan) untuk query unlimited tanpa batas harian.",
+    a: "Tidak ada batasan harian — kamu bisa mengecek HS code sebanyak yang dibutuhkan secara gratis.",
   },
   {
     q: "Apakah data saya dikirim ke server?",

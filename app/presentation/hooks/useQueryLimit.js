@@ -171,33 +171,25 @@ function clearProKey() {
  */
 export function useQueryLimit() {
   const [used, setUsed] = useState(0);
-  const [isPro, setIsPro] = useState(false);
+  const [isPro, setIsPro] = useState(true);
 
   useEffect(() => {
-    const proKey = readProKey();
-    if (proKey) {
-      setIsPro(true);
-      return;
-    }
+    // Selalu Pro, tapi tetap baca usage untuk statistik internal jika perlu
     const stored = readUsageStorage();
     if (stored) setUsed(stored.used);
   }, []);
 
   /**
    * Coba pakai sejumlah `count` query.
-   * User Pro selalu return true. User free dicek terhadap limit harian.
+   * Sekarang selalu return true karena limit dihapus.
    *
    * @param {number} count
    * @returns {boolean}
    */
   const consume = useCallback((count) => {
-    if (readProKey()) return true;
-
     const stored = readUsageStorage();
     const currentUsed = stored?.used ?? 0;
     const next = currentUsed + count;
-
-    if (next > DAILY_LIMIT) return false;
 
     const today = new Date().toISOString().slice(0, 10);
     writeUsageStorage({ date: today, used: next });

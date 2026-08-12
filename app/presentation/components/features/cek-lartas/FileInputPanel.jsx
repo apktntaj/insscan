@@ -57,6 +57,7 @@ export default function FileInputPanel() {
     handleExportResult,
     remaining,
     isLimitReached,
+    isPro,
     activateKey,
   } = useCekLartasFile();
 
@@ -84,7 +85,7 @@ export default function FileInputPanel() {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700">Input File</p>
-            {!isLimitReached ? (
+            {!isPro && !isLimitReached ? (
               <p className="text-xs text-zinc-400">Sisa kuota: {remaining} query</p>
             ) : null}
           </div>

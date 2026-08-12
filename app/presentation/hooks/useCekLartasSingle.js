@@ -161,7 +161,7 @@ export function useCekLartasSingle() {
   const [singleResult, setSingleResult] = useState(null);
   const [singleStatus, setSingleStatus] = useState("");
   const [isSingleLoading, setIsSingleLoading] = useState(false);
-  const { remaining, isLimitReached, consume, activateKey } = useQueryLimit();
+  const { remaining, isLimitReached, isPro, consume, activateKey } = useQueryLimit();
 
   /**
    * Validasi input, fetch ke /api/hs-code, parse respons, update state.
@@ -255,6 +255,7 @@ export function useCekLartasSingle() {
     handleExportSingle,
     remaining,
     isLimitReached,
+    isPro,
     activateKey,
   };
 }
