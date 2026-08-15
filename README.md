@@ -44,7 +44,7 @@ cp .env.example .env
 | `INSW_PUBLIC_ONLY_MODE` | `true` untuk skip endpoint CMS, pakai endpoint publik saja |
 | `INSW_USE_LOCAL_MOCK` | `true` untuk pakai data mock lokal |
 | `INSW_MOCK_ONLY_MODE` | `true` untuk hanya pakai mock, tanpa fetch live |
-| `NEXT_PUBLIC_GEMINI_API_KEY` | API key untuk Google Gemini AI (untuk ekstraksi BL otomatis) |
+| `GEMINI_API_KEY` | API key server-side untuk HS Finder dan ekstraksi BL otomatis |
 
 ### Mendapatkan Gemini API Key
 
@@ -53,7 +53,7 @@ cp .env.example .env
 3. Klik "Create API Key"
 4. Salin API key dan tambahkan ke file `.env`:
    ```
-   NEXT_PUBLIC_GEMINI_API_KEY=your_api_key_here
+   GEMINI_API_KEY=your_api_key_here
    ```
 
 **Catatan**: 

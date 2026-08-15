@@ -85,6 +85,6 @@ export const roadmapItems = [
   {
     id: "hs-code-finder",
     name: "HS code finder",
-    status: "planned",
+    status: "live",
   },
 ];

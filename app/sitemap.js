@@ -19,6 +19,12 @@ export default function sitemap() {
       priority: 0.9,
     },
     {
+      url: `${BASE_URL}/hs-finder`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
       url: `${BASE_URL}/shipments`,
       lastModified: new Date(),
       changeFrequency: "monthly",

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { CekLartasMockup } from "./presentation/components/common/ProductMockup";
+import AnimatedCekLartasDemo from "./presentation/components/features/AnimatedCekLartasDemo";
 import { WHATSAPP_NUMBER } from "./presentation/config/feedback-config";
 
 const EARLY_ACCESS_LINK = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
@@ -182,8 +182,8 @@ export default function Home() {
             Hasil cek LARTAS langsung di browser
           </h3>
         </div>
-        <div className="mx-auto max-w-2xl">
-          <CekLartasMockup />
+        <div className="mx-auto max-w-5xl">
+          <AnimatedCekLartasDemo />
         </div>
         <p className="mx-auto max-w-2xl text-center text-xs leading-6 text-zinc-500">Data pada contoh disederhanakan untuk demonstrasi dan bukan data pelanggan. Tampilan aktual mengikuti respons yang tersedia saat pemeriksaan.</p>
         <div className="mx-auto flex max-w-3xl flex-wrap justify-center gap-2" aria-label="Data yang tersedia pada hasil">

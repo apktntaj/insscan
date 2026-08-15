@@ -20,8 +20,8 @@ import { createHsFinderGeminiService } from "../../infrastructure/services/hs-fi
 import { createFindHsCodeUseCase } from "@core/use-cases/find-hs-code.js";
 import { createHsFinderController } from "../../adapters/controllers/hs-finder.controller.js";
 
-/** Allow long-running Gemini classification calls (up to 60 seconds) */
-export const maxDuration = 60;
+/** Allow two sequential Gemini calls plus chapter-note loading. */
+export const maxDuration = 120;
 
 // ─────────────────────────────────────────────
 // Dependency wiring

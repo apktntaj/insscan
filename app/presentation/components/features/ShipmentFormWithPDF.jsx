@@ -18,9 +18,8 @@ import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
 import ShipmentForm from "./ShipmentForm";
-import { createGeminiService } from "../../../infrastructure/services/gemini.service";
 import { createUsageTrackerService } from "../../../infrastructure/services/usage-tracker.service";
-import { createExtractBLWithGeminiUseCase } from "@core/use-cases/extract-bl-with-gemini";
+import { extractBlViaApi } from "../../../infrastructure/services/bl-extraction-api.service";
 import { toFormDataFromGemini } from "../../../adapters/services/form-filler.service";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -62,19 +61,7 @@ export default function ShipmentFormWithPDF({
   
   // Initialize services
   const usageTracker = useRef(createUsageTrackerService());
-  const geminiService = useRef(null);
-  const extractBLUseCase = useRef(null);
-  
-  // Initialize Gemini service on mount
   useEffect(() => {
-    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-    if (apiKey) {
-      geminiService.current = createGeminiService(apiKey);
-      extractBLUseCase.current = createExtractBLWithGeminiUseCase(
-        geminiService.current,
-        usageTracker.current
-      );
-    }
     loadRemainingUploads();
   }, []);
   
@@ -84,8 +71,9 @@ export default function ShipmentFormWithPDF({
   };
   
   const processSmartScan = async (pdfFile) => {
-    if (!extractBLUseCase.current) {
-      setStatus("Smart-Scan tidak tersedia. Gunakan clipboard buffer.");
+    const allowance = await usageTracker.current.canExtract();
+    if (!allowance.ok) {
+      handleExtractionError(allowance.error);
       return;
     }
     
@@ -105,7 +93,7 @@ export default function ShipmentFormWithPDF({
         fullText += pageText + "\n";
       }
 
-      const result = await extractBLUseCase.current.execute(fullText, pdfFile);
+      const result = await extractBlViaApi(fullText, pdfFile);
 
       if (!result.ok) {
         handleExtractionError(result.error);
@@ -113,6 +101,9 @@ export default function ShipmentFormWithPDF({
       }
 
       const formData = toFormDataFromGemini(result.data);
+      if (result.data.extractionMethod === "gemini") {
+        await usageTracker.current.incrementUsage();
+      }
 
       setAutoFillData(formData);
       setIsAutoFilled(true);

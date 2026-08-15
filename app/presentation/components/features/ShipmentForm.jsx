@@ -12,9 +12,8 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { extractConsigneeInitials, generateShipmentNumber } from "@core/entities/shipment";
-import { createGeminiService } from "../../../infrastructure/services/gemini.service";
 import { createUsageTrackerService } from "../../../infrastructure/services/usage-tracker.service";
-import { createExtractBLWithGeminiUseCase } from "@core/use-cases/extract-bl-with-gemini";
+import { extractBlViaApi } from "../../../infrastructure/services/bl-extraction-api.service";
 import { toFormDataFromGemini } from "../../../adapters/services/form-filler.service";
 import { pdfjs } from "react-pdf";
 
@@ -94,28 +93,16 @@ export default function ShipmentForm({
   const [smartFillData, setSmartFillData] = useState(null);
   const pdfInputRef = useRef(null);
   const usageTracker = useRef(createUsageTrackerService());
-  const geminiService = useRef(null);
-  const extractBLUseCase = useRef(null);
-
-  useEffect(() => {
-    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-    if (apiKey) {
-      geminiService.current = createGeminiService(apiKey);
-      extractBLUseCase.current = createExtractBLWithGeminiUseCase(
-        geminiService.current,
-        usageTracker.current
-      );
-    }
-  }, []);
 
   async function handleSmartFill(e) {
     const file = e.target.files?.[0];
     if (!file) return;
     e.target.value = "";
 
-    if (!extractBLUseCase.current) {
+    const allowance = await usageTracker.current.canExtract();
+    if (!allowance.ok) {
       setSmartFillStatus("error");
-      setSmartFillMessage("Smart Fill tidak tersedia. Isi form secara manual.");
+      setSmartFillMessage(allowance.error.message);
       return;
     }
 
@@ -132,7 +119,7 @@ export default function ShipmentForm({
         fullText += textContent.items.map((item) => item.str).join(" ") + "\n";
       }
 
-      const result = await extractBLUseCase.current.execute(fullText, file);
+      const result = await extractBlViaApi(fullText, file);
 
       if (!result.ok) {
         const errorMessages = {
@@ -149,6 +136,9 @@ export default function ShipmentForm({
       }
 
       const formData = toFormDataFromGemini(result.data);
+      if (result.data.extractionMethod === "gemini") {
+        await usageTracker.current.incrementUsage();
+      }
       setSmartFillData(formData);
 
       // Merge extracted data into form

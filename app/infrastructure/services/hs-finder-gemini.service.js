@@ -16,11 +16,33 @@ import { makeClassificationResult } from "@core/entities/hs-finder.js";
 // Constants
 // ─────────────────────────────────────────────
 
-const GEMINI_MODEL = "gemini-2.0-flash";
-const TIMEOUT_MS = 30_000;
+const GEMINI_MODEL = "gemini-2.5-flash";
+const PHOTO_TIMEOUT_MS = 45_000;
+const CHAPTER_TIMEOUT_MS = 45_000;
+const CLASSIFICATION_TIMEOUT_MS = 60_000;
 const MAX_CANDIDATE_CHAPTERS = 5;
 const CHAPTER_NUMBER_PATTERN = /^\d{2}$/;
 const MIN_PHOTO_DESCRIPTION_LENGTH = 5;
+
+/**
+ * Adds a stage-specific deadline and always releases its timer afterward.
+ * Gemini 2.5 may need longer for the final classification prompt because it
+ * includes chapter notes and a structured reasoning response.
+ */
+async function withTimeout(promise, timeoutMs) {
+  let timeoutId;
+
+  try {
+    return await Promise.race([
+      promise,
+      new Promise((_, reject) => {
+        timeoutId = setTimeout(() => reject(new Error("TIMEOUT")), timeoutMs);
+      }),
+    ]);
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
 
 // ─────────────────────────────────────────────
 // Helpers — prompt builders
@@ -292,21 +314,15 @@ export function createHsFinderGeminiService(geminiApiKey) {
    */
   async function identifyFromPhoto(imageBase64, mimeType) {
     const prompt = buildPhotoIdentificationPrompt();
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
     try {
-      const result = await Promise.race([
+      const result = await withTimeout(
         model.generateContent([
           { inlineData: { mimeType, data: imageBase64 } },
           { text: prompt },
         ]),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("TIMEOUT")), TIMEOUT_MS)
-        ),
-      ]);
-
-      clearTimeout(timer);
+        PHOTO_TIMEOUT_MS
+      );
 
       const responseText = result.response.text().trim();
 
@@ -320,7 +336,6 @@ export function createHsFinderGeminiService(geminiApiKey) {
 
       return { ok: true, data: responseText };
     } catch (err) {
-      clearTimeout(timer);
       return _mapError(err);
     }
   }
@@ -356,12 +371,10 @@ Kembalikan HANYA array JSON berisi nomor bab sebagai string 2 digit. Contoh: ["8
 Jangan sertakan penjelasan apapun — hanya array JSON.`;
 
     try {
-      const result = await Promise.race([
+      const result = await withTimeout(
         model.generateContent(prompt),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("TIMEOUT")), TIMEOUT_MS)
-        ),
-      ]);
+        CHAPTER_TIMEOUT_MS
+      );
 
       const responseText = result.response.text().trim();
       const parsed = parseChapterListResponse(responseText);
@@ -410,12 +423,10 @@ Jangan sertakan penjelasan apapun — hanya array JSON.`;
     const prompt = buildClassificationPrompt(itemDescription, chapterNotes, coverageMap);
 
     try {
-      const result = await Promise.race([
+      const result = await withTimeout(
         model.generateContent(prompt),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("TIMEOUT")), TIMEOUT_MS)
-        ),
-      ]);
+        CLASSIFICATION_TIMEOUT_MS
+      );
 
       const responseText = result.response.text().trim();
       return parseClassificationResponse(responseText);
@@ -438,6 +449,11 @@ Jangan sertakan penjelasan apapun — hanya array JSON.`;
  * @returns {{ ok: false, error: string }}
  */
 function _mapError(err) {
+  console.error("[hs-finder-gemini] Gemini request failed:", {
+    name: err?.name,
+    status: err?.status,
+    message: err?.message,
+  });
   if (err.message === "TIMEOUT" || err.name === "AbortError") {
     return { ok: false, error: "GEMINI_TIMEOUT" };
   }

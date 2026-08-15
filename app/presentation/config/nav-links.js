@@ -4,6 +4,11 @@
  */
 
 export const navLinks = [
+  {
+    id: 2,
+    label: "HS Finder",
+    href: "/hs-finder",
+  },
   // {
   //   id: 1,
   //   label: "Shipments",

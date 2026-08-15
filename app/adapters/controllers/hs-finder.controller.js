@@ -43,7 +43,8 @@ const ERROR_MESSAGES = {
   NO_CANDIDATE_CHAPTERS:
     "Deskripsi barang tidak cukup jelas untuk mengidentifikasi bab HS yang relevan. Coba tambahkan detail material, fungsi, atau bentuk barang.",
   GEMINI_UNAVAILABLE: "Ada masalah dengan sistem AI. Hubungi administrator.",
-  GEMINI_TIMEOUT: "Koneksi AI terputus. Silakan coba lagi.",
+  GEMINI_TIMEOUT:
+    "Proses AI memerlukan waktu terlalu lama. Silakan coba lagi dengan deskripsi yang lebih spesifik.",
   GEMINI_INVALID_RESPONSE: "Respons AI tidak valid. Silakan coba lagi.",
 };
 
