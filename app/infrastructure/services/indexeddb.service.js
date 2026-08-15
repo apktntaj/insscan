@@ -6,7 +6,7 @@
  * Database: shipment_management_db v1, object store: shipments
  */
 
-import { SHIPMENT_STATUS } from "../../core/entities/shipment";
+import { SHIPMENT_STATUS } from "@core/entities/shipment";
 
 const DB_NAME = "shipment_management_db";
 const DB_VERSION = 1;

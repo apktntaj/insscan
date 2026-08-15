@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { formatHsCode } from "../../../../core/entities/hs-code";
+import { formatHsCode } from "@core/entities/hs-code";
 
 /**
  * @param {{ 

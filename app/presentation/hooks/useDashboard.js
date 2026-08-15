@@ -10,10 +10,10 @@
  */
 
 import { useMemo, useState, useCallback } from "react";
-import { evaluateDataQualityAlerts } from "../../core/use-cases/evaluate-data-quality-alerts";
-import { evaluateShipmentStatusAlerts } from "../../core/use-cases/evaluate-shipment-status-alerts";
-import { startOfDay, diffCalendarDays, parseISODate } from "../../core/use-cases/evaluate-shipment-status-alerts";
-import { RISK_LEVEL_ORDER } from "../../core/use-cases/evaluate-data-quality-alerts";
+import { evaluateDataQualityAlerts } from "@core/use-cases/evaluate-data-quality-alerts";
+import { evaluateShipmentStatusAlerts } from "@core/use-cases/evaluate-shipment-status-alerts";
+import { startOfDay, diffCalendarDays, parseISODate } from "@core/use-cases/evaluate-shipment-status-alerts";
+import { RISK_LEVEL_ORDER } from "@core/use-cases/evaluate-data-quality-alerts";
 
 // ---------------------------------------------------------------------------
 // Pure Helpers (exported for testing)

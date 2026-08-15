@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState, useCallback } from "react";
 import Alert from "../common/Alert";
-import { formatHsCode, isValidHsCode } from "../../../core/entities/hs-code";
+import { formatHsCode, isValidHsCode } from "@core/entities/hs-code";
 import LartasDocModal from "./cek-lartas/LartasDocModal";
 
 /**

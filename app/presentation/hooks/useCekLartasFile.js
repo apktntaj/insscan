@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { parseHsCodeApiResponse } from "../../adapters/presenters/hs-code.presenter";
-import { isValidHsCode, formatHsCode } from "../../core/entities/hs-code";
+import { isValidHsCode, formatHsCode } from "@core/entities/hs-code";
 import {
   fileToArrayBuffer,
   bufferToJson,

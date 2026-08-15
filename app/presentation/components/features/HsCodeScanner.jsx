@@ -5,7 +5,7 @@ import HsCodeTable from "./HsCodeTable";
 import Button from "../common/Button";
 import Input from "../common/Input";
 import { fileToArrayBuffer, bufferToJson, isExcelFile } from "../../../infrastructure/excel/excel.service";
-import { formatHsCode, isValidHsCode } from "../../../core/entities/hs-code";
+import { formatHsCode, isValidHsCode } from "@core/entities/hs-code";
 
 const BASE_CHUNK_SIZE = resolveChunkSize(process.env.NEXT_PUBLIC_HS_CHUNK_SIZE);
 const MIN_CHUNK_SIZE = 1;

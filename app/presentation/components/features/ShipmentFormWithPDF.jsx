@@ -20,7 +20,7 @@ import "react-pdf/dist/esm/Page/TextLayer.css";
 import ShipmentForm from "./ShipmentForm";
 import { createGeminiService } from "../../../infrastructure/services/gemini.service";
 import { createUsageTrackerService } from "../../../infrastructure/services/usage-tracker.service";
-import { createExtractBLWithGeminiUseCase } from "../../../core/use-cases/extract-bl-with-gemini";
+import { createExtractBLWithGeminiUseCase } from "@core/use-cases/extract-bl-with-gemini";
 import { toFormDataFromGemini } from "../../../adapters/services/form-filler.service";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(

@@ -11,10 +11,10 @@
  */
 
 import React, { useState, useEffect, useRef } from "react";
-import { extractConsigneeInitials, generateShipmentNumber } from "../../../core/entities/shipment";
+import { extractConsigneeInitials, generateShipmentNumber } from "@core/entities/shipment";
 import { createGeminiService } from "../../../infrastructure/services/gemini.service";
 import { createUsageTrackerService } from "../../../infrastructure/services/usage-tracker.service";
-import { createExtractBLWithGeminiUseCase } from "../../../core/use-cases/extract-bl-with-gemini";
+import { createExtractBLWithGeminiUseCase } from "@core/use-cases/extract-bl-with-gemini";
 import { toFormDataFromGemini } from "../../../adapters/services/form-filler.service";
 import { pdfjs } from "react-pdf";
 

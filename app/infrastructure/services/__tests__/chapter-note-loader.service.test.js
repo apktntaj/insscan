@@ -177,7 +177,7 @@ describe("createChapterNoteLoaderService", () => {
 
   test("satisfies validateChapterNoteLoader without throwing", async () => {
     const { validateChapterNoteLoader } = await import(
-      "../../../core/ports/chapter-note-loader.port.js"
+      "@core/ports/chapter-note-loader.port.js"
     );
     const service = createChapterNoteLoaderService();
     expect(() => validateChapterNoteLoader(service)).not.toThrow();

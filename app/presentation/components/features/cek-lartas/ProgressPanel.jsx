@@ -1,6 +1,6 @@
 "use client";
 
-import { formatHsCode } from "../../../../core/entities/hs-code";
+import { formatHsCode } from "@core/entities/hs-code";
 
 /**
  * Hitung persentase 0-100, aman untuk total = 0.

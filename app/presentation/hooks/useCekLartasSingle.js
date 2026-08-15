@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { parseHsCodeApiResponse } from "../../adapters/presenters/hs-code.presenter";
-import { isValidHsCode } from "../../core/entities/hs-code";
+import { isValidHsCode } from "@core/entities/hs-code";
 import { downloadAsExcel } from "../../infrastructure/excel/excel.service";
 import { useQueryLimit } from "./useQueryLimit";
 

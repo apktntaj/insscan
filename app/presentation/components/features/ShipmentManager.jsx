@@ -17,7 +17,7 @@ import ShipmentForm from "./ShipmentForm";
 import ShipmentExportButton from "./ShipmentExportButton";
 import DashboardSection from "./DashboardSection";
 import { shipmentController } from "../../../adapters/controllers/shipment.controller";
-import { MAX_RECORD_LIMIT } from "../../../core/use-cases/create-shipment";
+import { MAX_RECORD_LIMIT } from "@core/use-cases/create-shipment";
 
 export default function ShipmentManager() {
   const {

@@ -17,7 +17,7 @@
 
 import { createChapterNoteLoaderService } from "../../infrastructure/services/chapter-note-loader.service.js";
 import { createHsFinderGeminiService } from "../../infrastructure/services/hs-finder-gemini.service.js";
-import { createFindHsCodeUseCase } from "../../core/use-cases/find-hs-code.js";
+import { createFindHsCodeUseCase } from "@core/use-cases/find-hs-code.js";
 import { createHsFinderController } from "../../adapters/controllers/hs-finder.controller.js";
 
 /** Allow long-running Gemini classification calls (up to 60 seconds) */

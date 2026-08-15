@@ -10,7 +10,7 @@
  */
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { makeClassificationResult } from "../../core/entities/hs-finder.js";
+import { makeClassificationResult } from "@core/entities/hs-finder.js";
 
 // ─────────────────────────────────────────────
 // Constants

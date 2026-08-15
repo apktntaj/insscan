@@ -11,7 +11,7 @@
  * @module adapters/controllers/hs-finder
  */
 
-import { makeItemDescription } from "../../core/entities/hs-finder.js";
+import { makeItemDescription } from "@core/entities/hs-finder.js";
 
 // ─────────────────────────────────────────────
 // Constants — photo validation

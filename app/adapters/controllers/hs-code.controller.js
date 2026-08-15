@@ -5,10 +5,10 @@
  * @description Orchestrates use cases and handles request/response transformation
  */
 
-import { createFetchHsCodeDataUseCase } from "../../core/use-cases/fetch-hs-code-data";
+import { createFetchHsCodeDataUseCase } from "@core/use-cases/fetch-hs-code-data";
 import { inswApiGateway } from "../../infrastructure/services/insw-api.service";
 import { toResultData } from "../presenters/hs-code.presenter";
-import { isValidHsCode } from "../../core/entities/hs-code";
+import { isValidHsCode } from "@core/entities/hs-code";
 
 /**
  * Creates the HS Code controller with injected dependencies

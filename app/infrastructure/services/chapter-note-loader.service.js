@@ -11,7 +11,7 @@
 
 import fs from "fs/promises";
 import path from "path";
-import { makeCoverageMap } from "../../core/entities/hs-finder.js";
+import { makeCoverageMap } from "@core/entities/hs-finder.js";
 
 // ─────────────────────────────────────────────
 // Constants

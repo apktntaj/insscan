@@ -6,12 +6,12 @@
  * consumed by the React hook (useShipments)
  */
 
-import { createCreateShipmentUseCase } from "../../core/use-cases/create-shipment";
-import { createEditShipmentUseCase } from "../../core/use-cases/edit-shipment";
-import { createTerminateShipmentUseCase } from "../../core/use-cases/terminate-shipment";
-import { createListShipmentsUseCase } from "../../core/use-cases/list-shipments";
-import { createExportShipmentsUseCase } from "../../core/use-cases/export-shipments";
-import { createScheduleNotificationsUseCase } from "../../core/use-cases/schedule-notifications";
+import { createCreateShipmentUseCase } from "@core/use-cases/create-shipment";
+import { createEditShipmentUseCase } from "@core/use-cases/edit-shipment";
+import { createTerminateShipmentUseCase } from "@core/use-cases/terminate-shipment";
+import { createListShipmentsUseCase } from "@core/use-cases/list-shipments";
+import { createExportShipmentsUseCase } from "@core/use-cases/export-shipments";
+import { createScheduleNotificationsUseCase } from "@core/use-cases/schedule-notifications";
 import { toExcelRow, toViewModels } from "../presenters/shipment.presenter";
 import { downloadAsExcel } from "../../infrastructure/excel/excel.service";
 import { indexedDbShipmentRepository } from "../../infrastructure/services/indexeddb.service";

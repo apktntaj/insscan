@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { formatHsCode } from "../../../../core/entities/hs-code";
+import { formatHsCode } from "@core/entities/hs-code";
 
 /**
  * Resolves clickable links from a LARTAS detail object.

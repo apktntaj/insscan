@@ -5,7 +5,7 @@ import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
 import { parsePDF } from "../../../infrastructure/services/pdf-parser.service";
-import { extractBLFields } from "../../../core/services/bl-extractor.service";
+import { extractBLFields } from "@core/services/bl-extractor.service";
 import { toFormData } from "../../../adapters/services/form-filler.service";
 import ShipmentForm from "./ShipmentForm";
 import { useShipments } from "../../hooks/useShipments";

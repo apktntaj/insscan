@@ -5,7 +5,7 @@
  * @description Transforms Shipment entities to view models and Excel export rows
  */
 
-import { isNotificationDue } from "../../core/entities/public-holidays";
+import { isNotificationDue } from "@core/entities/public-holidays";
 
 /**
  * Formats an ISO date string to a locale-friendly display string

@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from "react";
 import Alert from "../common/Alert";
-import { formatHsCode, isValidHsCode } from "../../../core/entities/hs-code";
+import { formatHsCode, isValidHsCode } from "@core/entities/hs-code";
 
 /**
  * HsCodeTable Component
