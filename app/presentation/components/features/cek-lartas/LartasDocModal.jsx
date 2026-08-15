@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { formatHsCode } from "@core/entities/hs-code";
 
 /**
@@ -12,8 +12,14 @@ import { formatHsCode } from "@core/entities/hs-code";
 export default function LartasDocModal({ cell, onClose }) {
   const grouped = useMemo(() => groupByCategory(cell.details), [cell.details]);
 
+  useEffect(() => {
+    const closeOnEscape = (event) => event.key === "Escape" && onClose();
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [onClose]);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/55 p-4 backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/55 p-4 backdrop-blur-sm" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="lartas-dialog-title">
       <div
         className="mx-auto flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-zinc-200 bg-white p-5 shadow-xl sm:p-7"
         onClick={(event) => event.stopPropagation()}
@@ -23,7 +29,7 @@ export default function LartasDocModal({ cell, onClose }) {
             <p className="text-sm text-zinc-500">
               Ref #{cell.referenceNo} | HS {formatHsCode(String(cell.hsCode))}
             </p>
-            <h3 className="mt-1 text-xl font-semibold tracking-tight text-zinc-900">Dokumen Pabean {cell.docCode}</h3>
+            <h3 id="lartas-dialog-title" className="mt-1 text-xl font-semibold tracking-tight text-zinc-900">Dokumen Pabean {cell.docCode}</h3>
           </div>
           <button
             type="button"

@@ -15,7 +15,7 @@ export default function Alert({ message, variant = "info" }) {
     };
 
     return (
-        <div className={`rounded-2xl border px-4 py-3 text-sm leading-relaxed shadow-sm ${variants[variant]}`}>
+        <div role={variant === "error" ? "alert" : "status"} aria-live="polite" className={`rounded-2xl border px-4 py-3 text-sm leading-relaxed shadow-sm ${variants[variant]}`}>
             <span>{message}</span>
         </div>
     );

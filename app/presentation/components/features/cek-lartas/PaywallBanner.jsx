@@ -5,7 +5,7 @@ import { WHATSAPP_NUMBER } from "../../../../presentation/config/feedback-config
 import UnlockModal from "./UnlockModal";
 
 const WA_MESSAGE = encodeURIComponent(
-  "Halo, saya ingin berlangganan Pesisir Pro (Cek Lartas unlimited) Rp26.000/bulan."
+  "Halo, saya ingin berlangganan Pesisir Pro (Cek LARTAS tanpa batas harian) Rp26.000/bulan."
 );
 const WA_LINK = `https://wa.me/${WHATSAPP_NUMBER}?text=${WA_MESSAGE}`;
 
@@ -31,13 +31,13 @@ export default function PaywallBanner({ onActivate }) {
 
           <div className="min-w-0 space-y-3">
             <p className="font-semibold text-cyan-900 sm:text-base">
-              Batas query harian tercapai
+              Batas pemeriksaan harian tercapai
             </p>
 
             <p className="text-sm leading-6 text-cyan-800">
-              Paket gratis dibatasi{" "}
-              <strong className="font-semibold">10 HS code per hari</strong>.
-              Upgrade ke Pro untuk query unlimited —{" "}
+              Paket Gratis mencakup{" "}
+              <strong className="font-semibold">10 pemeriksaan HS code per hari</strong>.
+              Upgrade ke Pro untuk pemeriksaan tanpa batas harian —{" "}
               <strong className="font-semibold">Rp26.000/bulan</strong>.
             </p>
 

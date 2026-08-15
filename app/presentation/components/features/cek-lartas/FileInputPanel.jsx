@@ -90,7 +90,7 @@ export default function FileInputPanel() {
             ) : null}
           </div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <div className="min-w-0 flex-1">
               <Input
                 handleChange={handleFileChange}
@@ -104,7 +104,7 @@ export default function FileInputPanel() {
               onClick={buttonAction}
               disabled={buttonDisabled}
               variant={hasResult ? "secondary" : "primary"}
-              className={`shrink-0 px-6 ${
+              className={`w-full shrink-0 px-6 sm:w-auto ${
                 hasResult 
                   ? "!border-sky-200 hover:!bg-sky-50" 
                   : "!border-cyan-700 !bg-gradient-to-r !from-sky-900 !to-cyan-700 hover:!from-sky-800 hover:!to-cyan-600"
@@ -113,6 +113,9 @@ export default function FileInputPanel() {
               {buttonLabel}
             </Button>
           </div>
+          {hasResult ? (
+            <p className="text-xs leading-6 text-zinc-500">Pilih file lain untuk memulai pemeriksaan baru. Hasil saat ini tetap dapat diekspor sebelum diganti.</p>
+          ) : null}
         </div>
 
         {/* Status Alert */}
@@ -136,7 +139,7 @@ export default function FileInputPanel() {
       ) : null}
 
       {/* Results table */}
-      <LartasResultTable fileData={fileData} sheetCount={sheetCount} resultData={resultData} viewMode={viewMode} setViewMode={setViewMode} />
+      {(fileData || hasResult) ? <LartasResultTable fileData={fileData} sheetCount={sheetCount} resultData={resultData} viewMode={viewMode} setViewMode={setViewMode} /> : null}
     </div>
   );
 }

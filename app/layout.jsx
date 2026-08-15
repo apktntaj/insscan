@@ -2,6 +2,8 @@ import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 import { Navbar } from "./presentation/components";
 import { navLinks } from "./presentation/config/nav-links";
+import Link from "next/link";
+import { WHATSAPP_NUMBER } from "./presentation/config/feedback-config";
 
 export const metadata = {
   metadataBase: new URL("https://pesisir.id"),
@@ -71,8 +73,17 @@ export default function RootLayout({ children }) {
           </div>
         </main>
         <footer className="border-t border-zinc-200/70 bg-zinc-50/90">
-          <aside className="mx-auto max-w-7xl px-5 py-6 text-center text-sm text-zinc-500 sm:px-8 lg:px-12">
-            <p>Copyright © 2024 Semesta Raya Software</p>
+          <aside className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-7 text-sm text-zinc-500 sm:px-8 lg:flex-row lg:items-center lg:justify-between lg:px-12">
+            <div>
+              <p className="font-medium text-zinc-700">Pesisir oleh Semesta Raya Software</p>
+              <p className="mt-1 text-xs">Alat bantu independen untuk operasional kepabeanan.</p>
+            </div>
+            <nav aria-label="Informasi hukum dan dukungan" className="flex flex-wrap gap-x-4 gap-y-2 text-xs">
+              <Link className="hover:text-cyan-700" href="/privacy">Privasi</Link>
+              <Link className="hover:text-cyan-700" href="/terms">Ketentuan</Link>
+              <Link className="hover:text-cyan-700" href="/refund-policy">Pembatalan & Refund</Link>
+              <a className="hover:text-cyan-700" href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer">Dukungan WhatsApp</a>
+            </nav>
           </aside>
         </footer>
       </body>

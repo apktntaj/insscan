@@ -82,6 +82,9 @@ function LartasMatrixTable({ rows, viewMode, setViewMode, fileStats }) {
               <tr>
                 <th className="px-4 py-3 font-medium">No</th>
                 <th className="px-4 py-3 font-medium">HS Code</th>
+                <th className="px-4 py-3 font-medium">BM</th>
+                <th className="px-4 py-3 font-medium">PPN</th>
+                <th className="px-4 py-3 font-medium">PPh</th>
                 {docCodes.map((docCode) => (
                   <th key={`head-${docCode}`} className="px-4 py-3 font-medium">
                     Dok {docCode}
@@ -95,6 +98,9 @@ function LartasMatrixTable({ rows, viewMode, setViewMode, fileStats }) {
                   <tr key={`${item.referenceNo}-${item.hsCode}`} className="border-t border-zinc-100 text-zinc-700">
                     <td className="px-4 py-3">{item.referenceNo}</td>
                     <td className="px-4 py-3 font-medium text-zinc-900">{formatHsCode(String(item.hsCode))}</td>
+                    <td className="whitespace-nowrap px-4 py-3">{item.bm || "—"}</td>
+                    <td className="whitespace-nowrap px-4 py-3">{item.ppn || "—"}</td>
+                    <td className="whitespace-nowrap px-4 py-3">{item.pph || "—"}</td>
                     {docCodes.map((docCode) => {
                       const cellDetails = item.detailsByDocCode.get(docCode) || [];
 
@@ -127,7 +133,7 @@ function LartasMatrixTable({ rows, viewMode, setViewMode, fileStats }) {
               })}
               {displayedRows.length === 0 ? (
                 <tr className="border-t border-zinc-100 text-zinc-600">
-                  <td className="px-4 py-4" colSpan={docCodes.length + 2}>
+                  <td className="px-4 py-4" colSpan={docCodes.length + 5}>
                     Tidak ada HS code yang terkena LARTAS.
                   </td>
                 </tr>
@@ -165,6 +171,9 @@ function buildMatrixRows(rows) {
     return {
       referenceNo: idx + 1,
       hsCode: row.hsCode,
+      bm: row.bm,
+      ppn: row.ppn,
+      pph: row.pph,
       hasLartas: details.length > 0,
       detailsByDocCode,
     };

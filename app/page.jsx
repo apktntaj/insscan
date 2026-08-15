@@ -3,6 +3,11 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { CekLartasMockup } from "./presentation/components/common/ProductMockup";
+import { WHATSAPP_NUMBER } from "./presentation/config/feedback-config";
+
+const EARLY_ACCESS_LINK = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+  "Halo, saya ingin bertanya tentang Pesisir Pro Early Access."
+)}`;
 
 const whyReasons = [
   {
@@ -25,27 +30,35 @@ const whyReasons = [
 const faqs = [
   {
     q: "Data LARTAS dari mana?",
-    a: "Langsung dari API INSW (Indonesia National Single Window) — sumber resmi yang sama yang dipakai portal insw.go.id.",
+    a: "Pesisir mengambil informasi tarif dan LARTAS dari layanan INSW saat pemeriksaan dilakukan. Hasil bergantung pada ketersediaan dan respons sumber tersebut.",
+  },
+  {
+    q: "Seberapa mutakhir hasil pemeriksaan?",
+    a: "Data diambil saat pemeriksaan dilakukan. Karena regulasi dan layanan sumber dapat berubah, verifikasi kembali keputusan penting melalui portal dan regulasi resmi.",
   },
   {
     q: "Format file Excel-nya seperti apa?",
     a: "Cukup satu kolom berisi HS code 8 digit. Tidak perlu header khusus — Pesisir akan membaca semua angka 8 digit yang ditemukan di file.",
   },
   {
-    q: "Berapa banyak HS code yang bisa dicek sekaligus?",
-    a: "Tidak ada batasan harian — kamu bisa mengecek HS code sebanyak yang dibutuhkan secara gratis.",
+    q: "Apa yang dihitung sebagai satu pemeriksaan?",
+    a: "Satu HS code unik dihitung sebagai satu pemeriksaan. Jika HS code yang sama muncul beberapa kali dalam satu file, kode tersebut diproses satu kali. Paket Gratis mencakup 10 pemeriksaan per hari.",
   },
   {
     q: "Apakah data saya dikirim ke server?",
     a: "File Excel yang kamu upload diproses di browser — tidak disimpan di server manapun. Hanya HS code yang dikirim ke INSW untuk dicek.",
   },
   {
-    q: "Apakah Pesisir terafiliasi dengan INSW atau instansi pemerintah?",
-    a: "Tidak. Pesisir adalah tool independen yang dibuat untuk membantu staf operasional PPJK dan freight forwarder.",
+    q: "Bagaimana kalau hasil LARTAS tidak muncul untuk HS code tertentu?",
+    a: "Artinya Pesisir tidak menemukan detail LARTAS pada respons saat pengecekan. Periksa kembali klasifikasi HS dan verifikasi keputusan penting pada portal atau regulasi resmi.",
   },
   {
-    q: "Bagaimana kalau hasil LARTAS tidak muncul untuk HS code tertentu?",
-    a: "Beberapa HS code memang tidak memiliki regulasi LARTAS aktif — artinya barang tersebut bebas tanpa persyaratan izin. Data tetap menampilkan tarif BM, PPN, dan PPh jika tersedia.",
+    q: "Apa perbedaan paket Gratis dan Pro?",
+    a: "Paket Gratis mencakup 10 pemeriksaan HS code per hari. Paket Pro Rp26.000 per bulan menyediakan pemeriksaan tanpa batas harian selama masa aktif.",
+  },
+  {
+    q: "Bagaimana aktivasi Pesisir Pro dilakukan?",
+    a: "Selama Early Access, pembayaran dan aktivasi dikonfirmasi secara manual melalui WhatsApp. Paket tidak diperpanjang otomatis.",
   },
 ];
 
@@ -117,20 +130,66 @@ export default function Home() {
               Cara Kerja
             </a>
           </div>
-          <p className="mt-4 text-xs text-zinc-400">Gratis 10 query/hari · Tidak perlu daftar akun</p>
+          <p className="mt-4 text-xs text-zinc-500">10 pemeriksaan HS code gratis per hari · File diproses di browser</p>
+        </div>
+      </section>
+
+      {/* Trust */}
+      <section aria-labelledby="trust-title" className="grid gap-4 lg:grid-cols-3">
+        <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-widest text-cyan-700">Sumber data</p>
+          <h2 id="trust-title" className="mt-2 font-semibold text-zinc-900">Respons data dari INSW</h2>
+          <p className="mt-2 text-sm leading-7 text-zinc-600">Pesisir mengambil tarif dan informasi LARTAS dari layanan INSW saat pemeriksaan dilakukan.</p>
+        </div>
+        <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-widest text-cyan-700">Privasi file</p>
+          <h2 className="mt-2 font-semibold text-zinc-900">Excel dibaca di perangkatmu</h2>
+          <p className="mt-2 text-sm leading-7 text-zinc-600">Isi file tidak diunggah. Hanya HS code yang terdeteksi dikirim untuk mengambil hasil pemeriksaan.</p>
+        </div>
+        <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-widest text-cyan-700">Transparansi</p>
+          <h2 className="mt-2 font-semibold text-zinc-900">Alat bantu independen</h2>
+          <p className="mt-2 text-sm leading-7 text-zinc-600">Pesisir tidak berafiliasi dengan INSW atau instansi pemerintah dan bukan pengganti keputusan kepabeanan profesional.</p>
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section id="harga" className="rounded-3xl border border-zinc-200 bg-white px-7 py-9 shadow-sm sm:px-10">
+        <div className="mx-auto max-w-2xl text-center">
+          <p className="text-xs font-semibold uppercase tracking-widest text-cyan-700">Harga transparan</p>
+          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-900">Mulai gratis, naikkan saat pekerjaan bertambah.</h2>
+          <p className="mt-3 text-sm leading-7 text-zinc-600">Satu HS code unik dihitung sebagai satu pemeriksaan. Kode duplikat dalam satu file diproses satu kali.</p>
+        </div>
+        <div className="mx-auto mt-7 grid max-w-3xl gap-4 sm:grid-cols-2">
+          <div className="rounded-2xl border border-zinc-200 p-6">
+            <p className="font-semibold text-zinc-900">Gratis</p><p className="mt-2 text-3xl font-semibold text-zinc-900">Rp0</p>
+            <p className="mt-4 text-sm leading-7 text-zinc-600">10 pemeriksaan HS code per hari, input tunggal atau Excel, dan ekspor hasil.</p>
+          </div>
+          <div className="rounded-2xl border border-cyan-300 bg-cyan-50/60 p-6">
+            <p className="font-semibold text-cyan-900">Pro</p><p className="mt-2 text-3xl font-semibold text-cyan-950">Rp26.000<span className="text-sm font-normal">/bulan</span></p>
+            <p className="mt-4 text-sm leading-7 text-cyan-900">Pemeriksaan tanpa batas harian. Aktivasi awal dilayani melalui WhatsApp.</p>
+            <p className="mt-3 rounded-xl border border-cyan-200 bg-white/70 px-3 py-2 text-xs leading-5 text-cyan-900">Early Access: pembayaran dan aktivasi masih dikonfirmasi manual. Tidak ada perpanjangan otomatis.</p>
+            <a href={EARLY_ACCESS_LINK} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex rounded-xl bg-cyan-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-cyan-800">Tanya Pro via WhatsApp</a>
+          </div>
         </div>
       </section>
 
       {/* Product Mockup */}
       <section className="space-y-6">
         <div className="text-center">
-          <p className="text-xs font-medium uppercase tracking-widest text-cyan-600">Tampilan</p>
+          <p className="text-xs font-medium uppercase tracking-widest text-cyan-600">Contoh hasil demonstrasi</p>
           <h3 className="mt-2 text-lg font-semibold text-zinc-900 sm:text-xl">
             Hasil cek LARTAS langsung di browser
           </h3>
         </div>
         <div className="mx-auto max-w-2xl">
           <CekLartasMockup />
+        </div>
+        <p className="mx-auto max-w-2xl text-center text-xs leading-6 text-zinc-500">Data pada contoh disederhanakan untuk demonstrasi dan bukan data pelanggan. Tampilan aktual mengikuti respons yang tersedia saat pemeriksaan.</p>
+        <div className="mx-auto flex max-w-3xl flex-wrap justify-center gap-2" aria-label="Data yang tersedia pada hasil">
+          {["BM MFN", "PPN", "PPh", "Status LARTAS", "Dokumen pabean", "Detail regulasi", "Ekspor Excel"].map((item) => (
+            <span key={item} className="rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-600">{item}</span>
+          ))}
         </div>
       </section>
 
@@ -198,6 +257,10 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      <p className="mx-auto max-w-4xl text-center text-xs leading-6 text-zinc-500">
+        Hasil Pesisir bersifat informatif berdasarkan respons yang tersedia saat pemeriksaan. Selalu verifikasi klasifikasi HS dan persyaratan regulasi untuk keputusan yang berdampak pada proses kepabeanan.
+      </p>
 
     </div>
   );

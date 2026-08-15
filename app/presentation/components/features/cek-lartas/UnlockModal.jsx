@@ -4,7 +4,7 @@ import { useState } from "react";
 import { WHATSAPP_NUMBER } from "../../../../presentation/config/feedback-config";
 
 const WA_MESSAGE = encodeURIComponent(
-  "Halo, saya ingin berlangganan Pesisir Pro (Cek Lartas unlimited) Rp26.000/bulan."
+  "Halo, saya ingin berlangganan Pesisir Pro (Cek LARTAS tanpa batas harian) Rp26.000/bulan."
 );
 const WA_LINK = `https://wa.me/${WHATSAPP_NUMBER}?text=${WA_MESSAGE}`;
 
@@ -38,14 +38,18 @@ export default function UnlockModal({ onActivate, onClose }) {
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="unlock-modal-title"
+      onKeyDown={(e) => { if (e.key === "Escape") onClose(); }}
     >
       <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-xl sm:p-8">
         {/* Header */}
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
-            <p className="text-base font-semibold text-zinc-900">Masukkan Kode Akses</p>
+            <p id="unlock-modal-title" className="text-base font-semibold text-zinc-900">Masukkan Kode Akses</p>
             <p className="mt-1 text-sm text-zinc-500">
-              Aktifkan akses Pro untuk query unlimited tanpa batas harian.
+              Aktifkan akses Pro untuk pemeriksaan tanpa batas harian.
             </p>
           </div>
           <button
@@ -77,6 +81,7 @@ export default function UnlockModal({ onActivate, onClose }) {
                 onChange={(e) => setInput(e.target.value.toUpperCase())}
                 placeholder="Masukkan kode akses"
                 autoComplete="off"
+                autoFocus
                 spellCheck={false}
                 className="block w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 font-mono text-sm text-zinc-800 placeholder:text-zinc-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
               />

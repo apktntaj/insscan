@@ -171,31 +171,30 @@ function clearProKey() {
  */
 export function useQueryLimit() {
   const [used, setUsed] = useState(0);
-  const [isPro, setIsPro] = useState(true);
+  const [isPro, setIsPro] = useState(false);
 
   useEffect(() => {
-    // Selalu Pro, tapi tetap baca usage untuk statistik internal jika perlu
     const stored = readUsageStorage();
     if (stored) setUsed(stored.used);
+    setIsPro(Boolean(readProKey()));
   }, []);
 
   /**
    * Coba pakai sejumlah `count` query.
-   * Sekarang selalu return true karena limit dihapus.
-   *
    * @param {number} count
    * @returns {boolean}
    */
   const consume = useCallback((count) => {
     const stored = readUsageStorage();
     const currentUsed = stored?.used ?? 0;
+    if (!isPro && currentUsed + count > DAILY_LIMIT) return false;
     const next = currentUsed + count;
 
     const today = new Date().toISOString().slice(0, 10);
     writeUsageStorage({ date: today, used: next });
     setUsed(next);
     return true;
-  }, []);
+  }, [isPro]);
 
   /**
    * Aktivasi unlock key. Return { ok: true } jika berhasil, { ok: false, error } jika gagal.

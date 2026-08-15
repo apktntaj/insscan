@@ -5,7 +5,9 @@ import MaintenanceOverlay from "../common/MaintenanceOverlay";
 import { Title, CekLartasScanner } from "../index";
 
 const PAGE_TITLE = "CEK LARTAS";
-const PAGE_DESCRIPTION = [];
+const PAGE_DESCRIPTION = [
+  "Periksa tarif dan status LARTAS dari satu HS code atau file Excel. Hanya HS code yang dikirim untuk mengambil data; file tetap diproses di browser.",
+];
 
 /**
  * CekLartasPage (Client Component)

@@ -413,14 +413,14 @@ export function useCekLartasFile() {
 
     // Cek limit sebelum mulai — batasi ke sisa kuota
     if (isLimitReached) {
-      setStatus("Batas query harian tercapai. Upgrade ke Pro untuk akses unlimited.");
+      setStatus("Batas pemeriksaan harian tercapai. Upgrade ke Pro untuk akses tanpa batas harian.");
       return;
     }
 
     const allowedCount = Math.min(uniqueHsCodes.length, remaining);
     const allowed = consume(allowedCount);
     if (!allowed) {
-      setStatus("Batas query harian tercapai. Upgrade ke Pro untuk akses unlimited.");
+      setStatus("Batas pemeriksaan harian tercapai. Upgrade ke Pro untuk akses tanpa batas harian.");
       return;
     }
 
@@ -658,6 +658,10 @@ export function useCekLartasFile() {
       return {
         referenceNo: idx + 1,
         hsCode: row.hsCode,
+        bm: row.bm,
+        ppn: row.ppn,
+        pph: row.pph,
+        pphNonApi: row.pphNonApi,
         hasLartas: details.length > 0,
         detailsByDocCode,
       };
@@ -689,6 +693,10 @@ export function useCekLartasFile() {
       const excelRow = {
         NO: row.referenceNo,
         "HS CODE": row.hsCode,
+        "BM MFN": row.bm ?? "tidak ada data",
+        PPN: row.ppn ?? "tidak ada data",
+        PPH: row.pph ?? "tidak ada data",
+        "PPH NON API": row.pphNonApi ?? "tidak ada data",
       };
 
       for (const docCode of docCodes) {
