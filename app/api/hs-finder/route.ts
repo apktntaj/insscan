@@ -23,8 +23,8 @@ import {
 } from "@core/hs-finder/use-cases/find-hs-code";
 import { createHsFinderController } from "@/app/features/hs-finder/adapters/controllers/hs-finder.controller";
 
-/** Allow two sequential Gemini calls plus chapter-note loading. */
-export const maxDuration = 120;
+/** Vercel Hobby plan allows a maximum function duration of 60 seconds. */
+export const maxDuration = 60;
 
 // ─────────────────────────────────────────────
 // Dependency wiring
