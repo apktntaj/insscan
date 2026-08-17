@@ -7,16 +7,20 @@ const config = {
   },
   transform: {
     '^.+\\.(js|jsx|mjs|cjs)$': ['babel-jest', {
-      presets: [['@babel/preset-env', { targets: { node: 'current' } }]],
-    }],
-    '^.+\\.ts$': ['babel-jest', {
       presets: [
         ['@babel/preset-env', { targets: { node: 'current' } }],
+        ['@babel/preset-react', { runtime: 'automatic' }],
+      ],
+    }],
+    '^.+\\.(ts|tsx)$': ['babel-jest', {
+      presets: [
+        ['@babel/preset-env', { targets: { node: 'current' } }],
+        ['@babel/preset-react', { runtime: 'automatic' }],
         '@babel/preset-typescript',
       ],
     }],
   },
-  moduleFileExtensions: ['ts', 'js', 'jsx', 'json'],
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
 };
 
 module.exports = config;

@@ -10,6 +10,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "check:architecture": "node scripts/check-architecture.mts",
+    "check": "npm run check:architecture && npm run typecheck && npm test -- --runInBand",
     "test": "jest"
   },
   "dependencies": {
@@ -28,11 +31,15 @@
   },
   "devDependencies": {
     "@babel/preset-env": "^7.29.2",
+    "@babel/preset-react": "^7.28.5",
     "@babel/preset-typescript": "^7.29.2",
     "@jest/globals": "^30.3.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.3.0",
     "@types/react": "18.3.31",
+    "@types/react-dom": "^18.3.7",
     "daisyui": "^4.12.2",
     "fast-check": "^4.7.0",
     "jest": "^30.3.0",

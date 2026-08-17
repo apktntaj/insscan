@@ -2,11 +2,12 @@
 
 ## Tech Stack & Architecture
 - **Framework**: Next.js 14 (App Router) with React 18 (Client components use `"use client"`).
-- **Architecture**: Clean Architecture — maintain strict separation between layers:
-  - `app/core/`: Business logic, entities, use cases, ports.
-  - `app/adapters/`: Controllers and presenters.
-  - `app/infrastructure/`: External services, INSW API, IndexedDB, Excel (`xlsx`), PDF parsing, Gemini AI.
-  - `app/presentation/`: React components, hooks, views.
+- **Architecture**: Vertical Slice Architecture with a framework-independent core:
+  - `core/<slice>/`: TypeScript domain logic, use cases, and ports. Never import Next.js, React, browser APIs, or application infrastructure.
+  - `app/features/<slice>/`: Next.js application adapters, infrastructure, components, and hooks grouped by feature.
+  - `app/shared/`: Shared application UI, configuration, and infrastructure.
+  - `app/api/` and route pages: Thin Next.js entry points/composition roots.
+  - Dependency direction: `app -> core`; never `core -> app`.
 - **Styling**: Tailwind CSS + DaisyUI.
 
 ## Development Commands
@@ -16,5 +17,5 @@
 - Build project: `npm run build`
 
 ## Coding Guidelines
-- **TypeScript / JavaScript**: Maintain type safety where TypeScript is used; keep code clean and well-documented in Indonesian or English as appropriate for domain logic (Indonesian customs terminology like *LARTAS*, *HS Code*, *PPJK*).
+- **TypeScript**: New production code must use `.ts`/`.tsx` with strict typing. Remaining legacy JavaScript must be migrated slice-by-slice; do not add new `.js`/`.jsx` source files. Keep code clean and well-documented in Indonesian or English as appropriate for domain logic (Indonesian customs terminology like *LARTAS*, *HS Code*, *PPJK*).
 - **Conciseness**: Keep responses and explanations clear, concise, and focused on practical solutions.

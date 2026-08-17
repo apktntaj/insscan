@@ -15,9 +15,10 @@ Platform operasional berbasis browser untuk staf PPJK dan freight forwarder di I
 
 ## Tech Stack
 
+- **TypeScript** (`strict: true`)
 - **Next.js 14** (App Router)
 - **Tailwind CSS** + DaisyUI
-- **Clean Architecture** — core, adapters, infrastructure, presentation
+- **Vertical Slice Architecture** — core framework-independent, aplikasi Next.js per fitur
 - **IndexedDB** — penyimpanan data shipment di sisi browser
 - **INSW API** — sumber data HS code, tarif, dan LARTAS
 
@@ -63,14 +64,20 @@ cp .env.example .env
 
 ## Struktur Project
 
+```text
+core/                 # Domain, use case, dan port; tanpa Next.js/React
+├── hs-code/
+├── hs-finder/
+├── shipments/
+└── bl-extraction/
+
+app/                  # Aplikasi Next.js
+├── api/              # HTTP entry points
+├── features/         # Slice vertikal per fitur
+└── shared/           # UI dan infrastructure lintas fitur
 ```
-app/
-├── core/           # Business logic (entities, use cases, ports)
-├── adapters/       # Controllers & presenters
-├── infrastructure/ # External services (INSW API, Excel, IndexedDB)
-├── presentation/   # React components & hooks
-└── api/            # Next.js API routes
-```
+
+Detail aturan dependensi dan status migrasi tersedia di [`docs/architecture.md`](docs/architecture.md).
 
 ## Devlog
 

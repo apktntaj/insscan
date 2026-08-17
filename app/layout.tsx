@@ -1,0 +1,94 @@
+import { Analytics } from "@vercel/analytics/react";
+import type { Metadata } from "next";
+import type { ReactNode } from "react";
+import "./globals.css";
+import Navbar from "@/app/shared/components/Navbar";
+import { navLinks } from "@/app/shared/config/nav-links";
+import Link from "next/link";
+import { WHATSAPP_NUMBER } from "@/app/features/feedback/config/feedback-config";
+
+export const metadata: Metadata = {
+  metadataBase: new URL("https://pesisir.id"),
+  title: {
+    default: "Pesisir — Platform Operasional PPJK & Freight Forwarder",
+    template: "%s | Pesisir",
+  },
+  description:
+    "Platform operasional untuk staf PPJK dan freight forwarder. Cek LARTAS batch dari Excel, kelola data shipment, dan ekstrak data B/L — semua dalam satu workspace.",
+  keywords: [
+    "cek lartas",
+    "PPJK",
+    "freight forwarder",
+    "HS code",
+    "INSW",
+    "shipment tracking",
+    "bea cukai",
+    "impor",
+    "kepabeanan",
+    "bill of lading",
+  ],
+  authors: [{ name: "Semesta Raya Software" }],
+  creator: "Semesta Raya Software",
+  icons: {
+    icon: "logo-container.svg",
+  },
+  openGraph: {
+    title: "Pesisir — Platform Operasional PPJK & Freight Forwarder",
+    description:
+      "Platform operasional untuk staf PPJK dan freight forwarder. Cek LARTAS batch dari Excel, kelola data shipment, dan ekstrak data B/L — semua dalam satu workspace.",
+    url: "https://pesisir.id",
+    siteName: "Pesisir",
+    locale: "id_ID",
+    images: [
+      {
+        url: "https://pesisir.id/logo-pesisir.png",
+        width: 1200,
+        height: 630,
+        alt: "Pesisir — Platform operasional PPJK dan freight forwarder",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Pesisir — Platform Operasional PPJK & Freight Forwarder",
+    description:
+      "Platform operasional untuk staf PPJK dan freight forwarder. Cek LARTAS batch dari Excel, kelola data shipment, dan ekstrak data B/L — semua dalam satu workspace.",
+    images: ["https://pesisir.id/logo-pesisir.png"],
+  },
+  alternates: {
+    canonical: "https://pesisir.id",
+  },
+};
+
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return (
+    <html data-theme="light" lang="id" className="scroll-smooth">
+      <body className="min-h-screen flex flex-col bg-zinc-50 text-zinc-900 antialiased [font-family:ui-sans-serif,system-ui,-apple-system,Segoe_UI,Roboto,Helvetica,Arial,sans-serif]">
+        <header className="fixed top-0 left-0 right-0 z-40 border-b border-zinc-200/70 bg-zinc-50">
+          <Navbar links={navLinks} />
+        </header>
+        <main className="flex-1 pt-16">
+          <div className="mx-auto w-full max-w-7xl px-5 pb-8 pt-6 sm:px-8 lg:px-12">
+            {children}
+            <Analytics />
+          </div>
+        </main>
+        <footer className="border-t border-zinc-200/70 bg-zinc-50/90">
+          <aside className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-7 text-sm text-zinc-500 sm:px-8 lg:flex-row lg:items-center lg:justify-between lg:px-12">
+            <div>
+              <p className="font-medium text-zinc-700">Pesisir oleh Semesta Raya Software</p>
+              <p className="mt-1 text-xs">Alat bantu independen untuk operasional kepabeanan.</p>
+            </div>
+            <nav aria-label="Informasi hukum dan dukungan" className="flex flex-wrap gap-x-4 gap-y-2 text-xs">
+              <Link className="hover:text-cyan-700" href="/privacy">Privasi</Link>
+              <Link className="hover:text-cyan-700" href="/terms">Ketentuan</Link>
+              <Link className="hover:text-cyan-700" href="/refund-policy">Pembatalan & Refund</Link>
+              <a className="hover:text-cyan-700" href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer">Dukungan WhatsApp</a>
+            </nav>
+          </aside>
+        </footer>
+      </body>
+    </html>
+  );
+}

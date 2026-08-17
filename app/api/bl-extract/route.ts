@@ -1,0 +1,48 @@
+import { createGeminiService } from "@/app/features/bl-extraction/infrastructure/gemini.service";
+import {
+  createExtractBLWithGeminiUseCase,
+  type ExtractionUsageTracker,
+  type GeminiExtractionGateway,
+} from "@core/bl-extraction/use-cases/extract-bl-with-gemini";
+
+export const maxDuration = 60;
+
+const MAX_PDF_BYTES = 10 * 1024 * 1024;
+const serverUsageTracker: ExtractionUsageTracker = {
+  canExtract: async () => ({ ok: true, remaining: Number.POSITIVE_INFINITY }),
+  incrementUsage: async () => {},
+};
+
+export async function POST(request: Request): Promise<Response> {
+  try {
+    const formData = await request.formData();
+    const pdfFile = formData.get("file");
+    const text = String(formData.get("text") || "");
+
+    if (!(pdfFile instanceof File) || pdfFile.type !== "application/pdf") {
+      return Response.json(
+        { ok: false, error: { code: "INVALID_FILE", message: "File harus berformat PDF." } },
+        { status: 400 }
+      );
+    }
+    if (pdfFile.size > MAX_PDF_BYTES) {
+      return Response.json(
+        { ok: false, error: { code: "FILE_TOO_LARGE", message: "Ukuran PDF maksimum 10 MB." } },
+        { status: 413 }
+      );
+    }
+
+    const service = createGeminiService(
+      process.env.GEMINI_API_KEY ?? "",
+    ) as unknown as GeminiExtractionGateway;
+    const useCase = createExtractBLWithGeminiUseCase(service, serverUsageTracker);
+    const result = await useCase.execute(text, pdfFile);
+    return Response.json(result, { status: result.ok ? 200 : 502 });
+  } catch (error) {
+    console.error("[bl-extract] Unexpected extraction error:", error);
+    return Response.json(
+      { ok: false, error: { code: "API_ERROR", message: "File tidak bisa diproses. Coba lagi atau isi manual." } },
+      { status: 500 }
+    );
+  }
+}
