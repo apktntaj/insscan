@@ -42,6 +42,8 @@ const ERROR_MESSAGES = {
     "Foto tidak dapat diidentifikasi. Coba foto yang lebih jelas atau ketik deskripsi barang secara manual.",
   NO_CANDIDATE_CHAPTERS:
     "Deskripsi barang tidak cukup jelas untuk mengidentifikasi bab HS yang relevan. Coba tambahkan detail material, fungsi, atau bentuk barang.",
+  INSUFFICIENT_LEGAL_COVERAGE:
+    "Basis pengetahuan hukum untuk bab kandidat belum lengkap atau masih berupa draf. Klasifikasi dihentikan agar tidak menghasilkan kode yang tidak didukung.",
   GEMINI_UNAVAILABLE: "Ada masalah dengan sistem AI. Hubungi administrator.",
   GEMINI_TIMEOUT:
     "Proses AI memerlukan waktu terlalu lama. Silakan coba lagi dengan deskripsi yang lebih spesifik.",
@@ -117,7 +119,7 @@ export function createHsFinderController({ findHsCodeUseCase, hsFinderGeminiServ
    * Input validation (Req 1.2, 1.3, 1.4, 1.5) is delegated to makeItemDescription()
    * which trims whitespace and enforces min 3 / max 2000 character constraints.
    *
-   * @param {{ text: string, source: "text" | "photo" }} requestBody
+   * @param {{ text: string, source: "text" | "photo", clarificationAnswers?: Array<{question: string, answer: string}> }} requestBody
    * @returns {Promise<{ ok: true, data: import('../../core/entities/hs-finder').ClassificationResult } | { ok: false, errorCode: string, errorMessage: string }>}
    *
    * @example
@@ -153,8 +155,20 @@ export function createHsFinderController({ findHsCodeUseCase, hsFinderGeminiServ
 
     const itemDescription = itemDescResult.data;
 
+    const clarificationAnswers = Array.isArray(requestBody?.clarificationAnswers)
+      ? requestBody.clarificationAnswers.slice(0, 2).flatMap((item) => {
+          if (typeof item?.question !== "string" || typeof item?.answer !== "string") return [];
+          const question = item.question.trim().slice(0, 300);
+          const answer = item.answer.trim().slice(0, 1000);
+          return question && answer ? [{ question, answer }] : [];
+        })
+      : [];
+
     // Run use case
-    const useCaseResult = await findHsCodeUseCase.execute({ itemDescription });
+    const useCaseResult = await findHsCodeUseCase.execute({
+      itemDescription,
+      clarificationAnswers,
+    });
 
     if (!useCaseResult.ok) {
       // Use case already provides errorCode and errorMessage

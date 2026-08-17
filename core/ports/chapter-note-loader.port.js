@@ -44,7 +44,8 @@
  *   Muat file `.md` untuk setiap nomor bab yang diminta.
  *   - Input: array nomor bab, e.g. `["84", "85", "90"]`
  *   - Output: `{ notes, coverageMap }` — bab yang tidak ada file-nya masuk ke
- *     `coverageMap` sebagai `"unvalidated"` dan tidak muncul di `notes`.
+ *     `coverageMap` sebagai `"unvalidated"`. File bertanda DRAFT dimuat untuk
+ *     audit, tetapi coverage-nya `"draft"`, bukan `"validated"`.
  *
  * @property {() => Promise<string[]>} listAvailableChapters
  *   Scan direktori chapters dan kembalikan daftar nomor bab yang ada file-nya.

@@ -22,7 +22,7 @@ describe("readChapterFile", () => {
     expect(result.data.title.length).toBeGreaterThan(0);
     expect(typeof result.data.content).toBe("string");
     expect(result.data.content.length).toBeGreaterThan(0);
-    expect(result.data.status).toBe("validated");
+    expect(result.data.status).toBe("draft");
   });
 
   test("parses title from heading # Bab {nn} — {title}", async () => {
@@ -51,11 +51,11 @@ describe("readChapterFile", () => {
     expect(result.data.content.length).toBeGreaterThan(50);
   });
 
-  test("status is always 'validated' when file exists", async () => {
+  test("status reflects the DRAFT marker in existing files", async () => {
     for (const num of ["01", "84", "85"]) {
       const result = await readChapterFile(num);
       if (result.ok) {
-        expect(result.data.status).toBe("validated");
+        expect(result.data.status).toBe("draft");
       }
     }
   });
@@ -73,16 +73,16 @@ describe("createChapterNoteLoaderService — loadChapters", () => {
     expect(notes).toHaveLength(2);
     expect(notes[0].chapterNumber).toBe("84");
     expect(notes[1].chapterNumber).toBe("85");
-    expect(coverageMap.chapters["84"]).toBe("validated");
-    expect(coverageMap.chapters["85"]).toBe("validated");
-    expect(coverageMap.hasUnvalidated).toBe(false);
+    expect(coverageMap.chapters["84"]).toBe("draft");
+    expect(coverageMap.chapters["85"]).toBe("draft");
+    expect(coverageMap.hasUnvalidated).toBe(true);
   });
 
   test("skips missing chapters silently and marks them unvalidated", async () => {
     const { notes, coverageMap } = await service.loadChapters(["84", "85", "90"]);
     expect(notes).toHaveLength(2);
-    expect(coverageMap.chapters["84"]).toBe("validated");
-    expect(coverageMap.chapters["85"]).toBe("validated");
+    expect(coverageMap.chapters["84"]).toBe("draft");
+    expect(coverageMap.chapters["85"]).toBe("draft");
     expect(coverageMap.chapters["90"]).toBe("unvalidated");
     expect(coverageMap.hasUnvalidated).toBe(true);
   });
@@ -116,7 +116,7 @@ describe("createChapterNoteLoaderService — loadChapters", () => {
     expect(note).toHaveProperty("chapterNumber");
     expect(note).toHaveProperty("title");
     expect(note).toHaveProperty("content");
-    expect(note).toHaveProperty("status", "validated");
+    expect(note).toHaveProperty("status", "draft");
   });
 });
 

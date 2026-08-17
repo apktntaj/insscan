@@ -9,7 +9,7 @@
 
 /**
  * Status ketersediaan ChapterNote untuk suatu bab.
- * @typedef {"validated" | "unvalidated"} CoverageStatus
+ * @typedef {"validated" | "draft" | "unvalidated"} CoverageStatus
  */
 
 /**
@@ -79,6 +79,9 @@ const MIN_DESCRIPTION_LENGTH = 3;
 const MAX_DESCRIPTION_LENGTH = 2000;
 const HS_CODE_PATTERN = /^\d{6}$/;
 const REASONING_STEPS_REQUIRED = 5;
+const RECOMMENDATION_CONFIDENCE_LEVELS = new Set(["high", "medium", "low"]);
+const MAX_RECOMMENDATIONS = 3;
+const MAX_CLARIFICATION_QUESTIONS = 2;
 
 // ─────────────────────────────────────────────
 // makeItemDescription
@@ -223,6 +226,113 @@ export function makeClassificationResult(raw) {
         chapters: { ...coverageMap.chapters },
         hasUnvalidated: coverageMap.hasUnvalidated,
       }),
+    }),
+  };
+}
+
+// ─────────────────────────────────────────────
+// makeClassificationDecision
+// ─────────────────────────────────────────────
+
+/**
+ * Validates the adaptive classification response. Clarification is allowed only
+ * when one or two targeted answers are required; otherwise ranked HS6
+ * recommendations are returned directly.
+ */
+export function makeClassificationDecision(raw) {
+  if (!raw || typeof raw !== "object") {
+    return { ok: false, error: "Data keputusan klasifikasi tidak valid." };
+  }
+
+  const coverageMap = raw.coverageMap;
+  if (
+    !coverageMap ||
+    typeof coverageMap !== "object" ||
+    !coverageMap.chapters ||
+    typeof coverageMap.chapters !== "object" ||
+    typeof coverageMap.hasUnvalidated !== "boolean"
+  ) {
+    return { ok: false, error: "coverageMap tidak valid." };
+  }
+
+  const normalizedCoverage = Object.freeze({
+    chapters: Object.freeze({ ...coverageMap.chapters }),
+    hasUnvalidated: coverageMap.hasUnvalidated,
+  });
+
+  if (raw.status === "needs_clarification") {
+    const questions = [...new Set(
+      (Array.isArray(raw.questions) ? raw.questions : [])
+        .filter((question) => typeof question === "string" && question.trim())
+        .map((question) => question.trim().slice(0, 300))
+    )].slice(0, MAX_CLARIFICATION_QUESTIONS);
+    const reason = typeof raw.clarificationReason === "string"
+      ? raw.clarificationReason.trim().slice(0, 500)
+      : "";
+
+    if (questions.length === 0 || !reason) {
+      return { ok: false, error: "Permintaan klarifikasi tidak valid." };
+    }
+
+    return {
+      ok: true,
+      data: Object.freeze({
+        status: "needs_clarification",
+        clarificationReason: reason,
+        questions: Object.freeze(questions),
+        recommendations: Object.freeze([]),
+        coverageMap: normalizedCoverage,
+      }),
+    };
+  }
+
+  if (raw.status !== "recommendations" || !Array.isArray(raw.recommendations)) {
+    return { ok: false, error: "Status keputusan klasifikasi tidak valid." };
+  }
+
+  const recommendations = [];
+  const seenCodes = new Set();
+  for (const item of raw.recommendations.slice(0, MAX_RECOMMENDATIONS)) {
+    const hsCode = typeof item?.hsCode === "string" ? item.hsCode.trim() : "";
+    const description = typeof item?.description === "string" ? item.description.trim() : "";
+    const rationale = typeof item?.rationale === "string" ? item.rationale.trim() : "";
+    if (
+      !HS_CODE_PATTERN.test(hsCode) ||
+      !description ||
+      !rationale ||
+      !RECOMMENDATION_CONFIDENCE_LEVELS.has(item?.confidence) ||
+      seenCodes.has(hsCode)
+    ) {
+      continue;
+    }
+
+    seenCodes.add(hsCode);
+    recommendations.push(Object.freeze({
+      hsCode,
+      description: description.slice(0, 500),
+      confidence: item.confidence,
+      rationale: rationale.slice(0, 1000),
+      quotedRule: typeof item.quotedRule === "string" && item.quotedRule.trim()
+        ? item.quotedRule.trim().slice(0, 1000)
+        : null,
+      chapterRef: typeof item.chapterRef === "string" && /^\d{2}$/.test(item.chapterRef)
+        ? item.chapterRef
+        : null,
+    }));
+  }
+
+  if (recommendations.length === 0) {
+    return { ok: false, error: "Tidak ada rekomendasi HS code yang valid." };
+  }
+
+  return {
+    ok: true,
+    data: Object.freeze({
+      status: "recommendations",
+      clarificationReason: null,
+      questions: Object.freeze([]),
+      recommendations: Object.freeze(recommendations),
+      coverageMap: normalizedCoverage,
     }),
   };
 }

@@ -10,7 +10,10 @@
  */
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { makeClassificationResult } from "@core/entities/hs-finder.js";
+import {
+  makeClassificationDecision,
+  makeClassificationResult,
+} from "@core/entities/hs-finder.js";
 
 // ─────────────────────────────────────────────
 // Constants
@@ -18,6 +21,7 @@ import { makeClassificationResult } from "@core/entities/hs-finder.js";
 
 const GEMINI_MODEL = "gemini-2.5-flash";
 const PHOTO_TIMEOUT_MS = 45_000;
+const PRODUCT_FACTS_TIMEOUT_MS = 45_000;
 const CHAPTER_TIMEOUT_MS = 45_000;
 const CLASSIFICATION_TIMEOUT_MS = 60_000;
 const MAX_CANDIDATE_CHAPTERS = 5;
@@ -74,9 +78,52 @@ Tulis deskripsi dalam 2–4 kalimat saja. Jangan gunakan format JSON atau bullet
 Jika kamu tidak dapat mengidentifikasi barang dari foto ini, jawab tepat dengan kata: TIDAK_DAPAT_DIIDENTIFIKASI`;
 }
 
+export function buildProductFactsPrompt({ description, previousFacts = null, answers = [] }) {
+  const priorContext = previousFacts
+    ? `\nFAKTA DARI PUTARAN SEBELUMNYA:\n${JSON.stringify(previousFacts)}\n`
+    : "";
+  const answerContext = answers.length
+    ? `\nJAWABAN PENGGUNA:\n${JSON.stringify(answers)}\n`
+    : "";
+
+  return `Kamu mengekstrak fakta produk untuk persiapan klasifikasi kepabeanan.
+
+ATURAN WAJIB:
+1. Gunakan hanya informasi yang dinyatakan pengguna. Jangan menebak fakta produk.
+2. Informasi yang tidak diketahui harus bernilai null.
+3. evidence harus berupa kutipan singkat dari input pengguna; gunakan null bila tidak ada.
+4. Jangan menentukan atau menyebut kode HS, bab, pos, subpos, atau pos tarif.
+5. Tandai fakta yang belum ada dan dapat mengubah klasifikasi sebagai blocking=true.
+6. Buat maksimum 3 pertanyaan lanjutan yang singkat dan spesifik.
+7. Kembalikan JSON murni tanpa markdown.
+
+DESKRIPSI AWAL:
+${description}
+${priorContext}${answerContext}
+FORMAT JSON:
+{
+  "facts": {
+    "productName": {"value": "string atau null", "confidence": "low|medium|high|null", "evidence": "string atau null"},
+    "materialComposition": {"value": "string atau null", "confidence": "low|medium|high|null", "evidence": "string atau null"},
+    "primaryFunction": {"value": "string atau null", "confidence": "low|medium|high|null", "evidence": "string atau null"},
+    "workingPrinciple": {"value": "string atau null", "confidence": "low|medium|high|null", "evidence": "string atau null"},
+    "physicalForm": {"value": "string atau null", "confidence": "low|medium|high|null", "evidence": "string atau null"},
+    "processingState": {"value": "string atau null", "confidence": "low|medium|high|null", "evidence": "string atau null"},
+    "intendedUse": {"value": "string atau null", "confidence": "low|medium|high|null", "evidence": "string atau null"},
+    "isPartOrAccessory": {"value": "boolean atau null", "confidence": "low|medium|high|null", "evidence": "string atau null"},
+    "isSetOrMixture": {"value": "boolean atau null", "confidence": "low|medium|high|null", "evidence": "string atau null"},
+    "packaging": {"value": "string atau null", "confidence": "low|medium|high|null", "evidence": "string atau null"},
+    "technicalSpecifications": {"value": "string atau null", "confidence": "low|medium|high|null", "evidence": "string atau null"}
+  },
+  "missingFacts": [{"field": "nama field", "reason": "alasan", "blocking": true}],
+  "questions": ["maksimum tiga pertanyaan"]
+}`;
+}
+
 /**
- * Builds the full classification prompt including all chapter notes and
- * explicit instruction to cite specific rules per reasoning step.
+ * Builds an adaptive classification prompt. It asks for ranked recommendations
+ * by default and permits targeted clarification only for materially different
+ * chapters or headings supported by the available legal notes.
  *
  * @param {string} itemDescription - Normalized item description text
  * @param {import('../../core/entities/hs-finder').ChapterNote[]} chapterNotes - Loaded chapter notes
@@ -91,82 +138,69 @@ Jika kamu tidak dapat mengidentifikasi barang dari foto ini, jawab tepat dengan 
  * buildClassificationPrompt("kain polyester", [], { chapters: { "55": "unvalidated" }, hasUnvalidated: true })
  * // => "Kamu adalah ahli klasifikasi HS code..." (includes unvalidated disclaimer)
  */
-export function buildClassificationPrompt(itemDescription, chapterNotes, coverageMap) {
+export function buildClassificationPrompt(
+  itemDescription,
+  chapterNotes,
+  coverageMap,
+  { clarificationAnswers = [] } = {}
+) {
   const notesSection = chapterNotes.length > 0
     ? chapterNotes.map((note) => {
         const statusLabel = note.status === "validated" ? "TERVALIDASI" : "BELUM TERVALIDASI";
         return `--- BAB ${note.chapterNumber} [${statusLabel}] ---\n${note.content}\n`;
       }).join("\n")
-    : "(Tidak ada catatan bab yang tersedia — gunakan pengetahuan umum dan tandai setiap langkah dengan ⚠️ tidak ada catatan tervalidasi)";
+    : "(Tidak ada catatan bab tervalidasi. Jangan menghasilkan klasifikasi.)";
+  const answersSection = clarificationAnswers.length
+    ? `\nJAWABAN KLARIFIKASI PENGGUNA:\n${JSON.stringify(clarificationAnswers)}\n`
+    : "";
+  const clarificationRule = clarificationAnswers.length > 0
+    ? "Pengguna sudah menjawab klarifikasi. Jangan ajukan pertanyaan lagi; berikan rekomendasi terbaik dari informasi yang tersedia."
+    : "Jika perbedaannya tidak material menurut kriteria di atas, jangan bertanya dan langsung berikan rekomendasi.";
 
-  return `Kamu adalah ahli klasifikasi HS code. Tugasmu mengklasifikasikan barang berikut berdasarkan HANYA catatan bab yang disediakan di bawah ini.
+  return `Kamu adalah ahli klasifikasi HS code. Nilai barang berdasarkan HANYA deskripsi dan catatan hukum yang tersedia.
 
-PENTING:
-- Setiap kesimpulan HARUS mengutip teks spesifik dari catatan bab yang disediakan.
-- Jangan membuat klaim berdasarkan pengetahuan umum jika tidak ada kutipan yang mendukung.
-- Untuk bab yang ditandai [BELUM TERVALIDASI], gunakan pengetahuan umummu tapi tandai setiap langkah dengan "⚠️ tidak ada catatan tervalidasi untuk bab ini".
-- Setiap kesimpulan harus mengutip teks spesifik dari catatan bab yang disediakan. Jangan membuat klaim tanpa dasar dari catatan bab.
-
-BARANG YANG DIKLASIFIKASIKAN:
+BARANG:
 ${itemDescription}
-
-CATATAN BAB YANG TERSEDIA:
+${answersSection}
+CATATAN BAB:
 ${notesSection}
 
-FORMAT OUTPUT (JSON saja, tanpa markdown code fence):
+ATURAN KEPUTUSAN:
+1. Utamakan memberikan 2–3 rekomendasi HS6 yang paling mungkin, diurutkan dari yang terkuat. Berikan satu saja bila hanya satu kode yang dapat dipertanggungjawabkan.
+2. Ajukan klarifikasi HANYA jika informasi yang hilang dapat memindahkan hasil secara material ke bab berbeda (2 digit) atau heading berbeda (4 digit), terutama karena catatan bagian/bab, pengecualian, status bagian/aksesori, komposisi, tingkat pengolahan, atau fungsi utama.
+3. Jangan bertanya bila ketidakpastian hanya memengaruhi peringkat kandidat yang berdekatan atau subheading dalam heading yang sama. Dalam kondisi itu langsung tampilkan rekomendasi.
+4. Maksimum 2 pertanyaan, singkat, dan setiap pertanyaan harus membedakan cabang klasifikasi yang berjauhan.
+5. Setiap rekomendasi harus didukung alasan dan kutipan nyata dari catatan yang diberikan. Jangan mengarang aturan.
+6. ${clarificationRule}
+
+Jika klarifikasi benar-benar diperlukan, keluarkan:
 {
-  "hsCode": "6 digit angka, contoh: 847130",
-  "description": "deskripsi subheading dalam Bahasa Indonesia",
-  "reasoningPath": [
+  "status": "needs_clarification",
+  "clarificationReason": "jelaskan singkat dua cabang bab/heading yang dapat berubah dan dasar catatannya",
+  "questions": ["maksimum dua pertanyaan pembeda"],
+  "recommendations": [],
+  "coverageMap": ${JSON.stringify(coverageMap)}
+}
+
+Jika klarifikasi tidak diperlukan, keluarkan:
+{
+  "status": "recommendations",
+  "clarificationReason": null,
+  "questions": [],
+  "recommendations": [
     {
-      "stepNumber": 1,
-      "title": "Identifikasi Barang",
-      "content": "Deskripsikan nama barang, material utama, fungsi, dan bentuk fisik.",
-      "quotedRule": null,
-      "chapterRef": null,
-      "coverage": null
-    },
-    {
-      "stepNumber": 2,
-      "title": "Eliminasi Bab",
-      "content": "Jelaskan bab mana yang dieliminasi dan mengapa, kutip teks dari catatan bab.",
-      "quotedRule": "teks kutipan langsung dari catatan bab",
-      "chapterRef": "nomor bab 2 digit, contoh: 84",
-      "coverage": "validated atau unvalidated"
-    },
-    {
-      "stepNumber": 3,
-      "title": "Konfirmasi Bab",
-      "content": "Jelaskan mengapa bab ini yang paling tepat, kutip teks dari catatan bab.",
-      "quotedRule": "teks kutipan langsung dari catatan bab",
-      "chapterRef": "nomor bab 2 digit",
-      "coverage": "validated atau unvalidated"
-    },
-    {
-      "stepNumber": 4,
-      "title": "Penentuan Heading",
-      "content": "Jelaskan heading (4-digit) yang dipilih beserta alasan.",
-      "quotedRule": "teks kutipan langsung dari catatan bab",
-      "chapterRef": "nomor bab 2 digit",
-      "coverage": "validated atau unvalidated"
-    },
-    {
-      "stepNumber": 5,
-      "title": "Penentuan Subheading",
-      "content": "Jelaskan subheading (6-digit) yang dipilih beserta alasan.",
-      "quotedRule": "teks kutipan langsung dari catatan bab",
-      "chapterRef": "nomor bab 2 digit",
-      "coverage": "validated atau unvalidated"
+      "hsCode": "6 digit angka tanpa titik",
+      "description": "deskripsi subheading dalam Bahasa Indonesia",
+      "confidence": "high|medium|low",
+      "rationale": "alasan ringkas pemilihan",
+      "quotedRule": "kutipan nyata dari catatan bab",
+      "chapterRef": "nomor bab 2 digit"
     }
   ],
   "coverageMap": ${JSON.stringify(coverageMap)}
 }
 
-Pastikan:
-1. hsCode berisi tepat 6 digit angka (tanpa titik atau spasi)
-2. reasoningPath berisi tepat 5 langkah dengan stepNumber 1 sampai 5 berurutan
-3. Setiap langkah yang mengutip aturan (stepNumber 2–5) harus mengisi quotedRule dengan kutipan nyata dari catatan bab
-4. Output hanya JSON murni — tidak ada teks pengantar, tidak ada code fence`;
+Output hanya JSON murni tanpa markdown.`;
 }
 
 // ─────────────────────────────────────────────
@@ -248,11 +282,25 @@ export function parseClassificationResponse(responseText) {
   try {
     const cleaned = stripCodeFences(responseText);
     const raw = JSON.parse(cleaned);
-    const result = makeClassificationResult(raw);
+    const result = raw?.status
+      ? makeClassificationDecision(raw)
+      : makeClassificationResult(raw);
     if (!result.ok) {
       return { ok: false, error: "GEMINI_INVALID_RESPONSE" };
     }
     return result;
+  } catch {
+    return { ok: false, error: "GEMINI_INVALID_RESPONSE" };
+  }
+}
+
+export function parseProductFactsResponse(responseText) {
+  try {
+    const parsed = JSON.parse(stripCodeFences(responseText));
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return { ok: false, error: "GEMINI_INVALID_RESPONSE" };
+    }
+    return { ok: true, data: parsed };
   } catch {
     return { ok: false, error: "GEMINI_INVALID_RESPONSE" };
   }
@@ -283,6 +331,7 @@ export function createHsFinderGeminiService(geminiApiKey) {
   if (!geminiApiKey || typeof geminiApiKey !== "string" || geminiApiKey.length <= 10) {
     return {
       identifyFromPhoto: async () => ({ ok: false, error: "GEMINI_UNAVAILABLE" }),
+      extractProductFacts: async () => ({ ok: false, error: "GEMINI_UNAVAILABLE" }),
       identifyCandidateChapters: async () => ({ ok: false, error: "GEMINI_UNAVAILABLE" }),
       classifyWithNotes: async () => ({ ok: false, error: "GEMINI_UNAVAILABLE" }),
     };
@@ -290,6 +339,19 @@ export function createHsFinderGeminiService(geminiApiKey) {
 
   const genAI = new GoogleGenerativeAI(geminiApiKey);
   const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
+
+  async function extractProductFacts(input) {
+    const prompt = buildProductFactsPrompt(input);
+    try {
+      const result = await withTimeout(
+        model.generateContent(prompt),
+        PRODUCT_FACTS_TIMEOUT_MS
+      );
+      return parseProductFactsResponse(result.response.text().trim());
+    } catch (err) {
+      return _mapError(err);
+    }
+  }
 
   // ─────────────────────────────────────────────
   // identifyFromPhoto
@@ -363,6 +425,8 @@ export function createHsFinderGeminiService(geminiApiKey) {
   async function identifyCandidateChapters(itemDescription) {
     const prompt = `Kamu adalah ahli klasifikasi HS code. Berdasarkan deskripsi barang di bawah ini, identifikasi maksimum 5 nomor bab HS yang paling mungkin relevan.
 
+Sertakan semua bab yang masih masuk akal apabila informasi tentang fungsi utama, bahan, tingkat pengolahan, atau status bagian/aksesori dapat memindahkan klasifikasi ke bab yang berbeda. Jangan tambahkan bab yang hanya bersifat spekulatif.
+
 BARANG:
 ${itemDescription}
 
@@ -419,8 +483,8 @@ Jangan sertakan penjelasan apapun — hanya array JSON.`;
    * await service.classifyWithNotes("kain poliester", [], { chapters: { "55": "unvalidated" }, hasUnvalidated: true })
    * // => { ok: true, data: { hsCode: "550920", ... } } or { ok: false, error: "GEMINI_INVALID_RESPONSE" }
    */
-  async function classifyWithNotes(itemDescription, chapterNotes, coverageMap) {
-    const prompt = buildClassificationPrompt(itemDescription, chapterNotes, coverageMap);
+  async function classifyWithNotes(itemDescription, chapterNotes, coverageMap, options = {}) {
+    const prompt = buildClassificationPrompt(itemDescription, chapterNotes, coverageMap, options);
 
     try {
       const result = await withTimeout(
@@ -435,7 +499,7 @@ Jangan sertakan penjelasan apapun — hanya array JSON.`;
     }
   }
 
-  return { identifyFromPhoto, identifyCandidateChapters, classifyWithNotes };
+  return { extractProductFacts, identifyFromPhoto, identifyCandidateChapters, classifyWithNotes };
 }
 
 // ─────────────────────────────────────────────

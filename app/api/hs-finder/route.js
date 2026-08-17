@@ -15,7 +15,7 @@
  * @module api/hs-finder
  */
 
-import { createChapterNoteLoaderService } from "../../infrastructure/services/chapter-note-loader.service.js";
+import { createClassificationKnowledgeService } from "../../infrastructure/services/classification-knowledge.service.js";
 import { createHsFinderGeminiService } from "../../infrastructure/services/hs-finder-gemini.service.js";
 import { createFindHsCodeUseCase } from "@core/use-cases/find-hs-code.js";
 import { createHsFinderController } from "../../adapters/controllers/hs-finder.controller.js";
@@ -43,9 +43,12 @@ if (!geminiApiKey) {
   );
 }
 
-const chapterNoteLoader = createChapterNoteLoaderService();
+const classificationKnowledge = createClassificationKnowledgeService();
 const hsFinderGeminiService = createHsFinderGeminiService(geminiApiKey);
-const findHsCodeUseCase = createFindHsCodeUseCase({ hsFinderGeminiService, chapterNoteLoader });
+const findHsCodeUseCase = createFindHsCodeUseCase({
+  hsFinderGeminiService,
+  classificationKnowledge,
+});
 const controller = createHsFinderController({ findHsCodeUseCase, hsFinderGeminiService });
 
 // ─────────────────────────────────────────────
@@ -56,7 +59,7 @@ const controller = createHsFinderController({ findHsCodeUseCase, hsFinderGeminiS
  * Handles POST /api/hs-finder.
  *
  * Expected request body (JSON):
- *   - action: "find"           → { action, text, source }
+ *   - action: "find"           → { action, text, source, clarificationAnswers? }
  *   - action: "identify_photo" → { action, imageBase64, mimeType }
  *
  * Responses:

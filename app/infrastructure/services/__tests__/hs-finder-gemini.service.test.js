@@ -10,9 +10,11 @@
 import fc from "fast-check";
 import {
   buildPhotoIdentificationPrompt,
+  buildProductFactsPrompt,
   buildClassificationPrompt,
   parseChapterListResponse,
   parseClassificationResponse,
+  parseProductFactsResponse,
   createHsFinderGeminiService,
 } from "../hs-finder-gemini.service.js";
 
@@ -43,6 +45,39 @@ const VALID_CLASSIFICATION_RESPONSE = JSON.stringify({
     { stepNumber: 5, title: "Penentuan Subheading", content: "Subheading 847130", quotedRule: "kutipan untuk subheading", chapterRef: "84", coverage: "validated" },
   ],
   coverageMap: { chapters: { "84": "validated" }, hasUnvalidated: false },
+});
+
+describe("product facts extraction helpers", () => {
+  test("prompt forbids guessing and HS classification", () => {
+    const prompt = buildProductFactsPrompt({ description: "laptop" });
+    expect(prompt).toContain("tidak diketahui harus bernilai null");
+    expect(prompt).toContain("Jangan menentukan atau menyebut kode HS");
+    expect(prompt).toContain("maksimum 3 pertanyaan");
+  });
+
+  test("prompt includes previous facts and user answers", () => {
+    const prompt = buildProductFactsPrompt({
+      description: "mesin",
+      previousFacts: { productName: { value: "mesin" } },
+      answers: [{ question: "Prinsip kerja?", answer: "elektrik" }],
+    });
+    expect(prompt).toContain("FAKTA DARI PUTARAN SEBELUMNYA");
+    expect(prompt).toContain("JAWABAN PENGGUNA");
+    expect(prompt).toContain("elektrik");
+  });
+
+  test("parses pure JSON and fenced JSON product facts", () => {
+    const response = JSON.stringify({ facts: {}, missingFacts: [], questions: [] });
+    expect(parseProductFactsResponse(response).ok).toBe(true);
+    expect(parseProductFactsResponse("```json\n" + response + "\n```").ok).toBe(true);
+  });
+
+  test("rejects invalid product facts JSON", () => {
+    expect(parseProductFactsResponse("not-json")).toEqual({
+      ok: false,
+      error: "GEMINI_INVALID_RESPONSE",
+    });
+  });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -90,10 +125,11 @@ describe("buildClassificationPrompt", () => {
     expect(prompt).toContain("laptop Intel i7");
   });
 
-  test("includes mandatory citation instruction (Req 5.6)", () => {
+  test("only allows questions for materially different chapters or headings", () => {
     const prompt = buildClassificationPrompt("laptop", [], VALID_COVERAGE_MAP);
-    expect(prompt).toContain("Setiap kesimpulan harus mengutip teks spesifik dari catatan bab yang disediakan.");
-    expect(prompt).toContain("Jangan membuat klaim tanpa dasar dari catatan bab.");
+    expect(prompt).toContain("bab berbeda (2 digit) atau heading berbeda (4 digit)");
+    expect(prompt).toContain("Maksimum 2 pertanyaan");
+    expect(prompt).toContain("langsung tampilkan rekomendasi");
   });
 
   test("includes chapter note content when notes are provided", () => {
@@ -115,7 +151,8 @@ describe("buildClassificationPrompt", () => {
 
   test("includes fallback message when no chapter notes are provided", () => {
     const prompt = buildClassificationPrompt("laptop", [], VALID_COVERAGE_MAP);
-    expect(prompt).toContain("Tidak ada catatan bab yang tersedia");
+    expect(prompt).toContain("Tidak ada catatan bab tervalidasi");
+    expect(prompt).toContain("Jangan menghasilkan klasifikasi");
   });
 
   test("embeds the coverageMap as JSON in the output format section", () => {
@@ -123,12 +160,22 @@ describe("buildClassificationPrompt", () => {
     expect(prompt).toContain('"hasUnvalidated"');
   });
 
-  test("includes JSON format instructions with all 5 reasoning steps", () => {
+  test("asks for ranked recommendations when clarification is unnecessary", () => {
     const prompt = buildClassificationPrompt("laptop", [], VALID_COVERAGE_MAP);
-    expect(prompt).toContain('"stepNumber": 1');
-    expect(prompt).toContain('"stepNumber": 5');
-    expect(prompt).toContain("Identifikasi Barang");
-    expect(prompt).toContain("Penentuan Subheading");
+    expect(prompt).toContain('"status": "recommendations"');
+    expect(prompt).toContain('"recommendations"');
+    expect(prompt).toContain('"confidence": "high|medium|low"');
+  });
+
+  test("forbids another question after clarification answers are supplied", () => {
+    const prompt = buildClassificationPrompt(
+      "mesin",
+      [VALID_CHAPTER_NOTE],
+      VALID_COVERAGE_MAP,
+      { clarificationAnswers: [{ question: "Fungsi?", answer: "Mengolah data" }] }
+    );
+    expect(prompt).toContain("Jangan ajukan pertanyaan lagi");
+    expect(prompt).toContain("Mengolah data");
   });
 });
 
@@ -304,6 +351,40 @@ describe("parseClassificationResponse", () => {
     expect(result.data.coverageMap.chapters["84"]).toBe("validated");
     expect(result.data.coverageMap.hasUnvalidated).toBe(false);
   });
+
+  test("parses adaptive ranked recommendations", () => {
+    const response = JSON.stringify({
+      status: "recommendations",
+      clarificationReason: null,
+      questions: [],
+      recommendations: [{
+        hsCode: "847130",
+        description: "Mesin pengolah data portabel",
+        confidence: "high",
+        rationale: "Fungsi utama pengolahan data.",
+        quotedRule: "Mesin pengolah data otomatis",
+        chapterRef: "84",
+      }],
+      coverageMap: VALID_COVERAGE_MAP,
+    });
+    const result = parseClassificationResponse(response);
+    expect(result.ok).toBe(true);
+    expect(result.data.status).toBe("recommendations");
+    expect(result.data.recommendations[0].hsCode).toBe("847130");
+  });
+
+  test("parses a targeted clarification decision", () => {
+    const response = JSON.stringify({
+      status: "needs_clarification",
+      clarificationReason: "Fungsi utama membedakan Bab 84 dan 85.",
+      questions: ["Apakah fungsi utama barang mengolah data atau komunikasi?"],
+      recommendations: [],
+      coverageMap: VALID_COVERAGE_MAP,
+    });
+    const result = parseClassificationResponse(response);
+    expect(result.ok).toBe(true);
+    expect(result.data.questions).toHaveLength(1);
+  });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -311,8 +392,9 @@ describe("parseClassificationResponse", () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe("createHsFinderGeminiService", () => {
-  test("returns an object with three method functions", () => {
+  test("returns an object with all HS Finder method functions", () => {
     const service = createHsFinderGeminiService("valid-api-key-12345");
+    expect(typeof service.extractProductFacts).toBe("function");
     expect(typeof service.identifyFromPhoto).toBe("function");
     expect(typeof service.identifyCandidateChapters).toBe("function");
     expect(typeof service.classifyWithNotes).toBe("function");

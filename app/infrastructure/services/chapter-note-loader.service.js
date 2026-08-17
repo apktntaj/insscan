@@ -26,6 +26,9 @@ const CHAPTER_FILE_PATTERN = /^chapter-(\d{2})\.md$/;
 /** Pattern to extract the title from the first heading line: # Bab {nn} — {title} */
 const HEADING_PATTERN = /^#\s+Bab\s+\d+\s+[—–-]\s+(.+)$/m;
 
+/** Legacy files carry this marker until checked against an authoritative text. */
+const DRAFT_MARKER_PATTERN = /<!--\s*DRAFT\b/i;
+
 // ─────────────────────────────────────────────
 // Module-level cache (shared across all instances)
 // ─────────────────────────────────────────────
@@ -86,7 +89,7 @@ export async function readChapterFile(chapterNumber) {
     chapterNumber,
     title,
     content,
-    status: "validated",
+    status: DRAFT_MARKER_PATTERN.test(content) ? "draft" : "validated",
   };
 
   const result = { ok: true, data: note };
@@ -101,9 +104,9 @@ export async function readChapterFile(chapterNumber) {
 /**
  * Loads `.md` files for the requested chapter numbers.
  *
- * Missing files are skipped silently (graceful degradation). The returned
- * `coverageMap` records every requested chapter as either "validated"
- * (file found) or "unvalidated" (file missing).
+ * Missing files are skipped. The returned `coverageMap` distinguishes legal
+ * text marked "validated", an existing file marked "draft", and a missing
+ * file marked "unvalidated".
  *
  * @param {string[]} chapterNumbers - Array of chapter numbers to load, e.g. ["84", "85", "90"]
  * @returns {Promise<{ notes: import('../../core/entities/hs-finder').ChapterNote[], coverageMap: import('../../core/entities/hs-finder').CoverageMap }>}
@@ -131,12 +134,22 @@ async function loadChapters(chapterNumbers) {
     const result = results[i];
     if (result.ok) {
       notes.push(result.data);
-      loadedChapterNumbers.push(chapterNumbers[i]);
+      if (result.data.status === "validated") {
+        loadedChapterNumbers.push(chapterNumbers[i]);
+      }
     }
     // Missing files are skipped silently — they appear in coverageMap as "unvalidated"
   }
 
-  const coverageMap = makeCoverageMap(chapterNumbers, loadedChapterNumbers);
+  const baseCoverageMap = makeCoverageMap(chapterNumbers, loadedChapterNumbers);
+  const chapters = { ...baseCoverageMap.chapters };
+  for (const note of notes) {
+    if (note.status === "draft") chapters[note.chapterNumber] = "draft";
+  }
+  const coverageMap = Object.freeze({
+    chapters: Object.freeze(chapters),
+    hasUnvalidated: Object.values(chapters).some((status) => status !== "validated"),
+  });
 
   return { notes, coverageMap };
 }

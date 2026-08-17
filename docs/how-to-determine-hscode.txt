@@ -1,0 +1,29 @@
+ 1. Establish the product facts:
+      - Material/composition
+      - Primary function
+      - Processing state
+      - Physical form
+      - Intended use
+      - How it operates
+      - Whether it is a complete product, part, mixture, or set
+
+  2. Apply GRI/KUM:
+      - GRI 1: heading wording and applicable Section/Chapter Notes
+      - GRI 2: incomplete goods, mixtures, and combinations
+      - GRI 3: specificity, essential character, then numerical order
+      - GRI 4: most similar goods
+      - GRI 5: cases and packaging
+      - GRI 6: comparison between subheadings at the same level
+
+  3. Navigate the hierarchy:
+
+  Section
+  → Chapter
+  → Heading (4 digits)
+  → HS subheading (6 digits)
+  → AHTN/BTKI tariff post (8 digits)
+
+  4. Check exclusions and redirects in Section and Chapter Notes.
+  5. Compare only headings or subheadings at the same hierarchical level.
+  6. Produce alternatives and explain why they were rejected.
+  7. Validate the final eight-digit code against the BTKI edition effective on the declaration date.

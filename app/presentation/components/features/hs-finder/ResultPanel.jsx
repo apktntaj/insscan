@@ -1,61 +1,72 @@
-"use client"
-import React, { useState } from "react";
+"use client";
 
-function formatHs(hs) {
-  if (!hs) return "-";
-  // insert dot after 2 and after 4 for 6-digit
-  const cleaned = hs.replace(/\./g, "");
-  if (cleaned.length === 6) return `${cleaned.slice(0,4)}.${cleaned.slice(4)}`.replace(/(\d{2})(\d{2})\.(\d{2})/, `$1.$2.$3`).replace(/^\./, "");
-  return hs;
+import React from "react";
+
+function formatHs(hsCode) {
+  if (!hsCode) return "-";
+  const cleaned = hsCode.replace(/\./g, "");
+  return cleaned.length === 6
+    ? `${cleaned.slice(0, 4)}.${cleaned.slice(4)}`
+    : hsCode;
 }
 
-export default function ResultPanel({ result, onRetry }) {
-  const [openIndex, setOpenIndex] = useState(null);
+const CONFIDENCE_LABELS = {
+  high: "Keyakinan tinggi",
+  medium: "Keyakinan sedang",
+  low: "Keyakinan rendah",
+};
 
+export default function ResultPanel({ result, onRetry }) {
   if (!result) return null;
 
-  const { hsCode, description, reasoningPath = [], coverage = [] } = result;
+  const recommendations = Array.isArray(result.recommendations) && result.recommendations.length
+    ? result.recommendations
+    : [{
+        hsCode: result.hsCode,
+        description: result.description,
+        confidence: "high",
+        rationale: null,
+        quotedRule: null,
+      }];
 
   return (
-    <div className="mt-6 p-4 border rounded">
-      <div className="flex items-baseline gap-4">
-        <div className="text-3xl font-bold">{formatHs(hsCode)}</div>
-        <div className="text-gray-600">{description}</div>
-      </div>
+    <section className="border-t border-zinc-200 pt-6">
+      <h2 className="text-lg font-semibold text-zinc-900">Rekomendasi HS code</h2>
+      <p className="mt-1 text-sm text-zinc-500">
+        Diurutkan dari kandidat yang paling kuat berdasarkan informasi yang tersedia.
+      </p>
 
-      {coverage && coverage.some((c) => c === "unvalidated") && (
-        <div className="mt-2 text-yellow-700">Disclaimer: beberapa bab mungkin belum tervalidasi.</div>
-      )}
-
-      <div className="mt-4">
-        <div className="font-medium mb-2">Reasoning Path</div>
-        <div className="space-y-2">
-          {reasoningPath.map((step, idx) => (
-            <div key={idx} className="border rounded">
-              <button
-                onClick={() => setOpenIndex(openIndex === idx ? null : idx)}
-                className="w-full text-left px-3 py-2 flex justify-between items-center"
-              >
-                <div>
-                  <span className="font-medium">Langkah {idx + 1}</span> — {step.summary || step.title}
-                </div>
-                <div>
-                  <span className={`px-2 py-1 rounded text-sm ${step.validated ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                    {step.validated ? 'Tervalidasi' : 'Belum Tervalidasi'}
-                  </span>
-                </div>
-              </button>
-              {openIndex === idx && (
-                <div className="px-3 py-2 text-sm text-gray-700">{step.reason || step.detail || JSON.stringify(step)}</div>
-              )}
+      <div className="mt-4 space-y-5">
+        {recommendations.map((recommendation, index) => (
+          <article key={recommendation.hsCode} className="border-l-2 border-zinc-300 pl-4">
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <h3 className="text-xl font-semibold text-zinc-900">
+                {index + 1}. {formatHs(recommendation.hsCode)}
+              </h3>
+              <span className="text-xs text-zinc-500">
+                {CONFIDENCE_LABELS[recommendation.confidence] ?? "Kandidat"}
+              </span>
             </div>
-          ))}
-        </div>
+            <p className="mt-1 text-sm leading-6 text-zinc-700">{recommendation.description}</p>
+            {recommendation.rationale && (
+              <p className="mt-2 text-sm leading-6 text-zinc-600">{recommendation.rationale}</p>
+            )}
+            {recommendation.quotedRule && (
+              <blockquote className="mt-2 text-xs leading-5 text-zinc-500">
+                Dasar catatan: “{recommendation.quotedRule}”
+              </blockquote>
+            )}
+          </article>
+        ))}
       </div>
 
-      <div className="mt-4">
-        <button onClick={onRetry} className="px-3 py-2 bg-gray-200 rounded">Cari Ulang</button>
-      </div>
-    </div>
+      <button
+        type="button"
+        onClick={onRetry}
+        className="mt-6 rounded-md border border-zinc-300 px-3 py-2 text-sm"
+      >
+        Cari ulang
+      </button>
+    </section>
   );
 }

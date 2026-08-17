@@ -1,13 +1,14 @@
-"use client"
+"use client";
+
 import React, { useState } from "react";
 import TextInputPanel from "./hs-finder/TextInputPanel";
-import PhotoInputPanel from "./hs-finder/PhotoInputPanel";
 import LoadingPanel from "./hs-finder/LoadingPanel";
 import ResultPanel from "./hs-finder/ResultPanel";
+import ClarificationPanel from "./hs-finder/ClarificationPanel";
 
 const initialSession = {
-  status: "idle", // idle | loading | done | error
-  itemDescription: null,
+  status: "idle", // idle | classifying | clarifying | done | error
+  itemDescription: "",
   result: null,
   error: null,
 };
@@ -15,84 +16,91 @@ const initialSession = {
 export default function HsFinderPage() {
   const [session, setSession] = useState(initialSession);
 
-  async function callApi(payload) {
-    setSession((s) => ({ ...s, status: "loading", error: null }));
+  async function findHsCodes(description, clarificationAnswers = []) {
+    setSession((current) => ({
+      ...current,
+      status: "classifying",
+      itemDescription: description,
+      error: null,
+    }));
+
     try {
-      const res = await fetch("/api/hs-finder", {
+      const response = await fetch("/api/hs-finder", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          action: "find",
+          text: description,
+          source: "text",
+          clarificationAnswers,
+        }),
       });
-      const json = await res.json();
-      if (!res.ok || !json.ok) {
+      const json = await response.json();
+      if (!response.ok || !json.ok) {
         throw new Error(json.errorMessage || "Permintaan HS Finder gagal.");
       }
-      return json.data;
-    } catch (err) {
-      setSession((s) => ({ ...s, status: "error", error: err.message }));
-      return null;
+
+      setSession((current) => ({
+        ...current,
+        status: json.data.status === "needs_clarification" ? "clarifying" : "done",
+        result: json.data,
+        error: null,
+      }));
+    } catch (error) {
+      setSession((current) => ({
+        ...current,
+        status: "error",
+        error: error.message,
+      }));
     }
   }
 
-  async function handleTextFind(description) {
-    setSession((s) => ({ ...s, itemDescription: description }));
-    const data = await callApi({ action: "find", text: description, source: "text" });
-    if (data) setSession((s) => ({ ...s, status: "done", result: data }));
+  function handleTextFind(description) {
+    findHsCodes(description);
   }
 
-  async function handlePhotoIdentify(file) {
-    // convert to base64
-    const base64 = await fileToDataUrl(file);
-    const mimeType = file.type || "image/jpeg";
-    const data = await callApi({ action: "identify_photo", imageBase64: base64.split(",")[1], mimeType });
-    if (data?.itemDescription) {
-      setSession((s) => ({ ...s, status: "idle", itemDescription: data.itemDescription }));
-    }
-    return data;
-  }
-
-  async function handleUseDescription(description) {
-    // proceed to classification
-    await handleTextFind(description);
-  }
-
-  function handleRetry() {
-    setSession(initialSession);
+  function handleClarification(answers) {
+    findHsCodes(session.itemDescription, answers);
   }
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 py-6 sm:py-10">
-      <div className="text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700">Pesisir AI</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">HS Finder</h1>
-        <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-zinc-600">Jelaskan barang atau unggah foto untuk mendapatkan kandidat HS code beserta alur pertimbangannya. Hasil AI wajib diverifikasi sebelum digunakan.</p>
-      </div>
+    <main className="mx-auto max-w-2xl space-y-6 py-6 sm:py-10">
+      <header>
+        <h1 className="text-2xl font-semibold text-zinc-900">HS Finder</h1>
+        <p className="mt-2 text-sm leading-6 text-zinc-600">
+          Tulis deskripsi barang untuk mendapatkan beberapa kandidat HS code.
+        </p>
+      </header>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <TextInputPanel onFind={handleTextFind} initialValue={session.itemDescription} />
-        <PhotoInputPanel onIdentify={handlePhotoIdentify} onUseDescription={handleUseDescription} />
-      </div>
+      <TextInputPanel
+        onFind={handleTextFind}
+        initialValue={session.itemDescription}
+        busy={session.status === "classifying"}
+      />
 
-      {session.status === "loading" && <LoadingPanel />}
+      {session.status === "classifying" && (
+        <div className="border-t border-zinc-200 pt-4">
+          <LoadingPanel statusLabel="Sedang menyusun rekomendasi…" />
+        </div>
+      )}
+
+      {session.status === "clarifying" && session.result && (
+        <ClarificationPanel result={session.result} onSubmit={handleClarification} />
+      )}
 
       {session.status === "done" && session.result && (
-        <ResultPanel result={session.result} onRetry={handleRetry} />
+        <ResultPanel result={session.result} onRetry={() => setSession(initialSession)} />
       )}
 
       {session.status === "error" && (
-        <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">Terjadi kesalahan: {session.error}</div>
+        <p role="alert" className="border-l-2 border-red-500 pl-3 text-sm text-red-700">
+          Terjadi kesalahan: {session.error}
+        </p>
       )}
 
-      <p className="text-center text-xs leading-6 text-zinc-500">HS Finder memberikan kandidat berbasis AI, bukan penetapan klasifikasi resmi. Verifikasi dengan BTKI, catatan bagian/bab, dan ketentuan yang berlaku.</p>
-    </div>
+      <p className="border-t border-zinc-200 pt-4 text-xs leading-5 text-zinc-500">
+        Hasil merupakan kandidat berbasis AI, bukan penetapan klasifikasi resmi. Verifikasi dengan BTKI dan ketentuan yang berlaku.
+      </p>
+    </main>
   );
-}
-
-function fileToDataUrl(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
 }
