@@ -5,17 +5,17 @@ import { useEffect, useRef, useState } from "react";
 
 const DURATION_SECONDS = 24;
 const DEMO_ROWS = [
-  { code: "3824.99.99", bm: "5%", ppn: "11%", pph: "2,5%", lartas: "Ada", docs: "Dok 20 · 2 izin" },
-  { code: "8471.30.90", bm: "0%", ppn: "11%", pph: "2,5%", lartas: "Tidak", docs: "—" },
-  { code: "6204.62.00", bm: "25%", ppn: "11%", pph: "7,5%", lartas: "Ada", docs: "Dok 40 · 1 izin" },
-  { code: "8504.40.90", bm: "10%", ppn: "11%", pph: "2,5%", lartas: "Tidak", docs: "—" },
+  { code: "3824.99.99", lartas: "Ada", docs: "Dok 20 · 2 izin" },
+  { code: "8471.30.90", lartas: "Ada", docs: "Dok 20 · 4 izin" },
+  { code: "6204.62.00", lartas: "Ada", docs: "Dok 40 · 1 izin" },
+  { code: "8504.40.90", lartas: "Tidak Ada", docs: "—" },
 ];
 
 function phaseLabel(second) {
   if (second < 3) return "Membaca invoice-impor.xlsx";
   if (second < 6) return "12 HS code ditemukan · 10 unik";
   if (second < 12) return "Mengambil data dari INSW";
-  if (second < 16) return "Tarif dan status LARTAS tersusun";
+  if (second < 16) return "Status dan persyaratan LARTAS tersusun";
   if (second < 19) return "Membuka detail regulasi";
   if (second < 22) return "Hasil siap diekspor";
   return "Coba dengan data kamu";
@@ -86,11 +86,11 @@ export default function AnimatedCekLartasDemo() {
           </div>
 
           <div className="min-w-0 flex-1 space-y-3">
-            <div className="flex items-end justify-between gap-3"><div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700">Hasil pemeriksaan</p><p className="mt-1 text-sm text-zinc-500">BM, pajak, dan dokumen LARTAS</p></div><span className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${exported ? "bg-emerald-100 text-emerald-700" : fetching ? "bg-cyan-100 text-cyan-700" : "bg-zinc-100 text-zinc-500"}`}>{exported ? "Siap diekspor" : fetching ? "Memproses…" : "Menunggu"}</span></div>
+            <div className="flex items-end justify-between gap-3"><div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700">Hasil pemeriksaan</p><p className="mt-1 text-sm text-zinc-500">Status dan dokumen LARTAS</p></div><span className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${exported ? "bg-emerald-100 text-emerald-700" : fetching ? "bg-cyan-100 text-cyan-700" : "bg-zinc-100 text-zinc-500"}`}>{exported ? "Siap diekspor" : fetching ? "Memproses…" : "Menunggu"}</span></div>
             <div className="h-1.5 overflow-hidden rounded-full bg-zinc-100"><div className="h-full rounded-full bg-gradient-to-r from-sky-800 to-cyan-500 transition-[width] duration-700" style={{ width: `${progress}%` }} /></div>
             <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
-              <div className="grid grid-cols-[1.35fr_.55fr_.55fr_.55fr_.8fr] gap-2 bg-zinc-50 px-3 py-2.5 text-[9px] font-semibold uppercase tracking-wide text-zinc-400 sm:text-[10px]"><span>HS Code</span><span>BM</span><span>PPN</span><span>PPh</span><span>LARTAS</span></div>
-              <div className="min-h-[13rem]">{DEMO_ROWS.map((row, index) => <div key={row.code} className={`grid grid-cols-[1.35fr_.55fr_.55fr_.55fr_.8fr] gap-2 border-t border-zinc-100 px-3 py-3 text-[10px] transition-all duration-500 sm:text-xs ${index < visibleRowCount ? "translate-x-0 opacity-100" : "translate-x-4 opacity-0"}`}><span className="font-mono font-semibold text-zinc-800">{row.code}</span><span>{row.bm}</span><span>{row.ppn}</span><span>{row.pph}</span><span className={row.lartas === "Ada" ? "font-semibold text-cyan-700" : "text-zinc-400"}>{row.lartas}</span></div>)}</div>
+              <div className="grid grid-cols-[1.2fr_.8fr_1.4fr] gap-2 bg-zinc-50 px-3 py-2.5 text-[9px] font-semibold uppercase tracking-wide text-zinc-400 sm:text-[10px]"><span>HS Code</span><span>LARTAS</span><span>Persyaratan</span></div>
+              <div className="min-h-[13rem]">{DEMO_ROWS.map((row, index) => <div key={row.code} className={`grid grid-cols-[1.2fr_.8fr_1.4fr] gap-2 border-t border-zinc-100 px-3 py-3 text-[10px] transition-all duration-500 sm:text-xs ${index < visibleRowCount ? "translate-x-0 opacity-100" : "translate-x-4 opacity-0"}`}><span className="font-mono font-semibold text-zinc-800">{row.code}</span><span className={row.lartas === "Ada" ? "font-semibold text-cyan-700" : "text-zinc-400"}>{row.lartas}</span><span className="text-zinc-500">{row.docs}</span></div>)}</div>
             </div>
           </div>
         </div>

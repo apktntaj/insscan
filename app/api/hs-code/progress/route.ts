@@ -1,26 +1,19 @@
 /**
  * HS Code Progress API Route
- * Infrastructure Layer - Next.js API endpoint
+ * Delivery Layer - Next.js API endpoint
  *
- * @description Streams serial HS code fetch progress as NDJSON.
+ * @description Streams Cek LARTAS progress as NDJSON.
  */
 
-import { hsCodeController } from "@/app/features/hs-code/adapters/controllers/hs-code.controller";
-import { toResultRow } from "@/app/features/hs-code/adapters/presenters/hs-code.presenter";
-import type {
-  FetchMultipleOptions,
-  HsCodeProgress,
-} from "@core/hs-code/use-cases/fetch-hs-code-data";
+import { controller as cekLartas } from
+  "@/app/features/cek-lartas/composition/cek-lartas.composition";
+import { toResultRow } from
+  "@/app/features/cek-lartas/adapters/presenters/cek-lartas.presenter";
+import type { Progress } from "@core/cek-lartas/check";
 
-interface HsCodeController {
-  handleFetchRequest(
-    hsCodes: string[],
-    options?: FetchMultipleOptions,
-  ): Promise<{ success: boolean; data: unknown }>;
-}
-
-const hsCodeApi = hsCodeController as unknown as HsCodeController;
-const presentResultRow = toResultRow as (result: HsCodeProgress["result"]) => unknown;
+const presentResultRow = toResultRow as (
+  result: Progress["result"],
+) => unknown;
 const encoder = new TextEncoder();
 export const maxDuration = 60;
 
@@ -47,8 +40,9 @@ export async function POST(req: Request): Promise<Response> {
             total: hsCodes.length,
           });
 
-          const result = await hsCodeApi.handleFetchRequest(hsCodes, {
-            onProgress(progress: HsCodeProgress) {
+          const result = await cekLartas.handle(
+            hsCodes,
+            (progress: Progress) => {
               const { result: progressResult, ...meta } = progress;
               push({
                 event: "progress",
@@ -56,11 +50,11 @@ export async function POST(req: Request): Promise<Response> {
                 row: presentResultRow(progressResult),
               });
             },
-          });
+          );
 
           push({
             event: "complete",
-            data: result.data,
+            data: result,
           });
         } catch (error) {
           console.error("HS Code progress stream error:", error);

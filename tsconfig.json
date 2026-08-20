@@ -20,12 +20,14 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./*"],
-      "@core/*": ["core/*"]
+      "@core/*": ["core/*"],
+      "@infrastructure/*": ["infrastructure/*"]
     }
   },
   "include": [
     "next-env.d.ts",
     "core/**/*.ts",
+    "infrastructure/**/*.ts",
     "app/**/*.ts",
     "app/**/*.tsx",
     "scripts/**/*.ts",

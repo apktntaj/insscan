@@ -4,6 +4,7 @@ const config = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
     '^@core/(.*)$': '<rootDir>/core/$1',
+    '^@infrastructure/(.*)$': '<rootDir>/infrastructure/$1',
   },
   transform: {
     '^.+\\.(js|jsx|mjs|cjs)$': ['babel-jest', {

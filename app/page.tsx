@@ -13,12 +13,12 @@ const whyReasons = [
   {
     pain: "Cek LARTAS satu per satu di INSW itu lambat — apalagi kalau invoice-nya punya 30+ item.",
     solve:
-      "Upload file Excel berisi HS code, semua data tarif dan status LARTAS langsung ditarik sekaligus. Tidak perlu buka INSW manual.",
+      "Upload invoice Excel berisi HS code, status dan persyaratan LARTAS langsung diperiksa sekaligus. Tidak perlu buka INSW manual.",
   },
   {
     pain: "Salah baca status LARTAS bisa berujung denda atau barang tertahan di pelabuhan.",
     solve:
-      "Data langsung dari INSW — BM MFN, PPN, PPh, dan detail regulasi impor/ekspor ditampilkan per HS code dengan jelas.",
+      "Data langsung dari INSW — status dan detail regulasi impor/ekspor ditampilkan per HS code dengan jelas.",
   },
   {
     pain: "Hasil cek LARTAS tersebar di tab browser, susah didokumentasikan.",
@@ -30,7 +30,7 @@ const whyReasons = [
 const faqs = [
   {
     q: "Data LARTAS dari mana?",
-    a: "Pesisir mengambil informasi tarif dan LARTAS dari layanan INSW saat pemeriksaan dilakukan. Hasil bergantung pada ketersediaan dan respons sumber tersebut.",
+    a: "Pesisir mengambil informasi LARTAS dari layanan INSW saat pemeriksaan dilakukan. Hasil bergantung pada ketersediaan dan respons sumber tersebut.",
   },
   {
     q: "Seberapa mutakhir hasil pemeriksaan?",
@@ -124,7 +124,7 @@ export default function Home() {
             Cek LARTAS puluhan HS code dalam sekali klik.
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-zinc-600">
-            Upload Excel berisi HS code dari invoice — Pesisir langsung tarik data tarif bea masuk, PPN, PPh, dan status LARTAS dari INSW. Tidak perlu buka portal satu per satu.
+            Upload invoice Excel berisi HS code — Pesisir langsung memeriksa status dan persyaratan LARTAS dari INSW. Tidak perlu buka portal satu per satu.
           </p>
           <div className="mt-9 flex flex-wrap justify-center gap-3">
             <Link
@@ -149,7 +149,7 @@ export default function Home() {
         <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-widest text-cyan-700">Sumber data</p>
           <h2 id="trust-title" className="mt-2 font-semibold text-zinc-900">Respons data dari INSW</h2>
-          <p className="mt-2 text-sm leading-7 text-zinc-600">Pesisir mengambil tarif dan informasi LARTAS dari layanan INSW saat pemeriksaan dilakukan.</p>
+          <p className="mt-2 text-sm leading-7 text-zinc-600">Pesisir mengambil informasi LARTAS dari layanan INSW saat pemeriksaan dilakukan.</p>
         </div>
         <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-widest text-cyan-700">Privasi file</p>
@@ -197,7 +197,7 @@ export default function Home() {
         </div>
         <p className="mx-auto max-w-2xl text-center text-xs leading-6 text-zinc-500">Data pada contoh disederhanakan untuk demonstrasi dan bukan data pelanggan. Tampilan aktual mengikuti respons yang tersedia saat pemeriksaan.</p>
         <div className="mx-auto flex max-w-3xl flex-wrap justify-center gap-2" aria-label="Data yang tersedia pada hasil">
-          {["BM MFN", "PPN", "PPh", "Status LARTAS", "Dokumen pabean", "Detail regulasi", "Ekspor Excel"].map((item) => (
+          {["Status LARTAS", "Border", "Post-border", "Dokumen pabean", "Detail regulasi", "Ekspor Excel"].map((item) => (
             <span key={item} className="rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-600">{item}</span>
           ))}
         </div>
@@ -229,7 +229,7 @@ export default function Home() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           {[
             { step: "1", title: "Upload Excel", desc: "Siapkan file .xls atau .xlsx berisi HS code 8 digit dari invoice kamu." },
-            { step: "2", title: "Tarik Data", desc: "Pesisir query ke INSW untuk setiap HS code — tarif dan status LARTAS langsung muncul." },
+            { step: "2", title: "Periksa LARTAS", desc: "Pesisir memeriksa setiap HS code ke INSW — status dan persyaratan LARTAS langsung muncul." },
             { step: "3", title: "Export Hasil", desc: "Download hasil sebagai Excel. Siap dilampirkan ke laporan atau dikirim ke tim." },
           ].map((item) => (
             <div key={item.step} className="relative overflow-hidden rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">

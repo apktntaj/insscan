@@ -3,11 +3,12 @@
 ## Tech Stack & Architecture
 - **Framework**: Next.js 14 (App Router) with React 18 (Client components use `"use client"`).
 - **Architecture**: Vertical Slice Architecture with a framework-independent core:
-  - `core/<slice>/`: TypeScript domain logic, use cases, and ports. Never import Next.js, React, browser APIs, or application infrastructure.
-  - `app/features/<slice>/`: Next.js application adapters, infrastructure, components, and hooks grouped by feature.
-  - `app/shared/`: Shared application UI, configuration, and infrastructure.
-  - `app/api/` and route pages: Thin Next.js entry points/composition roots.
-  - Dependency direction: `app -> core`; never `core -> app`.
+  - `core/<slice>/`: TypeScript domain logic, use cases, pure services, and outbound boundaries. Never import Next.js, React, browser APIs, or infrastructure.
+  - `infrastructure/<slice>/`: Concrete third-party implementations of core boundaries. May depend on core, but never on `app/`, Next.js, or React.
+  - `app/features/<slice>/`: Next.js adapters, composition roots, components, and hooks grouped by feature.
+  - `app/shared/`: Shared application UI, configuration, and browser-specific infrastructure.
+  - `app/api/` and route pages: Thin Next.js delivery entry points.
+  - Dependency direction: `app -> core`, `app composition -> infrastructure -> core`; never `core -> app/infrastructure`.
 - **Styling**: Tailwind CSS + DaisyUI.
 
 ## Development Commands

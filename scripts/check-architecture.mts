@@ -72,6 +72,50 @@ for (const filePath of walk(coreRoot).filter((file) => file.endsWith(".ts"))) {
   inspect(sourceFile);
 }
 
+const infrastructureRoot = path.join(root, "infrastructure");
+
+if (fs.existsSync(infrastructureRoot)) {
+  for (const filePath of walk(infrastructureRoot).filter((file) => /\.[jt]sx?$/.test(file))) {
+    const source = fs.readFileSync(filePath, "utf8");
+    const sourceFile = ts.createSourceFile(
+      filePath,
+      source,
+      ts.ScriptTarget.Latest,
+      true,
+      filePath.endsWith("x") ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
+    );
+
+    function inspectInfrastructure(node: ts.Node): void {
+      if (
+        (ts.isImportDeclaration(node) || ts.isExportDeclaration(node))
+        && node.moduleSpecifier
+        && ts.isStringLiteral(node.moduleSpecifier)
+      ) {
+        const specifier = node.moduleSpecifier.text;
+        const resolved = specifier.startsWith(".")
+          ? path.resolve(path.dirname(filePath), specifier)
+          : null;
+        const dependsOnApplication = specifier.startsWith("@/app/")
+          || specifier === "next"
+          || specifier.startsWith("next/")
+          || specifier === "react"
+          || specifier.startsWith("react/")
+          || Boolean(resolved?.startsWith(`${path.join(root, "app")}${path.sep}`));
+
+        if (dependsOnApplication) {
+          const position = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile));
+          violations.push(
+            `${path.relative(root, filePath)}:${position.line + 1}:${position.character + 1} infrastructure depends on application/framework code: "${specifier}"`,
+          );
+        }
+      }
+      ts.forEachChild(node, inspectInfrastructure);
+    }
+
+    inspectInfrastructure(sourceFile);
+  }
+}
+
 const sharedRoot = path.join(root, "app", "shared");
 const featuresRoot = path.join(root, "app", "features");
 
@@ -116,5 +160,5 @@ if (violations.length > 0) {
   console.error("Architecture boundary violations:\n" + violations.join("\n"));
   process.exitCode = 1;
 } else {
-  console.log("Architecture boundaries are valid: core is independent and shared does not depend on features.");
+  console.log("Architecture boundaries are valid: core is independent, infrastructure does not depend on the application, and shared does not depend on features.");
 }

@@ -6,7 +6,7 @@ Platform operasional berbasis browser untuk staf PPJK dan freight forwarder di I
 
 | Fitur | Status |
 |---|---|
-| Cek LARTAS — lookup HS code, tarif, dan status restriksi impor via INSW | ✅ Live |
+| Cek LARTAS — periksa status dan persyaratan LARTAS via INSW | ✅ Live |
 | Shipments — CRUD data shipment, tersimpan di browser (IndexedDB) | ✅ Live |
 | Export shipment ke Excel | ✅ Live |
 | Feedback & roadmap board | ✅ Live |
@@ -20,7 +20,7 @@ Platform operasional berbasis browser untuk staf PPJK dan freight forwarder di I
 - **Tailwind CSS** + DaisyUI
 - **Vertical Slice Architecture** — core framework-independent, aplikasi Next.js per fitur
 - **IndexedDB** — penyimpanan data shipment di sisi browser
-- **INSW API** — sumber data HS code, tarif, dan LARTAS
+- **INSW API** — sumber data status dan persyaratan LARTAS
 
 ## Menjalankan Project
 
@@ -65,16 +65,19 @@ cp .env.example .env
 ## Struktur Project
 
 ```text
-core/                 # Domain, use case, dan port; tanpa Next.js/React
-├── hs-code/
+core/                 # Domain, use case, service, dan boundary; framework-independent
+├── cek-lartas/
 ├── hs-finder/
 ├── shipments/
 └── bl-extraction/
 
-app/                  # Aplikasi Next.js
+infrastructure/       # Implementasi boundary pihak ketiga per slice
+└── cek-lartas/       # Adapter INSW
+
+app/                  # Delivery dan composition menggunakan Next.js
 ├── api/              # HTTP entry points
-├── features/         # Slice vertikal per fitur
-└── shared/           # UI dan infrastructure lintas fitur
+├── features/         # Adapter, composition, dan UI per fitur
+└── shared/           # UI dan browser infrastructure lintas fitur
 ```
 
 Detail aturan dependensi dan status migrasi tersedia di [`docs/architecture.md`](docs/architecture.md).
