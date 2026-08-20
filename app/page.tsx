@@ -1,9 +1,13 @@
-"use client";
-
-import React, { useState } from "react";
+import type { Metadata } from "next";
 import Link from "next/link";
 import AnimatedCekLartasDemo from "@/app/features/marketing/components/AnimatedCekLartasDemo";
+import FaqList, {
+  type FaqItemData,
+} from "@/app/features/marketing/components/FaqList";
 import { WHATSAPP_NUMBER } from "@/app/features/feedback/config/feedback-config";
+import { homeSocialMetadata } from "@/app/shared/config/site-metadata";
+
+export const metadata: Metadata = homeSocialMetadata;
 
 const EARLY_ACCESS_LINK = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
   "Halo, saya ingin bertanya tentang Pesisir Pro Early Access."
@@ -27,7 +31,7 @@ const whyReasons = [
   },
 ];
 
-const faqs = [
+const faqs: FaqItemData[] = [
   {
     q: "Data LARTAS dari mana?",
     a: "Pesisir mengambil informasi LARTAS dari layanan INSW saat pemeriksaan dilakukan. Hasil bergantung pada ketersediaan dan respons sumber tersebut.",
@@ -62,53 +66,7 @@ const faqs = [
   },
 ];
 
-/**
- * FAQ item with expand/collapse toggle.
- * @param {{ q: string, a: string, open: boolean, onToggle: () => void }} props
- */
-function FaqItem({
-  q,
-  a,
-  open,
-  onToggle,
-}: {
-  q: string;
-  a: string;
-  open: boolean;
-  onToggle: () => void;
-}) {
-  return (
-    <div className="border-b border-zinc-100 last:border-0">
-      <button
-        onClick={onToggle}
-        className="flex w-full items-start justify-between gap-4 py-5 text-left"
-        aria-expanded={open}
-      >
-        <span className="text-sm font-medium text-zinc-800 sm:text-base">{q}</span>
-        <span
-          className={`mt-0.5 shrink-0 text-zinc-400 transition-transform duration-200 ${open ? "rotate-45" : ""}`}
-          aria-hidden="true"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-        </span>
-      </button>
-      {open && (
-        <p className="pb-5 text-sm leading-7 text-zinc-500">{a}</p>
-      )}
-    </div>
-  );
-}
-
 export default function Home() {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
-
-  function handleToggle(index: number): void {
-    setActiveIndex(activeIndex === index ? null : index);
-  }
-
   return (
     <div className="space-y-12 pb-8 sm:space-y-16">
 
@@ -256,15 +214,7 @@ export default function Home() {
       <section className="rounded-3xl border border-zinc-200 bg-white px-7 py-8 shadow-sm sm:px-9">
         <h3 className="text-3xl text-center font-bold text-zinc-900">FAQ</h3>
         <div className="mt-4">
-          {faqs.map((faq, index) => (
-            <FaqItem
-              key={faq.q}
-              q={faq.q}
-              a={faq.a}
-              open={activeIndex === index}
-              onToggle={() => handleToggle(index)}
-            />
-          ))}
+          <FaqList items={faqs} />
         </div>
       </section>
 

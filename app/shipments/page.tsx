@@ -1,11 +1,11 @@
 import ShipmentManager from "@/app/features/shipments/presentation/components/ShipmentManager";
+import { createPageMetadata } from "@/app/shared/config/site-metadata";
 
-export const dynamic = "force-dynamic";
-
-export const metadata = {
+export const metadata = createPageMetadata({
   title: "Shipments",
   description:
     "Kelola data pengiriman dalam satu dashboard. Catat nomor B/L, shipper, dan ETA. Data tersimpan di browser kamu sendiri — tidak melewati server manapun.",
+  path: "/shipments",
   keywords: [
     "shipment tracking",
     "bill of lading",
@@ -15,16 +15,7 @@ export const metadata = {
     "manajemen pengiriman",
     "ETA kapal",
   ],
-  openGraph: {
-    title: "Shipments — Dashboard Pengiriman | Pesisir",
-    description:
-      "Kelola data pengiriman dalam satu dashboard. Catat nomor B/L, shipper, dan ETA. Data tersimpan di browser kamu sendiri — tidak melewati server manapun.",
-    url: "https://pesisir.id/shipments",
-  },
-  alternates: {
-    canonical: "https://pesisir.id/shipments",
-  },
-};
+});
 
 export default function ShipmentsPage() {
   return <ShipmentManager />;

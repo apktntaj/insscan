@@ -1,5 +1,12 @@
 import LegalPage, { Section } from "@/app/shared/components/LegalPage";
-export const metadata = { title: "Ketentuan Layanan" };
+import { createPageMetadata } from "@/app/shared/config/site-metadata";
+
+export const metadata = createPageMetadata({
+  title: "Ketentuan Layanan",
+  description:
+    "Ketentuan dasar penggunaan Pesisir selama periode gratis dan Early Access berbayar.",
+  path: "/terms",
+});
 export default function TermsPage() {
   return <LegalPage eyebrow="Pesisir" title="Ketentuan Layanan" intro="Ketentuan dasar penggunaan Pesisir selama periode gratis dan Early Access berbayar.">
     <Section title="Sifat layanan"><p>Pesisir adalah alat bantu independen dan tidak berafiliasi dengan INSW, Direktorat Jenderal Bea dan Cukai, atau instansi pemerintah lainnya.</p></Section>

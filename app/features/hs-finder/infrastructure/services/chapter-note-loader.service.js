@@ -9,6 +9,7 @@
  * @module infrastructure/services/chapter-note-loader
  */
 
+import "server-only";
 import fs from "fs/promises";
 import path from "path";
 import { makeCoverageMap } from "@core/hs-finder/domain/hs-finder";

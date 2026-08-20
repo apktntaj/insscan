@@ -1,7 +1,3 @@
-"use client";
-
-import React from "react";
-
 /**
  * Title Component
  * Presentation Layer - Common UI component

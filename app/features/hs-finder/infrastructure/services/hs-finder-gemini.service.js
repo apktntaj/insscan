@@ -9,6 +9,7 @@
  * @module infrastructure/services/hs-finder-gemini
  */
 
+import "server-only";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import {
   makeClassificationDecision,

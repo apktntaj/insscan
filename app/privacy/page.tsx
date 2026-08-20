@@ -1,5 +1,12 @@
 import LegalPage, { Section } from "@/app/shared/components/LegalPage";
-export const metadata = { title: "Kebijakan Privasi" };
+import { createPageMetadata } from "@/app/shared/config/site-metadata";
+
+export const metadata = createPageMetadata({
+  title: "Kebijakan Privasi",
+  description:
+    "Ringkasan data yang diproses saat menggunakan Pesisir dan pilihan yang tersedia bagi pengguna.",
+  path: "/privacy",
+});
 export default function PrivacyPage() {
   return <LegalPage eyebrow="Pesisir" title="Kebijakan Privasi" intro="Ringkasan data yang diproses saat menggunakan Pesisir dan pilihan yang tersedia bagi pengguna.">
     <Section title="Data yang diproses"><p>File Excel dibaca di browser. Pesisir mengekstrak HS code dan mengirim HS code tersebut ke server untuk mengambil data. File asli tidak dimaksudkan untuk disimpan oleh server Pesisir.</p><p>Kami dapat menerima data kontak dan bukti transaksi yang dikirim secara sukarela melalui WhatsApp untuk dukungan atau aktivasi Early Access.</p></Section>

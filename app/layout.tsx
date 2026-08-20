@@ -6,9 +6,10 @@ import Navbar from "@/app/shared/components/Navbar";
 import { navLinks } from "@/app/shared/config/nav-links";
 import Link from "next/link";
 import { WHATSAPP_NUMBER } from "@/app/features/feedback/config/feedback-config";
+import { SITE_URL } from "@/app/shared/config/site-metadata";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://pesisir.id"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Pesisir — Platform Operasional PPJK & Freight Forwarder",
     template: "%s | Pesisir",
@@ -31,33 +32,6 @@ export const metadata: Metadata = {
   creator: "Semesta Raya Software",
   icons: {
     icon: "logo-container.svg",
-  },
-  openGraph: {
-    title: "Pesisir — Platform Operasional PPJK & Freight Forwarder",
-    description:
-      "Platform operasional untuk staf PPJK dan freight forwarder. Cek LARTAS batch dari Excel, kelola data shipment, dan ekstrak data B/L — semua dalam satu workspace.",
-    url: "https://pesisir.id",
-    siteName: "Pesisir",
-    locale: "id_ID",
-    images: [
-      {
-        url: "https://pesisir.id/logo-pesisir.png",
-        width: 1200,
-        height: 630,
-        alt: "Pesisir — Platform operasional PPJK dan freight forwarder",
-      },
-    ],
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Pesisir — Platform Operasional PPJK & Freight Forwarder",
-    description:
-      "Platform operasional untuk staf PPJK dan freight forwarder. Cek LARTAS batch dari Excel, kelola data shipment, dan ekstrak data B/L — semua dalam satu workspace.",
-    images: ["https://pesisir.id/logo-pesisir.png"],
-  },
-  alternates: {
-    canonical: "https://pesisir.id",
   },
 };
 

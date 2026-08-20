@@ -1,21 +1,14 @@
 import { roadmapItems, WHATSAPP_NUMBER, DEVELOPER_PHOTO_PATH } from "@/app/features/feedback/config/feedback-config";
 import RoadmapBoard from "@/app/features/feedback/components/RoadmapBoard";
 import SupportSection from "@/app/features/feedback/components/SupportSection";
+import { createPageMetadata } from "@/app/shared/config/site-metadata";
 
-export const metadata = {
+export const metadata = createPageMetadata({
   title: "Feedback & Roadmap",
   description:
     "Lihat roadmap pengembangan fitur Pesisir dan kirim saran langsung via WhatsApp. Pesisir dikembangkan secara independen dan terus ditingkatkan berdasarkan masukan pengguna.",
-  openGraph: {
-    title: "Feedback & Roadmap | Pesisir",
-    description:
-      "Lihat roadmap pengembangan fitur Pesisir dan kirim saran langsung via WhatsApp.",
-    url: "https://pesisir.id/feedback",
-  },
-  alternates: {
-    canonical: "https://pesisir.id/feedback",
-  },
-};
+  path: "/feedback",
+});
 
 /**
  * Halaman /feedback — Next.js Server Component

@@ -178,7 +178,7 @@ export function useCekLartasSingle() {
     } finally {
       setIsSingleLoading(false);
     }
-  }, [singleInput]);
+  }, [singleInput, isLimitReached, consume]);
 
   /**
    * Salin HS code dari singleResult ke clipboard.

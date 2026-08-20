@@ -5,6 +5,7 @@ const config = {
     '^@/(.*)$': '<rootDir>/$1',
     '^@core/(.*)$': '<rootDir>/core/$1',
     '^@infrastructure/(.*)$': '<rootDir>/infrastructure/$1',
+    '^server-only$': '<rootDir>/scripts/testing/server-only.ts',
   },
   transform: {
     '^.+\\.(js|jsx|mjs|cjs)$': ['babel-jest', {

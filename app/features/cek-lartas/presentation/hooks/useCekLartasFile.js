@@ -633,7 +633,7 @@ export function useCekLartasFile() {
       );
       setIsLoading(false);
     }
-  }, [fileData]);
+  }, [fileData, isLimitReached, remaining, consume]);
 
   /**
    * Mengunduh resultData sebagai file Excel dalam format matriks LARTAS.

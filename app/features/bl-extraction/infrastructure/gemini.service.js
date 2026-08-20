@@ -7,6 +7,7 @@
  * @module infrastructure/services/gemini
  */
 
+import "server-only";
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 /**

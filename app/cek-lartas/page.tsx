@@ -1,26 +1,18 @@
 import CekLartasPageClient from "@/app/features/cek-lartas/presentation/components/CekLartasPage";
+import Title from "@/app/shared/components/Title";
+import { createPageMetadata } from "@/app/shared/config/site-metadata";
 
-export const metadata = {
+const PAGE_DESCRIPTION = [
+  "Periksa status dan persyaratan LARTAS dari satu HS code atau invoice Excel. Hanya HS code yang dikirim; file tetap diproses di browser.",
+];
+
+export const metadata = createPageMetadata({
   title: "Cek Lartas",
   description:
     "Cek status dan persyaratan LARTAS untuk puluhan HS code sekaligus. Upload file Excel dari invoice, hasil langsung tersedia tanpa buka INSW satu per satu.",
-  keywords: [
-    "cek lartas",
-    "lartas impor",
-    "HS code",
-    "INSW",
-    "batch HS code",
-  ],
-  openGraph: {
-    title: "Cek Lartas — Batch HS Code dari Excel | Pesisir",
-    description:
-      "Cek status dan persyaratan LARTAS untuk puluhan HS code sekaligus. Upload file Excel dari invoice, hasil langsung tersedia.",
-    url: "https://pesisir.id/cek-lartas",
-  },
-  alternates: {
-    canonical: "https://pesisir.id/cek-lartas",
-  },
-};
+  path: "/cek-lartas",
+  keywords: ["cek lartas", "lartas impor", "HS code", "INSW", "batch HS code"],
+});
 
 /**
  * Cek Lartas Page (Server Component)
@@ -28,5 +20,15 @@ export const metadata = {
  * agar maintenance window check bisa menggunakan hooks.
  */
 export default function CekLartasPage() {
-  return <CekLartasPageClient />;
+  return (
+    <div className="mx-auto w-full max-w-6xl space-y-4">
+      <Title
+        title="CEK LARTAS"
+        descs={PAGE_DESCRIPTION}
+        variant="modern"
+        eyebrow="Pesisir"
+      />
+      <CekLartasPageClient />
+    </div>
+  );
 }

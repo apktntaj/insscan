@@ -1,40 +1,23 @@
-const BASE_URL = "https://pesisir.id";
+import type { MetadataRoute } from "next";
+import { SITE_URL } from "@/app/shared/config/site-metadata";
 
-/**
- * Generates the sitemap for Pesisir.
- * @returns {import("next").MetadataRoute.Sitemap}
- */
-export default function sitemap() {
-  return [
-    {
-      url: BASE_URL,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 1,
-    },
-    {
-      url: `${BASE_URL}/cek-lartas`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.9,
-    },
-    {
-      url: `${BASE_URL}/hs-finder`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${BASE_URL}/shipments`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${BASE_URL}/feedback`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.5,
-    },
-  ];
+const routes = [
+  { path: "/", priority: 1 },
+  { path: "/cek-lartas", priority: 0.9 },
+  { path: "/hs-finder", priority: 0.8 },
+  { path: "/shipments", priority: 0.8 },
+  { path: "/learn", priority: 0.7 },
+  { path: "/exercise", priority: 0.7 },
+  { path: "/feedback", priority: 0.5 },
+  { path: "/privacy", priority: 0.3 },
+  { path: "/terms", priority: 0.3 },
+  { path: "/refund-policy", priority: 0.3 },
+] as const;
+
+export default function sitemap(): MetadataRoute.Sitemap {
+  return routes.map(({ path, priority }) => ({
+    url: path === "/" ? SITE_URL : `${SITE_URL}${path}`,
+    changeFrequency: "monthly",
+    priority,
+  }));
 }

@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
-import { questions, getRandomQuestions } from "@/app/features/learning/config/exercise-config";
+import React, { useState, useCallback, useMemo } from "react";
+import { getRandomQuestions } from "@/app/features/learning/config/exercise-config";
 
 const QUIZ_SIZE = 10;
 
@@ -32,34 +32,49 @@ function ScoreBadge({ correct, total }) {
   );
 }
 
+/** Buat PRNG deterministik agar SSR dan hydration menghasilkan urutan sama. */
+function createSeededRandom(seed) {
+  let state = 2166136261;
+  for (let index = 0; index < seed.length; index += 1) {
+    state ^= seed.charCodeAt(index);
+    state = Math.imul(state, 16777619);
+  }
+
+  return () => {
+    state += 0x6d2b79f5;
+    let value = state;
+    value = Math.imul(value ^ (value >>> 15), value | 1);
+    value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
+    return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
 /**
- * Mengacak urutan pilihan jawaban dan mengembalikan array terurut acak
- * beserta mapping index-baru → index-asli.
- * Stabil selama komponen tidak di-unmount (dihitung sekali via useState init).
+ * Mengacak pilihan secara deterministik berdasarkan seed yang dikirim server.
  *
- * @param {string[]} choices - pilihan jawaban asli
+ * @param {string[]} choices
+ * @param {string} seed
  * @returns {{ text: string, originalIndex: number }[]}
  */
-function useShuffledChoices(choices) {
-  const [shuffled] = useState(() => {
+function useShuffledChoices(choices, seed) {
+  return useMemo(() => {
+    const random = createSeededRandom(seed);
     const indexed = choices.map((text, originalIndex) => ({ text, originalIndex }));
-    for (let i = indexed.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
+    for (let i = indexed.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(random() * (i + 1));
       [indexed[i], indexed[j]] = [indexed[j], indexed[i]];
     }
     return indexed;
-  });
-  return shuffled;
+  }, [choices, seed]);
 }
 
 /**
  * Satu kartu soal pilihan ganda dengan urutan pilihan yang diacak.
- * @param {{ question: import("@/app/features/learning/config/exercise-config").Question, index: number, total: number, onAnswer: (isCorrect: boolean) => void }} props
+ * @param {{ question: import("@/app/features/learning/config/exercise-config").Question, index: number, total: number, seed: string, onAnswer: (isCorrect: boolean) => void }} props
  */
-function QuestionCard({ question, index, total, onAnswer }) {
+function QuestionCard({ question, index, total, seed, onAnswer }) {
   const [selected, setSelected] = useState(null);
-  // shuffledChoices: array { text, originalIndex } — urutan acak, stabil per mount
-  const shuffledChoices = useShuffledChoices(question.pilihanJawaban);
+  const shuffledChoices = useShuffledChoices(question.pilihanJawaban, seed);
 
   /**
    * @param {number} shuffledIdx - posisi dalam array yang sudah diacak
@@ -217,8 +232,9 @@ function ResultPanel({ correct, total, onRestart }) {
 /**
  * Halaman latihan soal kepabeanan interaktif.
  */
-export default function ExercisePage() {
-  const [quizQuestions, setQuizQuestions] = useState(() => getRandomQuestions(QUIZ_SIZE));
+export default function ExercisePage({ initialQuestions, initialShuffleSeed }) {
+  const [quizQuestions, setQuizQuestions] = useState(initialQuestions);
+  const [shuffleSeed, setShuffleSeed] = useState(initialShuffleSeed);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [answered, setAnswered] = useState(false);
@@ -244,6 +260,7 @@ export default function ExercisePage() {
 
   function handleRestart() {
     setQuizQuestions(getRandomQuestions(QUIZ_SIZE));
+    setShuffleSeed(`${Date.now()}-${Math.random()}`);
     setCurrentIndex(0);
     setCorrectCount(0);
     setAnswered(false);
@@ -290,10 +307,11 @@ export default function ExercisePage() {
       ) : (
         <>
           <QuestionCard
-            key={currentQuestion.id}
+            key={`${shuffleSeed}:${currentQuestion.id}`}
             question={currentQuestion}
             index={currentIndex}
             total={quizQuestions.length}
+            seed={`${shuffleSeed}:${currentQuestion.id}`}
             onAnswer={handleAnswer}
           />
 

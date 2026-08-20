@@ -64,7 +64,7 @@ export default function HsFinderPage() {
   }
 
   return (
-    <main className="mx-auto max-w-2xl space-y-6 py-6 sm:py-10">
+    <section className="mx-auto max-w-2xl space-y-6 py-6 sm:py-10">
       <header>
         <h1 className="text-2xl font-semibold text-zinc-900">HS Finder</h1>
         <p className="mt-2 text-sm leading-6 text-zinc-600">
@@ -101,6 +101,6 @@ export default function HsFinderPage() {
       <p className="border-t border-zinc-200 pt-4 text-xs leading-5 text-zinc-500">
         Hasil merupakan kandidat berbasis AI, bukan penetapan klasifikasi resmi. Verifikasi dengan BTKI dan ketentuan yang berlaku.
       </p>
-    </main>
+    </section>
   );
 }

@@ -1,5 +1,11 @@
 import LegalPage, { Section } from "@/app/shared/components/LegalPage";
-export const metadata = { title: "Kebijakan Pembatalan dan Refund" };
+import { createPageMetadata } from "@/app/shared/config/site-metadata";
+
+export const metadata = createPageMetadata({
+  title: "Kebijakan Pembatalan dan Refund",
+  description: "Kebijakan pembelian Pesisir Pro selama Early Access.",
+  path: "/refund-policy",
+});
 export default function RefundPolicyPage() {
   return <LegalPage eyebrow="Pesisir Pro" title="Pembatalan dan Refund" intro="Kebijakan pembelian Pesisir Pro selama Early Access.">
     <Section title="Tidak ada perpanjangan otomatis"><p>Paket berlaku untuk masa aktif yang dikonfirmasi saat pembelian. Pengguna harus menyetujui dan melakukan pembayaran baru untuk memperpanjangnya.</p></Section>

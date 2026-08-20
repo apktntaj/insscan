@@ -7,21 +7,19 @@
 
 import { controller } from
   "@/app/features/cek-lartas/composition/cek-lartas.composition";
-
-interface HsCodeRequestItem {
-  hs_code?: unknown;
-}
+import { parseHsCodeRequest } from
+  "@/app/features/cek-lartas/adapters/requests/parse-hs-code-request";
 
 export const maxDuration = 60;
 
 export async function POST(req: Request): Promise<Response> {
   try {
-    const body: unknown = await req.json();
-    const hsCodes = Array.isArray(body)
-      ? body.map((item: HsCodeRequestItem) => String(item?.hs_code ?? ""))
-      : [];
+    const parsed = await parseHsCodeRequest(req);
+    if (!parsed.ok) {
+      return Response.json({ error: parsed.message }, { status: 400 });
+    }
 
-    const result = await controller.handle(hsCodes);
+    const result = await controller.handle(parsed.hsCodes);
 
     return Response.json(result, {
       status: 200,

@@ -1,10 +1,12 @@
 import LearnPage from "@/app/features/learning/components/LearnPage";
+import { createPageMetadata } from "@/app/shared/config/site-metadata";
 
-export const metadata = {
+export const metadata = createPageMetadata({
   title: "Materi Kepabeanan",
   description:
     "Pelajari materi kepabeanan Indonesia: definisi, kewajiban pabean, tata laksana ekspor impor, dan lainnya.",
-};
+  path: "/learn",
+});
 
 export default function Learn() {
   return (

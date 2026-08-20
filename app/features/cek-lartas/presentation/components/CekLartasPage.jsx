@@ -2,13 +2,7 @@
 
 import { useMaintenanceWindow } from "@/app/shared/hooks/useMaintenanceWindow";
 import MaintenanceOverlay from "@/app/shared/components/MaintenanceOverlay";
-import Title from "@/app/shared/components/Title";
 import CekLartasScanner from "@/app/features/cek-lartas/presentation/components/CekLartasScanner";
-
-const PAGE_TITLE = "CEK LARTAS";
-const PAGE_DESCRIPTION = [
-  "Periksa status dan persyaratan LARTAS dari satu HS code atau invoice Excel. Hanya HS code yang dikirim; file tetap diproses di browser.",
-];
 
 /**
  * CekLartasPage (Client Component)
@@ -23,15 +17,12 @@ export default function CekLartasPage() {
   const { isUnderMaintenance, config } = useMaintenanceWindow("cek-lartas");
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-4">
-      <Title title={PAGE_TITLE} descs={PAGE_DESCRIPTION} variant="modern" eyebrow="Pesisir" />
-      <MaintenanceOverlay
-        isActive={isUnderMaintenance}
-        title={config?.title ?? "Fitur Sedang Tidak Tersedia"}
-        message={config?.message ?? "Fitur ini sedang tidak tersedia. Silakan coba beberapa saat lagi."}
-      >
-        <CekLartasScanner />
-      </MaintenanceOverlay>
-    </div>
+    <MaintenanceOverlay
+      isActive={isUnderMaintenance}
+      title={config?.title ?? "Fitur Sedang Tidak Tersedia"}
+      message={config?.message ?? "Fitur ini sedang tidak tersedia. Silakan coba beberapa saat lagi."}
+    >
+      <CekLartasScanner />
+    </MaintenanceOverlay>
   );
 }

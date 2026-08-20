@@ -10,6 +10,8 @@ import { controller as cekLartas } from
 import { toResultRow } from
   "@/app/features/cek-lartas/adapters/presenters/cek-lartas.presenter";
 import type { Progress } from "@core/cek-lartas/check";
+import { parseHsCodeRequest } from
+  "@/app/features/cek-lartas/adapters/requests/parse-hs-code-request";
 
 const presentResultRow = toResultRow as (
   result: Progress["result"],
@@ -23,10 +25,11 @@ function toNdjsonLine(payload: Record<string, unknown>): string {
 
 export async function POST(req: Request): Promise<Response> {
   try {
-    const body: unknown = await req.json();
-    const hsCodes = Array.isArray(body)
-      ? body.map((item: { hs_code?: unknown }) => String(item?.hs_code ?? ""))
-      : [];
+    const parsed = await parseHsCodeRequest(req);
+    if (!parsed.ok) {
+      return Response.json({ error: parsed.message }, { status: 400 });
+    }
+    const hsCodes = parsed.hsCodes;
 
     const stream = new ReadableStream<Uint8Array>({
       async start(controller) {
