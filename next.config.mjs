@@ -1,16 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  webpack: (config, { dev }) => {
-    config.resolve.alias = {
-      ...(config.resolve.alias || {}),
-      canvas: false,
-      encoding: false,
-    };
-
-    // Disable webpack cache to avoid corruption with large libraries (xlsx)
-    config.cache = { type: "memory" };
-
-    return config;
+  // Keep tracing and Turbopack scoped to this app when parent directories
+  // contain unrelated lockfiles.
+  outputFileTracingRoot: process.cwd(),
+  turbopack: {
+    root: process.cwd(),
   },
   async headers() {
     return [

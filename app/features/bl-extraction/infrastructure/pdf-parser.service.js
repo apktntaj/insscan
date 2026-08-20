@@ -5,11 +5,30 @@
  * All processing happens client-side for data privacy.
  */
 
-import * as pdfjsLib from 'pdfjs-dist';
+let pdfJsModulePromise = null;
 
-// Configure PDF.js worker
-if (typeof window !== 'undefined') {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+/**
+ * Loads PDF.js only in the browser. Client Components are also evaluated while
+ * rendering on the server, where PDF.js browser globals such as DOMMatrix do
+ * not exist.
+ */
+async function loadPdfJsModule() {
+  if (typeof window === 'undefined') {
+    throw new Error('PDFJS_BROWSER_ONLY');
+  }
+
+  if (!pdfJsModulePromise) {
+    pdfJsModulePromise = import('pdfjs-dist').then((pdfjsLib) => {
+      // Keep PDF processing local; no document content is sent to a third-party worker CDN.
+      pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+        'pdfjs-dist/build/pdf.worker.min.mjs',
+        import.meta.url
+      ).toString();
+      return pdfjsLib;
+    });
+  }
+
+  return pdfJsModulePromise;
 }
 
 /**
@@ -129,14 +148,17 @@ export async function parsePDF(file) {
  */
 async function parseWithTimeout(file) {
   try {
-    // Convert file to ArrayBuffer
-    const arrayBuffer = await file.arrayBuffer();
+    // Convert file to ArrayBuffer and load the browser-only PDF.js module.
+    const [arrayBuffer, pdfjsLib] = await Promise.all([
+      file.arrayBuffer(),
+      loadPdfJsModule(),
+    ]);
     
     // Load PDF document
     const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
     const pdf = await loadingTask.promise;
     
-    const pageCount = 1; // Only first page (header info)
+    const pageCount = Math.min(pdf.numPages, 10);
     const textParts = [];
     
     // Extract text from each page sequentially

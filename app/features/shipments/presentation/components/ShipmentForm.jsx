@@ -15,12 +15,7 @@ import { extractConsigneeInitials, generateShipmentNumber } from "@core/shipment
 import { createUsageTrackerService } from "@/app/features/bl-extraction/infrastructure/usage-tracker.service";
 import { extractBlViaApi } from "@/app/features/bl-extraction/infrastructure/bl-extraction-api.service";
 import { toFormDataFromGemini } from "@/app/features/bl-extraction/adapters/form-filler.service";
-import { pdfjs } from "react-pdf";
-
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  "pdfjs-dist/build/pdf.worker.min.js",
-  import.meta.url
-).toString();
+import { parsePDF } from "@/app/features/bl-extraction/infrastructure/pdf-parser.service";
 
 const MONTH_ABBR = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
 
@@ -110,16 +105,14 @@ export default function ShipmentForm({
     setSmartFillMessage("Smart scan berjalan...");
 
     try {
-      const pdfData = await file.arrayBuffer();
-      const pdf = await pdfjs.getDocument({ data: pdfData }).promise;
-      let fullText = "";
-      for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        const textContent = await page.getTextContent();
-        fullText += textContent.items.map((item) => item.str).join(" ") + "\n";
+      const parsedPdf = await parsePDF(file);
+      if (!parsedPdf.ok) {
+        setSmartFillStatus("error");
+        setSmartFillMessage(parsedPdf.message);
+        return;
       }
 
-      const result = await extractBlViaApi(fullText, file);
+      const result = await extractBlViaApi(parsedPdf.text, file);
 
       if (!result.ok) {
         const errorMessages = {

@@ -74,7 +74,7 @@ export function isWorkingDay(date: Date): boolean {
  * @returns {Date}
  */
 export function getHMinusOne(targetDate: Date): Date {
-  let candidate = new Date(targetDate);
+  const candidate = new Date(targetDate);
   candidate.setDate(candidate.getDate() - 1);
 
   while (!isWorkingDay(candidate)) {

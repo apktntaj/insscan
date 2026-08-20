@@ -10,13 +10,13 @@ Platform operasional berbasis browser untuk staf PPJK dan freight forwarder di I
 | Shipments — CRUD data shipment, tersimpan di browser (IndexedDB) | ✅ Live |
 | Export shipment ke Excel | ✅ Live |
 | Feedback & roadmap board | ✅ Live |
-| BL Scanner — parse PDF Bill of Lading untuk auto-fill form | 🔄 In Progress |
+| Smart Fill — parse PDF Bill of Lading untuk auto-fill form shipment | 🔄 In Progress |
 | ETA Notifications | ⏳ Planned |
 
 ## Tech Stack
 
 - **TypeScript** (`strict: true`)
-- **Next.js 14** (App Router)
+- **Next.js 16** (App Router) + **React 19**
 - **Tailwind CSS** + DaisyUI
 - **Vertical Slice Architecture** — core framework-independent, aplikasi Next.js per fitur
 - **IndexedDB** — penyimpanan data shipment di sisi browser

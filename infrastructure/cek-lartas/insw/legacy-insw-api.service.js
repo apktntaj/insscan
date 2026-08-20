@@ -99,12 +99,11 @@ const INSW_PUBLIC_ONLY_MODE =
   process.env.INSW_DISABLE_AUTH_SOURCES === "true";
 const INSW_USE_LOCAL_MOCK = process.env.INSW_USE_LOCAL_MOCK === "true";
 const INSW_MOCK_ONLY_MODE = process.env.INSW_MOCK_ONLY_MODE === "true";
-const INSW_MOCK_FILE_PATH =
-  process.env.INSW_MOCK_FILE_PATH ||
-  path.join(
-    process.cwd(),
-    "infrastructure/cek-lartas/insw/mocks/insw-detail-komoditas.mock.json",
-  );
+const DEFAULT_INSW_MOCK_FILE_PATH = path.join(
+  process.cwd(),
+  "infrastructure/cek-lartas/insw/mocks/insw-detail-komoditas.mock.json",
+);
+const CUSTOM_INSW_MOCK_FILE_PATH = process.env.INSW_MOCK_FILE_PATH;
 
 const INSW_HEADERS = {
   accept: "application/json, text/plain, */*",
@@ -691,7 +690,12 @@ async function loadMockSnapshot() {
   mockSnapshotLoaded = true;
 
   try {
-    const raw = await readFile(INSW_MOCK_FILE_PATH, "utf8");
+    const raw = CUSTOM_INSW_MOCK_FILE_PATH
+      ? await readFile(
+          /* turbopackIgnore: true */ CUSTOM_INSW_MOCK_FILE_PATH,
+          "utf8",
+        )
+      : await readFile(DEFAULT_INSW_MOCK_FILE_PATH, "utf8");
     cachedMockSnapshot = JSON.parse(raw);
   } catch {
     cachedMockSnapshot = null;
