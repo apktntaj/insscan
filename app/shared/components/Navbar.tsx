@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -15,7 +15,17 @@ export interface NavigationLink {
     href: string;
 }
 
-export default function Navbar({ links = [] }: { links?: NavigationLink[] }) {
+interface NavbarProps {
+    links?: NavigationLink[];
+    authSlot?: ReactNode;
+    mobileAuthSlot?: ReactNode;
+}
+
+export default function Navbar({
+    links = [],
+    authSlot,
+    mobileAuthSlot,
+}: NavbarProps) {
     const pathname = usePathname();
     const [menuOpen, setMenuOpen] = useState(false);
 
@@ -69,6 +79,7 @@ export default function Navbar({ links = [] }: { links?: NavigationLink[] }) {
                             </Link>
                         );
                     })}
+                    {authSlot}
                 </div>
 
                 {/* Hamburger — kanan, mobile only */}
@@ -150,6 +161,7 @@ export default function Navbar({ links = [] }: { links?: NavigationLink[] }) {
                             </Link>
                         );
                     })}
+                    {mobileAuthSlot}
                 </nav>
             </div>
         </>

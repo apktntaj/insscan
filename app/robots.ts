@@ -1,14 +1,13 @@
-/**
- * Generates robots.txt for Pesisir.
- * Allows all crawlers to index public pages.
- * @returns {import("next").MetadataRoute.Robots}
- */
-export default function robots() {
+import type { MetadataRoute } from "next";
+import { SITE_URL } from "@/app/shared/config/site-metadata";
+
+export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: "*",
       allow: "/",
+      disallow: ["/account", "/auth"],
     },
-    sitemap: "https://pesisir.id/sitemap.xml",
+    sitemap: `${SITE_URL}/sitemap.xml`,
   };
 }
