@@ -4,14 +4,11 @@ import type { LucideIcon } from "lucide-react";
 import {
   ArrowRightIcon,
   CheckCircle2Icon,
-  Clock3Icon,
   DownloadIcon,
   FileSearchIcon,
   FileSpreadsheetIcon,
   MessageCircleIcon,
-  SearchIcon,
   ShieldCheckIcon,
-  ShipIcon,
   UploadIcon,
 } from "lucide-react";
 import FaqList, { type FaqItemData } from "@/app/features/marketing/components/FaqList";
@@ -28,7 +25,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = homeSocialMetadata;
@@ -47,25 +51,18 @@ interface WorkspaceFeature {
 
 const workspaceFeatures: WorkspaceFeature[] = [
   {
-    title: "Cek LARTAS batch",
+    title: "Cek LARTAS dari Excel",
     description: "Periksa puluhan HS code dari invoice Excel dan ekspor hasilnya untuk dokumentasi kerja.",
     href: "/cek-lartas",
     action: "Mulai pemeriksaan",
     icon: FileSpreadsheetIcon,
   },
   {
-    title: "Cari kandidat HS code",
-    description: "Susun fakta produk dan dapatkan kandidat klasifikasi untuk membantu riset awal.",
-    href: "/hs-finder",
-    action: "Buka HS Finder",
-    icon: SearchIcon,
-  },
-  {
-    title: "Kelola shipment",
-    description: "Pantau B/L, ETA, kelengkapan data, dan pekerjaan yang perlu ditindaklanjuti.",
-    href: "/shipments",
-    action: "Lihat shipment",
-    icon: ShipIcon,
+    title: "Cek satu HS code",
+    description: "Masukkan satu HS code untuk melihat status dan persyaratan LARTAS dengan cepat.",
+    href: "/cek-lartas",
+    action: "Masukkan HS code",
+    icon: FileSearchIcon,
   },
 ];
 
@@ -92,12 +89,6 @@ const faqs: FaqItemData[] = [
   },
 ];
 
-const workflowItems = [
-  { label: "Invoice IMP-0823", detail: "24 HS code siap diperiksa", status: "Siap", variant: "secondary" as const },
-  { label: "Shipment MJS-0826", detail: "ETA dalam 3 hari", status: "Pantau", variant: "outline" as const },
-  { label: "Dokumen B/L", detail: "1 data perlu dilengkapi", status: "Tindak lanjut", variant: "secondary" as const },
-];
-
 export default function Home() {
   return (
     <div className="flex flex-col gap-20 pb-8 sm:gap-24">
@@ -105,18 +96,18 @@ export default function Home() {
         <div className="max-w-2xl">
           <Badge variant="secondary">Workspace operasional PPJK</Badge>
           <h1 className="mt-6 font-heading text-4xl leading-tight font-semibold tracking-tight text-balance sm:text-5xl lg:text-6xl">
-            Pekerjaan kepabeanan harian, lebih ringkas dan jelas.
+            Pemeriksaan LARTAS yang lebih ringkas dan jelas.
           </h1>
           <p className="mt-6 max-w-xl text-base leading-7 text-muted-foreground sm:text-lg">
-            Cek LARTAS, riset HS code, dan pantau shipment dalam satu workspace sederhana yang dibuat untuk ritme kerja PPJK.
+            Periksa satu HS code atau seluruh invoice dari satu tempat, lalu lanjutkan pekerjaan dengan hasil yang mudah dibaca.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link href="/cek-lartas" className={buttonVariants({ size: "lg" })}>
               Cek LARTAS sekarang
               <ArrowRightIcon data-icon="inline-end" />
             </Link>
-            <Link href="/shipments" className={buttonVariants({ size: "lg", variant: "outline" })}>
-              Buka workspace
+            <Link href="#tools-title" className={buttonVariants({ size: "lg", variant: "outline" })}>
+              Pilih cara pemeriksaan
             </Link>
           </div>
           <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
@@ -127,46 +118,27 @@ export default function Home() {
 
         <Card className="shadow-xl shadow-primary/5">
           <CardHeader>
-            <CardTitle>Ringkasan pekerjaan</CardTitle>
-            <CardDescription>Prioritas yang perlu Anda lihat hari ini.</CardDescription>
-            <CardAction><Badge variant="outline">Hari ini</Badge></CardAction>
+            <CardTitle>Mulai pemeriksaan pertama Anda</CardTitle>
+            <CardDescription>Hasil pemeriksaan LARTAS akan tersedia setelah Anda memasukkan HS code atau mengunggah invoice.</CardDescription>
+            <CardAction><Badge variant="secondary">LARTAS</Badge></CardAction>
           </CardHeader>
-          <CardContent className="flex flex-col gap-5">
-            <div className="grid grid-cols-3 gap-3">
-              <div className="rounded-lg bg-secondary p-3">
-                <p className="text-xs text-muted-foreground">HS code</p>
-                <p className="mt-1 text-2xl font-semibold tabular-nums">24</p>
-              </div>
-              <div className="rounded-lg bg-secondary p-3">
-                <p className="text-xs text-muted-foreground">Shipment</p>
-                <p className="mt-1 text-2xl font-semibold tabular-nums">8</p>
-              </div>
-              <div className="rounded-lg bg-secondary p-3">
-                <p className="text-xs text-muted-foreground">Perlu aksi</p>
-                <p className="mt-1 text-2xl font-semibold tabular-nums">2</p>
-              </div>
-            </div>
-            <div className="flex flex-col">
-              {workflowItems.map((item, index) => (
-                <div key={item.label}>
-                  {index > 0 ? <Separator /> : null}
-                  <div className="flex items-center gap-3 py-4">
-                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground">
-                      {index === 0 ? <FileSearchIcon className="size-4" /> : index === 1 ? <Clock3Icon className="size-4" /> : <FileSpreadsheetIcon className="size-4" />}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium">{item.label}</p>
-                      <p className="truncate text-xs text-muted-foreground">{item.detail}</p>
-                    </div>
-                    <Badge variant={item.variant}>{item.status}</Badge>
-                  </div>
-                </div>
-              ))}
-            </div>
+          <CardContent>
+            <Empty>
+              <EmptyHeader>
+                <EmptyMedia variant="icon"><FileSearchIcon /></EmptyMedia>
+                <EmptyTitle>Belum ada pemeriksaan</EmptyTitle>
+                <EmptyDescription>Mulai dengan satu HS code atau file Excel. File Anda diproses di browser.</EmptyDescription>
+              </EmptyHeader>
+              <EmptyContent>
+                <Link href="/cek-lartas" className={buttonVariants({ size: "sm" })}>
+                  Cek LARTAS sekarang
+                  <ArrowRightIcon data-icon="inline-end" />
+                </Link>
+              </EmptyContent>
+            </Empty>
           </CardContent>
           <CardFooter className="justify-between gap-3">
-            <span className="text-xs text-muted-foreground">Contoh tampilan workspace</span>
-            <Link href="/shipments" className={buttonVariants({ size: "sm", variant: "ghost" })}>Lihat detail</Link>
+            <span className="text-xs text-muted-foreground">Tidak perlu akun untuk mulai memeriksa.</span>
           </CardFooter>
         </Card>
       </section>
@@ -177,13 +149,13 @@ export default function Home() {
           <h2 id="tools-title" className="mt-4 font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
             Mulai dari pekerjaan yang perlu diselesaikan.
           </h2>
-          <p className="mt-3 text-muted-foreground">Setiap alat berdiri sendiri, dengan alur yang pendek dan hasil yang mudah dibaca.</p>
+          <p className="mt-3 text-muted-foreground">Pilih pemeriksaan sesuai data yang Anda miliki, lalu lanjutkan dari hasil yang tersedia.</p>
         </div>
-        <div className="mt-8 grid gap-4 md:grid-cols-3">
+        <div className="mt-8 grid gap-4 md:grid-cols-2">
           {workspaceFeatures.map((feature) => {
             const Icon = feature.icon;
             return (
-              <Card key={feature.href}>
+              <Card key={feature.title}>
                 <CardHeader>
                   <div className="mb-3 flex size-10 items-center justify-center rounded-lg bg-accent text-accent-foreground">
                     <Icon className="size-5" />
@@ -207,13 +179,13 @@ export default function Home() {
         <div className="max-w-md">
           <Badge variant="outline">Alur sederhana</Badge>
           <h2 id="steps-title" className="mt-4 font-heading text-3xl font-semibold tracking-tight">Dari data kerja ke hasil yang siap ditindaklanjuti.</h2>
-          <p className="mt-3 text-muted-foreground">Tidak ada dashboard yang ramai. Hanya input penting, proses yang terlihat, dan hasil yang bisa dibawa ke pekerjaan berikutnya.</p>
+          <p className="mt-3 text-muted-foreground">Mulai dari data yang Anda miliki, periksa persyaratan, lalu simpan hasilnya untuk pekerjaan berikutnya.</p>
         </div>
         <div className="grid gap-4 sm:grid-cols-3">
           {[
-            { step: "01", title: "Masukkan data", description: "Upload Excel atau isi detail barang dan shipment.", icon: UploadIcon },
+            { step: "01", title: "Masukkan data", description: "Upload Excel atau isi satu HS code.", icon: UploadIcon },
             { step: "02", title: "Periksa hasil", description: "Lihat status, catatan, dan data yang masih perlu perhatian.", icon: FileSearchIcon },
-            { step: "03", title: "Lanjutkan kerja", description: "Ekspor hasil atau tindak lanjuti shipment dari satu tempat.", icon: DownloadIcon },
+            { step: "03", title: "Lanjutkan kerja", description: "Ekspor hasil untuk dokumentasi dan tindak lanjut.", icon: DownloadIcon },
           ].map((item) => {
             const Icon = item.icon;
             return (

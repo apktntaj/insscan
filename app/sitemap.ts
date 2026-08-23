@@ -4,7 +4,6 @@ import { SITE_URL } from "@/app/shared/config/site-metadata";
 const routes = [
   { path: "/", priority: 1 },
   { path: "/cek-lartas", priority: 0.9 },
-  { path: "/hs-finder", priority: 0.8 },
   { path: "/shipments", priority: 0.8 },
   { path: "/learn", priority: 0.7 },
   { path: "/exercise", priority: 0.7 },
