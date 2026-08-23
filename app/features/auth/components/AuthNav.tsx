@@ -3,9 +3,13 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
+import { LogOutIcon, UserIcon } from "lucide-react";
 import { signOut } from "@/app/features/auth/actions/auth.actions";
-import { createClient } from
-  "@/app/features/auth/infrastructure/supabase/client";
+import { createClient } from "@/app/features/auth/infrastructure/supabase/client";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 interface AuthNavProps {
   mobile?: boolean;
@@ -13,9 +17,11 @@ interface AuthNavProps {
 
 function getDisplayName(user: User): string {
   const metadataName = user.user_metadata.full_name;
-  return typeof metadataName === "string"
-    ? metadataName
-    : (user.email ?? "Akun");
+  return typeof metadataName === "string" ? metadataName : (user.email ?? "Akun");
+}
+
+function getInitial(user: User): string {
+  return getDisplayName(user).trim().charAt(0).toUpperCase() || "P";
 }
 
 export default function AuthNav({ mobile = false }: AuthNavProps) {
@@ -26,54 +32,50 @@ export default function AuthNav({ mobile = false }: AuthNavProps) {
     const { data } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
-
     return () => data.subscription.unsubscribe();
   }, [supabase]);
 
   if (user === undefined) {
-    return (
-      <span
-        aria-hidden="true"
-        className={mobile
-          ? "my-3 h-10 w-full animate-pulse rounded-xl bg-zinc-100"
-          : "h-9 w-20 animate-pulse rounded-xl bg-zinc-200"}
-      />
-    );
+    return <Skeleton className={mobile ? "h-9 w-full" : "h-8 w-24"} />;
   }
 
   if (!user) {
     return (
-      <Link
-        href="/login"
-        className={mobile
-          ? "py-4 text-sm font-semibold text-sky-700"
-          : "rounded-xl bg-sky-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-800"}
-      >
+      <Link href="/login" className={cn(buttonVariants(), mobile && "w-full")}>
         Masuk
       </Link>
     );
   }
 
   return (
-    <div className={mobile ? "flex flex-col gap-1 border-t border-zinc-100 pt-3" : "flex items-center gap-2"}>
+    <div className={mobile ? "flex flex-col gap-2" : "flex items-center gap-1"}>
       <Link
         href="/account"
         title={user.email ?? undefined}
-        className={mobile
-          ? "py-3 text-sm font-semibold text-sky-700"
-          : "max-w-36 truncate rounded-xl px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100"}
+        className={cn(
+          buttonVariants({ variant: "ghost" }),
+          mobile ? "w-full justify-start" : "max-w-44",
+        )}
       >
-        {getDisplayName(user)}
+        {mobile ? (
+          <UserIcon data-icon="inline-start" />
+        ) : (
+          <Avatar size="sm">
+            <AvatarFallback>{getInitial(user)}</AvatarFallback>
+          </Avatar>
+        )}
+        <span className="truncate">{getDisplayName(user)}</span>
       </Link>
       <form action={signOut}>
-        <button
+        <Button
           type="submit"
-          className={mobile
-            ? "py-3 text-left text-sm text-zinc-500 hover:text-zinc-800"
-            : "rounded-xl border border-zinc-200 px-3 py-2 text-sm text-zinc-600 hover:bg-zinc-100"}
+          variant="outline"
+          className={mobile ? "w-full" : undefined}
+          size={mobile ? "default" : "icon"}
         >
-          Keluar
-        </button>
+          <LogOutIcon data-icon={mobile ? "inline-start" : undefined} />
+          {mobile ? "Keluar" : <span className="sr-only">Keluar</span>}
+        </Button>
       </form>
     </div>
   );

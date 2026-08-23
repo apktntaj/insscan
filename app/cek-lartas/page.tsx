@@ -21,12 +21,12 @@ export const metadata = createPageMetadata({
  */
 export default function CekLartasPage() {
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-4">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-4">
       <Title
-        title="CEK LARTAS"
+        title="Cek LARTAS"
         descs={PAGE_DESCRIPTION}
         variant="modern"
-        eyebrow="Pesisir"
+        eyebrow="Alat kerja PPJK"
       />
       <CekLartasPageClient />
     </div>

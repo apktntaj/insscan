@@ -5,22 +5,27 @@
 
 export const navLinks = [
   {
+    id: 1,
+    label: "Cek LARTAS",
+    href: "/cek-lartas",
+  },
+  {
     id: 2,
     label: "HS Finder",
     href: "/hs-finder",
   },
-  // {
-  //   id: 1,
-  //   label: "Shipments",
-  //   href: "/shipments",
-  // },
+  {
+    id: 3,
+    label: "Shipment",
+    href: "/shipments",
+  },
   // {
   //   id: 2,
   //   label: "Materi",
   //   href: "/learn",
   // },
   {
-    id: 3,
+    id: 4,
     label: "Latihan",
     href: "/exercise",
   },

@@ -18,6 +18,15 @@ import ShipmentExportButton from "@/app/features/shipments/presentation/componen
 import DashboardSection from "@/app/features/shipments/presentation/components/DashboardSection";
 import { shipmentController } from "@/app/features/shipments/adapters/controllers/shipment.controller";
 import { MAX_RECORD_LIMIT } from "@core/shipments/use-cases/create-shipment";
+import { BellIcon, CheckCircle2Icon, PlusIcon, TriangleAlertIcon, XIcon } from "lucide-react";
+import {
+  Alert,
+  AlertAction,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 export default function ShipmentManager() {
   const {
@@ -74,11 +83,11 @@ export default function ShipmentManager() {
     async (data) => {
       if (editTarget) {
         const result = await editShipment(editTarget.id, data);
-        if (result.ok) showSuccess("Shipment updated successfully.");
+        if (result.ok) showSuccess("Perubahan shipment tersimpan.");
         return result;
       } else {
         const result = await createShipment(data);
-        if (result.ok) showSuccess("Shipment created successfully.");
+        if (result.ok) showSuccess("Shipment baru berhasil dibuat.");
         return result;
       }
     },
@@ -88,7 +97,7 @@ export default function ShipmentManager() {
   const handleTerminate = useCallback(
     async (id) => {
       const result = await terminateShipment(id);
-      if (result.ok) showSuccess("Shipment terminated.");
+      if (result.ok) showSuccess("Shipment berhasil dihapus.");
       else setSuccessMessage(null);
     },
     [terminateShipment]
@@ -96,7 +105,7 @@ export default function ShipmentManager() {
 
   const handleExport = useCallback(async () => {
     const result = await exportShipments();
-    if (result.ok) showSuccess("Export complete. All records have been cleared.");
+    if (result.ok) showSuccess("Ekspor selesai. Semua data aktif telah dihapus.");
     return result;
   }, [exportShipments]);
 
@@ -104,101 +113,81 @@ export default function ShipmentManager() {
   const nearLimit = count >= MAX_RECORD_LIMIT * 0.9 && !atLimit;
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Shipment Management</h1>
-          <p className="mt-1 text-sm text-zinc-500">
-            Track and manage your shipment records locally in the browser.
+          <Badge variant="secondary">Workspace PPJK</Badge>
+          <h1 className="mt-3 font-heading text-3xl font-semibold tracking-tight sm:text-4xl">Shipment</h1>
+          <p className="mt-2 text-sm text-muted-foreground sm:text-base">
+            Pantau ETA, kelengkapan data, dan pekerjaan shipment dari satu tempat.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
           {/* Record counter badge */}
-          <span
-            className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium ${
-              atLimit
-                ? "border-red-200 bg-red-50 text-red-700"
-                : nearLimit
-                ? "border-amber-200 bg-amber-50 text-amber-700"
-                : "border-zinc-200 bg-zinc-50 text-zinc-600"
-            }`}
-          >
-            {count}/{MAX_RECORD_LIMIT} records used
-          </span>
+          <Badge variant={atLimit ? "destructive" : nearLimit ? "secondary" : "outline"}>
+            {count}/{MAX_RECORD_LIMIT} data tersimpan
+          </Badge>
 
           <ShipmentExportButton onExport={handleExport} disabled={count === 0} />
 
-          <button
+          <Button
             type="button"
             onClick={handleOpenCreate}
             disabled={atLimit}
-            className="inline-flex items-center gap-2 rounded-xl border border-zinc-900 bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            New Shipment
-          </button>
+            <PlusIcon data-icon="inline-start" />
+            Shipment baru
+          </Button>
         </div>
       </div>
 
       {/* Limit warning banner */}
       {atLimit && (
-        <div className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-5 py-4">
-          <svg xmlns="http://www.w3.org/2000/svg" className="mt-0.5 h-5 w-5 shrink-0 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-          </svg>
-          <p className="text-sm text-red-700">
-            <span className="font-medium">Maximum record limit reached ({MAX_RECORD_LIMIT} records).</span>{" "}
-            Please export your records to Excel before adding new ones.
-          </p>
-        </div>
+        <Alert variant="destructive">
+          <TriangleAlertIcon />
+          <AlertTitle>Batas {MAX_RECORD_LIMIT} data tercapai</AlertTitle>
+          <AlertDescription>Ekspor data ke Excel sebelum menambahkan shipment baru.</AlertDescription>
+        </Alert>
       )}
 
       {nearLimit && (
-        <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4">
-          <svg xmlns="http://www.w3.org/2000/svg" className="mt-0.5 h-5 w-5 shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-          </svg>
-          <p className="text-sm text-amber-700">
-            Approaching record limit. Consider exporting soon.
-          </p>
-        </div>
+        <Alert>
+          <TriangleAlertIcon />
+          <AlertTitle>Penyimpanan hampir penuh</AlertTitle>
+          <AlertDescription>Pertimbangkan untuk mengekspor data shipment segera.</AlertDescription>
+        </Alert>
       )}
 
       {/* Success message */}
       {successMessage && (
-        <div className="flex items-center gap-3 rounded-2xl border border-green-200 bg-green-50 px-5 py-3">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 shrink-0 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
-          <p className="text-sm text-green-700">{successMessage}</p>
-        </div>
+        <Alert>
+          <CheckCircle2Icon />
+          <AlertDescription>{successMessage}</AlertDescription>
+        </Alert>
       )}
 
       {/* In-app notification fallback */}
       {inAppNotification && (
-        <div className="flex items-start justify-between gap-3 rounded-2xl border border-sky-200 bg-sky-50 px-5 py-4">
-          <p className="text-sm text-sky-700">{inAppNotification}</p>
-          <button
-            type="button"
-            onClick={() => setInAppNotification(null)}
-            className="shrink-0 text-sky-500 hover:text-sky-700"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+        <Alert>
+          <BellIcon />
+          <AlertDescription>{inAppNotification}</AlertDescription>
+          <AlertAction>
+            <Button type="button" variant="ghost" size="icon-sm" onClick={() => setInAppNotification(null)}>
+              <XIcon /><span className="sr-only">Tutup notifikasi</span>
+            </Button>
+          </AlertAction>
+        </Alert>
       )}
 
       {/* Error state */}
       {error && (
-        <div className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
-          {error}
-        </div>
+        <Alert variant="destructive">
+          <TriangleAlertIcon />
+          <AlertTitle>Data shipment gagal dimuat</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       {/* Dashboard section */}

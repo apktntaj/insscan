@@ -223,9 +223,9 @@ export default function ShipmentForm({
 
   function validate() {
     const newErrors = {};
-    if (!isEditMode && !form.blNumber.trim()) newErrors.blNumber = "B/L number is required";
-    if (!form.shipperName.trim()) newErrors.shipperName = "Shipper name is required";
-    if (!form.consigneeName.trim()) newErrors.consigneeName = "Consignee name is required";
+    if (!isEditMode && !form.blNumber.trim()) newErrors.blNumber = "Nomor B/L wajib diisi";
+    if (!form.shipperName.trim()) newErrors.shipperName = "Nama shipper wajib diisi";
+    if (!form.consigneeName.trim()) newErrors.consigneeName = "Nama consignee wajib diisi";
     if (!form.eta) newErrors.eta = "ETA wajib diisi";
     return newErrors;
   }
@@ -288,7 +288,7 @@ export default function ShipmentForm({
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
               </svg>
-              Upload PDF for Smart Fill
+              Isi otomatis dari PDF
             </button>
           )}
 
@@ -351,14 +351,14 @@ export default function ShipmentForm({
 
       {/* B/L Number */}
       <FormField
-        label="B/L Number"
+        label="Nomor B/L"
         name="blNumber"
         value={form.blNumber}
         onChange={handleChange}
         readOnly={isEditMode}
         required={!isEditMode}
         error={errors.blNumber}
-        placeholder="E.G. MSKU1234567"
+        placeholder="Contoh: MSKU1234567"
         onFocus={onFieldFocus}
         onBlur={onFieldBlur}
         isActive={activeField === "blNumber"}
@@ -372,7 +372,7 @@ export default function ShipmentForm({
         name="alias"
         value={form.alias}
         onChange={handleChange}
-        placeholder="SHORT FRIENDLY NAME FOR QUICK RECALL"
+        placeholder="Nama singkat untuk memudahkan pencarian"
         onFocus={onFieldFocus}
         onBlur={onFieldBlur}
         isActive={activeField === "alias"}
@@ -382,13 +382,13 @@ export default function ShipmentForm({
       {/* Required mutable fields */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <FormField
-              label="Shipper Name"
+              label="Nama Shipper"
               name="shipperName"
               value={form.shipperName}
               onChange={handleChange}
               required
               error={errors.shipperName}
-              placeholder="SHIPPER COMPANY NAME"
+              placeholder="Nama perusahaan shipper"
               onFocus={onFieldFocus}
               onBlur={onFieldBlur}
               isActive={activeField === "shipperName"}
@@ -396,13 +396,13 @@ export default function ShipmentForm({
               confidence={confidenceScores.shipperName ?? null}
             />
             <FormField
-              label="Consignee Name"
+              label="Nama Consignee"
               name="consigneeName"
               value={form.consigneeName}
               onChange={handleChange}
               required
               error={errors.consigneeName}
-              placeholder="CONSIGNEE COMPANY NAME"
+              placeholder="Nama perusahaan consignee"
               onFocus={onFieldFocus}
               onBlur={onFieldBlur}
               isActive={activeField === "consigneeName"}
@@ -414,11 +414,11 @@ export default function ShipmentForm({
           {/* Optional vessel info */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <FormField
-              label="Vessel Name"
+              label="Nama Vessel"
               name="vesselName"
               value={form.vesselName}
               onChange={handleChange}
-              placeholder="E.G. MV EVER GIVEN"
+              placeholder="Contoh: MV EVER GIVEN"
               onFocus={onFieldFocus}
               onBlur={onFieldBlur}
               isActive={activeField === "vesselName"}
@@ -430,7 +430,7 @@ export default function ShipmentForm({
               name="voyage"
               value={form.voyage}
               onChange={handleChange}
-              placeholder="E.G. 025W"
+              placeholder="Contoh: 025W"
               onFocus={onFieldFocus}
               onBlur={onFieldBlur}
               isActive={activeField === "voyage"}
@@ -442,11 +442,11 @@ export default function ShipmentForm({
           {/* Ports */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <FormField
-              label="Port of Loading"
+              label="Pelabuhan Muat"
               name="portOfLoading"
               value={form.portOfLoading}
               onChange={handleChange}
-              placeholder="E.G. SHANGHAI"
+              placeholder="Contoh: SHANGHAI"
               onFocus={onFieldFocus}
               onBlur={onFieldBlur}
               isActive={activeField === "portOfLoading"}
@@ -454,11 +454,11 @@ export default function ShipmentForm({
               confidence={confidenceScores.portOfLoading ?? null}
             />
             <FormField
-              label="Port of Discharge"
+              label="Pelabuhan Bongkar"
               name="portOfDischarge"
               value={form.portOfDischarge}
               onChange={handleChange}
-              placeholder="E.G. TANJUNG PRIOK"
+              placeholder="Contoh: TANJUNG PRIOK"
               onFocus={onFieldFocus}
               onBlur={onFieldBlur}
               isActive={activeField === "portOfDischarge"}
@@ -483,7 +483,7 @@ export default function ShipmentForm({
               confidence={confidenceScores.eta ?? null}
             />
             <FormField
-              label="Custom Notification Date"
+              label="Tanggal Pengingat"
               name="customNotificationDate"
               type="date"
               value={form.customNotificationDate}
@@ -497,13 +497,13 @@ export default function ShipmentForm({
 
           {/* Notes */}
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-zinc-700">Notes</label>
+            <label className="mb-1.5 block text-xs font-medium text-zinc-700">Catatan</label>
             <textarea
               name="notes"
               value={form.notes}
               onChange={handleChange}
               rows={3}
-              placeholder="ADDITIONAL REMARKS..."
+              placeholder="Catatan tambahan..."
               className="block w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm uppercase text-zinc-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 resize-none"
             />
           </div>
@@ -520,7 +520,7 @@ export default function ShipmentForm({
               onClick={onClose}
               className="rounded-xl border border-zinc-300 px-5 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-100"
             >
-              Cancel
+              Batal
             </button>
             <button
               type="submit"
@@ -533,7 +533,7 @@ export default function ShipmentForm({
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                 </svg>
               )}
-              {submitting ? "Saving..." : isEditMode ? "Save Changes" : "Create Shipment"}
+              {submitting ? "Menyimpan..." : isEditMode ? "Simpan Perubahan" : "Buat Shipment"}
             </button>
           </div>
     </>
@@ -545,7 +545,7 @@ export default function ShipmentForm({
       <div className="h-full overflow-y-auto" ref={formContainerRef}>
         <div className="mb-4">
           <h2 className="text-base font-semibold text-zinc-900">
-            {isEditMode ? "Edit Shipment" : "New Shipment"}
+            {isEditMode ? "Edit Shipment" : "Shipment Baru"}
           </h2>
         </div>
 
@@ -562,13 +562,13 @@ export default function ShipmentForm({
       <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border border-zinc-200 bg-white shadow-xl">
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-zinc-100 bg-white px-6 py-4">
           <h2 className="text-base font-semibold text-zinc-900">
-            {isEditMode ? "Edit Shipment" : "New Shipment"}
+            {isEditMode ? "Edit Shipment" : "Shipment Baru"}
           </h2>
           <button
             type="button"
             onClick={onClose}
             className="rounded-lg p-1.5 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900"
-            aria-label="Close"
+            aria-label="Tutup"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

@@ -7,6 +7,14 @@ import Button from "@/app/shared/components/Button";
 import Input from "@/app/shared/components/Input";
 import LartasResultTable from "@/app/features/cek-lartas/presentation/components/LartasResultTable";
 import PaywallBanner from "@/app/features/cek-lartas/presentation/components/cek-lartas/PaywallBanner";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
 
 /**
  * Resolve Alert variant based on status message content.
@@ -64,32 +72,27 @@ export default function FileInputPanel() {
   const alertVariant = resolveAlertVariant(status);
 
   const hasResult = resultData && resultData.length > 0;
-  const canFetch = fileData && !hasResult && !isLoading;
-  
   const buttonLabel = hasResult 
     ? `Ekspor ${viewMode === "lartas" ? "LARTAS" : "Semua"}`
-    : isLoading 
-    ? "Loading..." 
     : "Tarik Data";
   
   const buttonAction = hasResult ? handleExportResult : handleFetch;
   const buttonDisabled = isLoading || (!fileData && !hasResult) || (!hasResult && isLimitReached);
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-4">
       {/* Paywall banner — tampil saat limit tercapai */}
       {isLimitReached && !hasResult ? <PaywallBanner onActivate={activateKey} /> : null}
 
-      {/* Input card */}
-      <div className="overflow-hidden rounded-3xl border border-sky-100 bg-white p-5 shadow-sm sm:p-6">
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700">Input File</p>
-            {!isPro && !isLimitReached ? (
-              <p className="text-xs text-zinc-400">Sisa kuota: {remaining} query</p>
-            ) : null}
-          </div>
-          
+      <Card>
+        <CardHeader>
+          <CardTitle>Upload invoice Excel</CardTitle>
+          <CardDescription>Format .xls atau .xlsx, dapat memuat beberapa sheet.</CardDescription>
+          {!isPro && !isLimitReached ? (
+            <p className="text-xs text-muted-foreground">Sisa kuota: {remaining} pemeriksaan</p>
+          ) : null}
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <div className="min-w-0 flex-1">
               <Input
@@ -97,41 +100,35 @@ export default function FileInputPanel() {
                 className="w-full"
                 ariaLabel="Unggah file Excel (.xls, .xlsx)"
                 selectedFileName={selectedFileName}
-                placeholder="Masukkan invoice (file excel)"
+                placeholder="Pilih invoice untuk mulai"
               />
             </div>
             <Button
               onClick={buttonAction}
               disabled={buttonDisabled}
               variant={hasResult ? "secondary" : "primary"}
-              className={`w-full shrink-0 px-6 sm:w-auto ${
-                hasResult 
-                  ? "!border-sky-200 hover:!bg-sky-50" 
-                  : "!border-cyan-700 !bg-gradient-to-r !from-sky-900 !to-cyan-700 hover:!from-sky-800 hover:!to-cyan-600"
-              }`}
+              className="w-full shrink-0 sm:w-auto"
             >
+              {isLoading ? <Spinner data-icon="inline-start" /> : null}
               {buttonLabel}
             </Button>
           </div>
           {hasResult ? (
-            <p className="text-xs leading-6 text-zinc-500">Pilih file lain untuk memulai pemeriksaan baru. Hasil saat ini tetap dapat diekspor sebelum diganti.</p>
+            <p className="text-xs leading-6 text-muted-foreground">Pilih file lain untuk memulai pemeriksaan baru. Hasil saat ini tetap dapat diekspor sebelum diganti.</p>
           ) : null}
-        </div>
 
-        {/* Status Alert */}
-        {status ? (
-          <div className="mt-4">
-            <Alert
-              message={
-                alertVariant === "warning"
-                  ? `${status} Data yang sudah berhasil diambil tetap bisa diekspor.`
-                  : status
-              }
-              variant={alertVariant}
-            />
-          </div>
-        ) : null}
-      </div>
+          {status ? (
+              <Alert
+                message={
+                  alertVariant === "warning"
+                    ? `${status} Data yang sudah berhasil diambil tetap bisa diekspor.`
+                    : status
+                }
+                variant={alertVariant}
+              />
+          ) : null}
+        </CardContent>
+      </Card>
 
       {/* Progress panel */}
       {progress.total > 0 ? (

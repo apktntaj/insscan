@@ -19,7 +19,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
   - `app/shared/`: Shared application UI, configuration, and browser-specific infrastructure.
   - `app/api/` and route pages: Thin Next.js delivery entry points.
   - Dependency direction: `app -> core`, `app composition -> infrastructure -> core`; never `core -> app/infrastructure`.
-- **Styling**: Tailwind CSS + DaisyUI.
+- **Styling**: Tailwind CSS v4 + shadcn/ui using Base UI primitives. DaisyUI has been removed.
 
 ## Development Commands
 - Run development server: `npm run dev`

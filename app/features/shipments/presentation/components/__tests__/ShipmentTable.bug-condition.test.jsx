@@ -65,6 +65,6 @@ describe("ShipmentTable — Bug Condition: shipments is undefined", () => {
    */
   it("displays the empty-state text when shipments={undefined}", () => {
     render(<ShipmentTable {...baseProps} shipments={undefined} />);
-    expect(screen.getByText(/No shipment records yet\./i)).toBeInTheDocument();
+    expect(screen.getByText(/Belum ada shipment/i)).toBeInTheDocument();
   });
 });

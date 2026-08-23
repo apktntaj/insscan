@@ -20,17 +20,14 @@ import Image from "next/image";
 export default function SupportSection({ developerPhotoPath }) {
   return (
     <section aria-labelledby="about-heading">
-      <h2
-        id="about-heading"
-        className="text-lg font-semibold text-zinc-900"
-      >
+      <h2 id="about-heading" className="font-heading text-lg font-semibold">
         Tentang Developer
       </h2>
 
       <div className="mt-4 flex flex-col gap-6 sm:flex-row sm:items-start">
         {/* Developer Photo */}
         <div className="shrink-0">
-          <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm">
+          <div className="overflow-hidden rounded-xl border bg-background p-2">
             <Image
               src={developerPhotoPath}
               alt="Foto developer Pesisir Platform"
@@ -42,7 +39,7 @@ export default function SupportSection({ developerPhotoPath }) {
         </div>
 
         {/* Personal introduction */}
-        <div className="space-y-2 text-sm leading-6 text-zinc-600">
+        <div className="space-y-3 text-sm leading-6 text-muted-foreground">
           <p>
             Kedekatan saya dengan industri kepabeanan tumbuh dari lingkungan keluarga dan pengalaman langsung terlibat di dalamnya — cukup untuk memahami bagaimana operasional PPJK berjalan di lapangan.
           </p>

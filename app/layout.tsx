@@ -8,6 +8,7 @@ import Link from "next/link";
 import { WHATSAPP_NUMBER } from "@/app/features/feedback/config/feedback-config";
 import { SITE_URL } from "@/app/shared/config/site-metadata";
 import AuthNav from "@/app/features/auth/components/AuthNav";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -38,35 +39,35 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html data-theme="light" lang="id" className="scroll-smooth">
-      <body className="min-h-screen flex flex-col bg-zinc-50 text-zinc-900 antialiased [font-family:ui-sans-serif,system-ui,-apple-system,Segoe_UI,Roboto,Helvetica,Arial,sans-serif]">
-        <header className="fixed top-0 left-0 right-0 z-40 border-b border-zinc-200/70 bg-zinc-50">
-          <Navbar
-            links={navLinks}
-            authSlot={<AuthNav />}
-            mobileAuthSlot={<AuthNav mobile />}
-          />
-        </header>
-        <main className="flex-1 pt-16">
-          <div className="mx-auto w-full max-w-7xl px-5 pb-8 pt-6 sm:px-8 lg:px-12">
-            {children}
-            <Analytics />
-          </div>
-        </main>
-        <footer className="border-t border-zinc-200/70 bg-zinc-50/90">
-          <aside className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-7 text-sm text-zinc-500 sm:px-8 lg:flex-row lg:items-center lg:justify-between lg:px-12">
-            <div>
-              <p className="font-medium text-zinc-700">Pesisir oleh Semesta Raya Software</p>
-              <p className="mt-1 text-xs">Alat bantu independen untuk operasional kepabeanan.</p>
-            </div>
-            <nav aria-label="Informasi hukum dan dukungan" className="flex flex-wrap gap-x-4 gap-y-2 text-xs">
-              <Link className="hover:text-cyan-700" href="/privacy">Privasi</Link>
-              <Link className="hover:text-cyan-700" href="/terms">Ketentuan</Link>
-              <Link className="hover:text-cyan-700" href="/refund-policy">Pembatalan & Refund</Link>
-              <a className="hover:text-cyan-700" href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer">Dukungan WhatsApp</a>
-            </nav>
-          </aside>
-        </footer>
+    <html lang="id" className="font-sans">
+      <body className="flex min-h-screen flex-col">
+        <TooltipProvider>
+          <header className="fixed inset-x-0 top-0 z-40 border-b bg-background/90 backdrop-blur-xl">
+            <Navbar
+              links={navLinks}
+              authSlot={<AuthNav />}
+              mobileAuthSlot={<AuthNav mobile />}
+            />
+          </header>
+          <main className="flex-1 pt-16">
+            <div className="workspace-container py-6 sm:py-8">{children}</div>
+          </main>
+          <footer className="border-t bg-card/70">
+            <aside className="workspace-container flex flex-col gap-5 py-8 text-sm text-muted-foreground lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <p className="font-medium text-foreground">Pesisir oleh Semesta Raya Software</p>
+                <p className="mt-1 text-xs">Alat bantu independen untuk operasional kepabeanan.</p>
+              </div>
+              <nav aria-label="Informasi hukum dan dukungan" className="flex flex-wrap gap-x-5 gap-y-2 text-xs">
+                <Link className="hover:text-foreground" href="/privacy">Privasi</Link>
+                <Link className="hover:text-foreground" href="/terms">Ketentuan</Link>
+                <Link className="hover:text-foreground" href="/refund-policy">Pembatalan & Refund</Link>
+                <a className="hover:text-foreground" href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer">Dukungan WhatsApp</a>
+              </nav>
+            </aside>
+          </footer>
+          <Analytics />
+        </TooltipProvider>
       </body>
     </html>
   );

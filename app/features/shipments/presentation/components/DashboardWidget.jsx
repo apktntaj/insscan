@@ -8,21 +8,7 @@
  */
 
 import React from "react";
-
-/** @type {Record<string, string>} */
-const VARIANT_CLASSES = {
-  default: "bg-zinc-50 border-zinc-200 text-zinc-900",
-  danger:  "bg-red-50 border-red-200 text-red-700",
-  warning: "bg-amber-50 border-amber-200 text-amber-700",
-  info:    "bg-sky-50 border-sky-200 text-sky-700",
-};
-
-const LABEL_CLASSES = {
-  default: "text-zinc-500",
-  danger:  "text-red-500",
-  warning: "text-amber-600",
-  info:    "text-sky-600",
-};
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 /**
  * @param {{
@@ -33,18 +19,15 @@ const LABEL_CLASSES = {
  * }} props
  */
 export default function DashboardWidget({ label, value, variant = "default", icon }) {
-  const containerClass = VARIANT_CLASSES[variant] ?? VARIANT_CLASSES.default;
-  const labelClass = LABEL_CLASSES[variant] ?? LABEL_CLASSES.default;
-
   return (
-    <div className={`flex flex-col gap-1 rounded-2xl border px-5 py-4 ${containerClass}`}>
-      <div className="flex items-center justify-between">
-        <span className={`text-xs font-medium uppercase tracking-wide ${labelClass}`}>
+    <Card size="sm" className={variant === "danger" ? "text-destructive" : variant === "info" ? "bg-secondary text-secondary-foreground" : undefined}>
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between text-xs uppercase tracking-wide">
           {label}
-        </span>
-        {icon && <span className="opacity-60">{icon}</span>}
-      </div>
-      <span className="text-3xl font-bold tabular-nums">{value}</span>
-    </div>
+          {icon}
+        </CardTitle>
+      </CardHeader>
+      <CardContent><span className="text-3xl font-semibold tabular-nums">{value}</span></CardContent>
+    </Card>
   );
 }

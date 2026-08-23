@@ -3,8 +3,22 @@
 import { useCekLartasSingle } from "@/app/features/cek-lartas/presentation/hooks/useCekLartasSingle";
 import SingleResultCard from "@/app/features/cek-lartas/presentation/components/cek-lartas/SingleResultCard";
 import Alert from "@/app/shared/components/Alert";
-import Button from "@/app/shared/components/Button";
 import PaywallBanner from "@/app/features/cek-lartas/presentation/components/cek-lartas/PaywallBanner";
+import { SearchIcon } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import { Spinner } from "@/components/ui/spinner";
 
 /**
  * Resolves the Alert variant from a status string.
@@ -43,55 +57,51 @@ export default function SingleInputPanel() {
   const alertVariant = resolveAlertVariant(singleStatus);
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-4">
       {/* Paywall banner — tampil saat limit tercapai */}
       {isLimitReached ? <PaywallBanner onActivate={activateKey} /> : null}
 
-      {/* Input card */}
-      <div className="overflow-hidden rounded-3xl border border-sky-100 bg-white p-5 shadow-sm sm:p-6">
-        <div className="mx-auto max-w-2xl space-y-3">
-          
-          {/* Search input with icon */}
-          <div className="relative">
-            <input
+      <Card>
+        <CardHeader>
+          <CardTitle>Periksa satu HS code</CardTitle>
+          <CardDescription>
+            Masukkan 8 digit tanpa titik, misalnya 84713090.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <InputGroup className="h-10">
+            <InputGroupInput
               type="text"
               value={singleInput}
               onChange={(e) => setSingleInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter") handleFetch(); }}
-              placeholder="Masukkan HS code 8 digit, mis. 84713090"
+              placeholder="84713090"
+              aria-label="HS code 8 digit"
               disabled={isSingleLoading || isLimitReached}
-              className="block w-full rounded-xl border border-sky-100 bg-sky-50/40 py-3 pl-4 pr-11 text-sm text-zinc-700 placeholder:text-zinc-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
             />
-            <button
-              type="button"
-              onClick={handleFetch}
-              disabled={isSingleLoading || isLimitReached}
-              aria-label="Cari HS code"
-              title="Cari"
-              className="absolute inset-y-0 right-0 flex items-center pr-4 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <svg className="h-5 w-5 text-cyan-600 transition hover:text-cyan-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </button>
-          </div>
-          
-          <p className="text-center text-xs leading-6 text-zinc-500 sm:text-sm">
+            <InputGroupAddon align="inline-end">
+              <InputGroupButton
+                size="icon-sm"
+                onClick={handleFetch}
+                disabled={isSingleLoading || isLimitReached}
+                aria-label="Cari HS code"
+                title="Cari"
+              >
+                {isSingleLoading ? <Spinner /> : <SearchIcon />}
+              </InputGroupButton>
+            </InputGroupAddon>
+          </InputGroup>
+
+          <p className="text-xs leading-6 text-muted-foreground sm:text-sm">
             {isSingleLoading
               ? "Sedang mencari..."
               : !isPro && !isLimitReached
               ? `Sisa kuota hari ini: ${remaining} query`
               : ""}
           </p>
-        </div>
-
-        {/* Status Alert */}
-        {singleStatus ? (
-          <div className="mt-4">
-            <Alert message={singleStatus} variant={alertVariant} />
-          </div>
-        ) : null}
-      </div>
+          {singleStatus ? <Alert message={singleStatus} variant={alertVariant} /> : null}
+        </CardContent>
+      </Card>
 
       {/* Result card */}
       {singleResult ? (

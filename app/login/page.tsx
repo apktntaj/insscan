@@ -3,6 +3,18 @@ import { redirect } from "next/navigation";
 import GoogleSignInButton from
   "@/app/features/auth/components/GoogleSignInButton";
 import { getCurrentUser } from "@/app/features/auth/data-access/auth";
+import Link from "next/link";
+import { CircleAlertIcon } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export const metadata: Metadata = {
   title: "Masuk",
@@ -26,33 +38,30 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const errorMessage = params.error ? errorMessages[params.error] : undefined;
 
   return (
-    <section className="mx-auto flex min-h-[65vh] max-w-md items-center">
-      <div className="w-full rounded-3xl border border-zinc-200 bg-white p-7 shadow-sm sm:p-9">
-        <div className="text-center">
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-sky-700">
-            Akun Pesisir
-          </p>
-          <h1 className="mt-3 text-3xl font-bold tracking-tight text-zinc-900">
-            Masuk atau daftar
-          </h1>
-          <p className="mt-3 text-sm leading-6 text-zinc-500">
+    <section className="mx-auto flex min-h-[70vh] max-w-md items-center">
+      <Card className="w-full">
+        <CardHeader className="text-center">
+          <div className="mb-2 flex justify-center"><Badge variant="secondary">Akun Pesisir</Badge></div>
+          <CardTitle className="text-2xl">Masuk atau daftar</CardTitle>
+          <CardDescription>
             Gunakan akun Google untuk mengakses saldo kredit dan riwayat pemakaian Anda.
-          </p>
-        </div>
-
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-5">
         {errorMessage && (
-          <p role="alert" className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {errorMessage}
-          </p>
+          <Alert variant="destructive">
+            <CircleAlertIcon />
+            <AlertDescription>{errorMessage}</AlertDescription>
+          </Alert>
         )}
-
-        <div className="mt-7">
-          <GoogleSignInButton />
-        </div>
-        <p className="mt-5 text-center text-xs leading-5 text-zinc-400">
-          Dengan melanjutkan, Anda menyetujui Ketentuan Layanan dan Kebijakan Privasi Pesisir.
-        </p>
-      </div>
+        <GoogleSignInButton />
+        </CardContent>
+        <CardFooter className="justify-center text-center text-xs text-muted-foreground">
+          <p>
+            Dengan melanjutkan, Anda menyetujui <Link className="underline underline-offset-4" href="/terms">Ketentuan</Link> dan <Link className="underline underline-offset-4" href="/privacy">Kebijakan Privasi</Link>.
+          </p>
+        </CardFooter>
+      </Card>
     </section>
   );
 }

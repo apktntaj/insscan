@@ -1,6 +1,19 @@
 "use client";
 
 import { formatHsCode } from "@core/cek-lartas/domain";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Progress,
+  ProgressLabel,
+  ProgressValue,
+} from "@/components/ui/progress";
 
 /**
  * Hitung persentase 0-100, aman untuk total = 0.
@@ -112,27 +125,21 @@ export default function ProgressPanel({ progress, isLoading }) {
     : "Memulai proses...";
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-sky-100 bg-white p-4 shadow-sm sm:p-5">
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700">
-          {isDone ? "Selesai" : "Sedang Memproses..."}
-        </p>
-        <p className="text-sm font-semibold text-zinc-900">
-          {progress.current} / {progress.total}
-        </p>
-      </div>
-
-      <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-sky-100">
-        <div
-          className="h-full rounded-full bg-gradient-to-r from-sky-900 to-cyan-600 transition-all duration-300"
-          style={{ width: `${percent}%` }}
-        />
-      </div>
-
-      {/* Satu baris info — berubah selaras dengan progress */}
-      <p className="mt-2 truncate text-xs text-zinc-500 transition-all duration-200">
-        {infoLine}
-      </p>
-    </div>
+    <Card size="sm">
+      <CardHeader>
+        <CardTitle>{isDone ? "Pemeriksaan selesai" : "Memeriksa HS code"}</CardTitle>
+        <CardAction>
+          <Badge variant={isDone ? "secondary" : "outline"}>
+            {progress.current} / {progress.total}
+          </Badge>
+        </CardAction>
+      </CardHeader>
+      <CardContent>
+        <Progress value={percent}>
+          <ProgressLabel className="truncate">{infoLine}</ProgressLabel>
+          <ProgressValue>{percent}%</ProgressValue>
+        </Progress>
+      </CardContent>
+    </Card>
   );
 }

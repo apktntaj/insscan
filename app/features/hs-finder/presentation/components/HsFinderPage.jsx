@@ -5,6 +5,10 @@ import TextInputPanel from "@/app/features/hs-finder/presentation/components/det
 import LoadingPanel from "@/app/features/hs-finder/presentation/components/details/LoadingPanel";
 import ResultPanel from "@/app/features/hs-finder/presentation/components/details/ResultPanel";
 import ClarificationPanel from "@/app/features/hs-finder/presentation/components/details/ClarificationPanel";
+import { InfoIcon, TriangleAlertIcon } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 
 const initialSession = {
   status: "idle", // idle | classifying | clarifying | done | error
@@ -64,11 +68,12 @@ export default function HsFinderPage() {
   }
 
   return (
-    <section className="mx-auto max-w-2xl space-y-6 py-6 sm:py-10">
+    <section className="mx-auto flex max-w-3xl flex-col gap-6 py-4 sm:py-8">
       <header>
-        <h1 className="text-2xl font-semibold text-zinc-900">HS Finder</h1>
-        <p className="mt-2 text-sm leading-6 text-zinc-600">
-          Tulis deskripsi barang untuk mendapatkan beberapa kandidat HS code.
+        <Badge variant="secondary">Asisten klasifikasi</Badge>
+        <h1 className="mt-3 font-heading text-3xl font-semibold tracking-tight sm:text-4xl">HS Finder</h1>
+        <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
+          Susun informasi barang dan bandingkan beberapa kandidat HS code sebagai titik awal riset klasifikasi.
         </p>
       </header>
 
@@ -79,7 +84,8 @@ export default function HsFinderPage() {
       />
 
       {session.status === "classifying" && (
-        <div className="border-t border-zinc-200 pt-4">
+        <div className="flex flex-col gap-4">
+          <Separator />
           <LoadingPanel statusLabel="Sedang menyusun rekomendasi…" />
         </div>
       )}
@@ -93,14 +99,19 @@ export default function HsFinderPage() {
       )}
 
       {session.status === "error" && (
-        <p role="alert" className="border-l-2 border-red-500 pl-3 text-sm text-red-700">
-          Terjadi kesalahan: {session.error}
-        </p>
+        <Alert variant="destructive">
+          <TriangleAlertIcon />
+          <AlertTitle>Analisis belum berhasil</AlertTitle>
+          <AlertDescription>{session.error}</AlertDescription>
+        </Alert>
       )}
 
-      <p className="border-t border-zinc-200 pt-4 text-xs leading-5 text-zinc-500">
-        Hasil merupakan kandidat berbasis AI, bukan penetapan klasifikasi resmi. Verifikasi dengan BTKI dan ketentuan yang berlaku.
-      </p>
+      <Alert>
+        <InfoIcon />
+        <AlertDescription>
+          Hasil merupakan kandidat berbasis AI, bukan penetapan resmi. Verifikasi dengan BTKI dan ketentuan yang berlaku.
+        </AlertDescription>
+      </Alert>
     </section>
   );
 }

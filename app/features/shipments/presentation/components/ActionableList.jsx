@@ -10,6 +10,8 @@
  */
 
 import React from "react";
+import { CheckCircle2Icon } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 /** @type {Record<string, { badge: string, dot: string, label: string }>} */
 const RISK_STYLES = {
@@ -39,18 +41,10 @@ const RISK_STYLES = {
 export default function ActionableList({ items, onEditShipment }) {
   if (!items || items.length === 0) {
     return (
-      <div className="flex items-center gap-3 rounded-2xl border border-green-200 bg-green-50 px-5 py-4">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5 shrink-0 text-green-500"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-        </svg>
-        <p className="text-sm font-medium text-green-700">Semua shipment dalam kondisi baik</p>
-      </div>
+      <Alert>
+        <CheckCircle2Icon />
+        <AlertDescription>Semua shipment dalam kondisi baik.</AlertDescription>
+      </Alert>
     );
   }
 

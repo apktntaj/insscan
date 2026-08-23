@@ -1,227 +1,300 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import AnimatedCekLartasDemo from "@/app/features/marketing/components/AnimatedCekLartasDemo";
-import FaqList, {
-  type FaqItemData,
-} from "@/app/features/marketing/components/FaqList";
+import type { LucideIcon } from "lucide-react";
+import {
+  ArrowRightIcon,
+  CheckCircle2Icon,
+  Clock3Icon,
+  DownloadIcon,
+  FileSearchIcon,
+  FileSpreadsheetIcon,
+  MessageCircleIcon,
+  SearchIcon,
+  ShieldCheckIcon,
+  ShipIcon,
+  UploadIcon,
+} from "lucide-react";
+import FaqList, { type FaqItemData } from "@/app/features/marketing/components/FaqList";
 import { WHATSAPP_NUMBER } from "@/app/features/feedback/config/feedback-config";
 import { homeSocialMetadata } from "@/app/shared/config/site-metadata";
+import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = homeSocialMetadata;
 
 const EARLY_ACCESS_LINK = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-  "Halo, saya ingin bertanya tentang Pesisir Pro Early Access."
+  "Halo, saya ingin bertanya tentang Pesisir Pro Early Access.",
 )}`;
 
-const whyReasons = [
+interface WorkspaceFeature {
+  title: string;
+  description: string;
+  href: string;
+  action: string;
+  icon: LucideIcon;
+}
+
+const workspaceFeatures: WorkspaceFeature[] = [
   {
-    pain: "Cek LARTAS satu per satu di INSW itu lambat — apalagi kalau invoice-nya punya 30+ item.",
-    solve:
-      "Upload invoice Excel berisi HS code, status dan persyaratan LARTAS langsung diperiksa sekaligus. Tidak perlu buka INSW manual.",
+    title: "Cek LARTAS batch",
+    description: "Periksa puluhan HS code dari invoice Excel dan ekspor hasilnya untuk dokumentasi kerja.",
+    href: "/cek-lartas",
+    action: "Mulai pemeriksaan",
+    icon: FileSpreadsheetIcon,
   },
   {
-    pain: "Salah baca status LARTAS bisa berujung denda atau barang tertahan di pelabuhan.",
-    solve:
-      "Data langsung dari INSW — status dan detail regulasi impor/ekspor ditampilkan per HS code dengan jelas.",
+    title: "Cari kandidat HS code",
+    description: "Susun fakta produk dan dapatkan kandidat klasifikasi untuk membantu riset awal.",
+    href: "/hs-finder",
+    action: "Buka HS Finder",
+    icon: SearchIcon,
   },
   {
-    pain: "Hasil cek LARTAS tersebar di tab browser, susah didokumentasikan.",
-    solve:
-      "Export hasil ke Excel dalam satu klik. Siap dilampirkan ke laporan atau dikirim ke tim.",
+    title: "Kelola shipment",
+    description: "Pantau B/L, ETA, kelengkapan data, dan pekerjaan yang perlu ditindaklanjuti.",
+    href: "/shipments",
+    action: "Lihat shipment",
+    icon: ShipIcon,
   },
 ];
 
 const faqs: FaqItemData[] = [
   {
-    q: "Data LARTAS dari mana?",
+    q: "Data LARTAS berasal dari mana?",
     a: "Pesisir mengambil informasi LARTAS dari layanan INSW saat pemeriksaan dilakukan. Hasil bergantung pada ketersediaan dan respons sumber tersebut.",
   },
   {
-    q: "Seberapa mutakhir hasil pemeriksaan?",
-    a: "Data diambil saat pemeriksaan dilakukan. Karena regulasi dan layanan sumber dapat berubah, verifikasi kembali keputusan penting melalui portal dan regulasi resmi.",
+    q: "Apakah file Excel saya disimpan?",
+    a: "Tidak. File Excel dibaca di browser dan tidak disimpan di server Pesisir. Hanya HS code yang terdeteksi yang digunakan untuk mengambil hasil pemeriksaan.",
   },
   {
-    q: "Format file Excel-nya seperti apa?",
-    a: "Cukup satu kolom berisi HS code 8 digit. Tidak perlu header khusus — Pesisir akan membaca semua angka 8 digit yang ditemukan di file.",
+    q: "Format file Excel seperti apa yang didukung?",
+    a: "Gunakan file .xls atau .xlsx yang memuat HS code 8 digit. Pesisir dapat membaca beberapa sheet dan akan memproses kode duplikat satu kali.",
   },
   {
-    q: "Apa yang dihitung sebagai satu pemeriksaan?",
-    a: "Satu HS code unik dihitung sebagai satu pemeriksaan. Jika HS code yang sama muncul beberapa kali dalam satu file, kode tersebut diproses satu kali. Paket Gratis mencakup 10 pemeriksaan per hari.",
-  },
-  {
-    q: "Apakah data saya dikirim ke server?",
-    a: "File Excel yang kamu upload diproses di browser — tidak disimpan di server manapun. Hanya HS code yang dikirim ke INSW untuk dicek.",
-  },
-  {
-    q: "Bagaimana kalau hasil LARTAS tidak muncul untuk HS code tertentu?",
-    a: "Artinya Pesisir tidak menemukan detail LARTAS pada respons saat pengecekan. Periksa kembali klasifikasi HS dan verifikasi keputusan penting pada portal atau regulasi resmi.",
+    q: "Apakah hasil Pesisir dapat dijadikan keputusan resmi?",
+    a: "Tidak. Pesisir adalah alat bantu operasional. Klasifikasi dan persyaratan penting tetap perlu diverifikasi melalui portal, regulasi, dan pihak berwenang yang relevan.",
   },
   {
     q: "Apa perbedaan paket Gratis dan Pro?",
-    a: "Paket Gratis mencakup 10 pemeriksaan HS code per hari. Paket Pro Rp26.000 per bulan menyediakan pemeriksaan tanpa batas harian selama masa aktif.",
+    a: "Paket Gratis mencakup 10 pemeriksaan HS code per hari. Pro menghapus batas harian selama masa aktif. Aktivasi Early Access masih dikonfirmasi manual melalui WhatsApp.",
   },
-  {
-    q: "Bagaimana aktivasi Pesisir Pro dilakukan?",
-    a: "Selama Early Access, pembayaran dan aktivasi dikonfirmasi secara manual melalui WhatsApp. Paket tidak diperpanjang otomatis.",
-  },
+];
+
+const workflowItems = [
+  { label: "Invoice IMP-0823", detail: "24 HS code siap diperiksa", status: "Siap", variant: "secondary" as const },
+  { label: "Shipment MJS-0826", detail: "ETA dalam 3 hari", status: "Pantau", variant: "outline" as const },
+  { label: "Dokumen B/L", detail: "1 data perlu dilengkapi", status: "Tindak lanjut", variant: "secondary" as const },
 ];
 
 export default function Home() {
   return (
-    <div className="space-y-12 pb-8 sm:space-y-16">
-
-      {/* Hero */}
-      <section className="relative -mx-5 -mt-8 flex min-h-screen items-start justify-center overflow-hidden bg-gradient-to-br from-sky-50 via-white to-cyan-50 px-6 pt-[22vh] sm:-mx-8 sm:px-10 lg:-mx-12">
-        <div className="pointer-events-none absolute -top-16 right-8 h-72 w-72 rounded-full bg-sky-300/35" />
-        <div className="pointer-events-none absolute -bottom-20 left-6 h-80 w-80 rounded-full bg-cyan-300/35 blur-3xl" />
-        <div className="relative mx-auto max-w-3xl text-center">
-          <p className="inline-flex rounded-full border border-cyan-200/80 bg-white/75 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.18em] text-cyan-700">
-            Pesisir
-          </p>
-          <h1 className="mt-6 bg-gradient-to-r from-sky-900 to-cyan-700 bg-clip-text text-4xl font-semibold tracking-tight text-transparent sm:text-5xl lg:text-6xl">
-            Cek LARTAS puluhan HS code dalam sekali klik.
+    <div className="flex flex-col gap-20 pb-8 sm:gap-24">
+      <section className="grid min-h-[calc(100vh-8rem)] items-center gap-12 py-10 lg:grid-cols-[1.05fr_0.95fr] lg:py-16">
+        <div className="max-w-2xl">
+          <Badge variant="secondary">Workspace operasional PPJK</Badge>
+          <h1 className="mt-6 font-heading text-4xl leading-tight font-semibold tracking-tight text-balance sm:text-5xl lg:text-6xl">
+            Pekerjaan kepabeanan harian, lebih ringkas dan jelas.
           </h1>
-          <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-zinc-600">
-            Upload invoice Excel berisi HS code — Pesisir langsung memeriksa status dan persyaratan LARTAS dari INSW. Tidak perlu buka portal satu per satu.
+          <p className="mt-6 max-w-xl text-base leading-7 text-muted-foreground sm:text-lg">
+            Cek LARTAS, riset HS code, dan pantau shipment dalam satu workspace sederhana yang dibuat untuk ritme kerja PPJK.
           </p>
-          <div className="mt-9 flex flex-wrap justify-center gap-3">
-            <Link
-              href="/cek-lartas"
-              className="rounded-xl bg-gradient-to-r from-sky-900 to-cyan-700 px-6 py-3 text-sm font-medium text-white transition hover:from-sky-800 hover:to-cyan-600"
-            >
-              Coba Sekarang — Gratis
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Link href="/cek-lartas" className={buttonVariants({ size: "lg" })}>
+              Cek LARTAS sekarang
+              <ArrowRightIcon data-icon="inline-end" />
             </Link>
-            <a
-              href="#cara-kerja"
-              className="rounded-xl border border-zinc-300 px-5 py-3 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100"
-            >
-              Cara Kerja
-            </a>
+            <Link href="/shipments" className={buttonVariants({ size: "lg", variant: "outline" })}>
+              Buka workspace
+            </Link>
           </div>
-          <p className="mt-4 text-xs text-zinc-500">10 pemeriksaan HS code gratis per hari · File diproses di browser</p>
-        </div>
-      </section>
-
-      {/* Trust */}
-      <section aria-labelledby="trust-title" className="grid gap-4 lg:grid-cols-3">
-        <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-widest text-cyan-700">Sumber data</p>
-          <h2 id="trust-title" className="mt-2 font-semibold text-zinc-900">Respons data dari INSW</h2>
-          <p className="mt-2 text-sm leading-7 text-zinc-600">Pesisir mengambil informasi LARTAS dari layanan INSW saat pemeriksaan dilakukan.</p>
-        </div>
-        <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-widest text-cyan-700">Privasi file</p>
-          <h2 className="mt-2 font-semibold text-zinc-900">Excel dibaca di perangkatmu</h2>
-          <p className="mt-2 text-sm leading-7 text-zinc-600">Isi file tidak diunggah. Hanya HS code yang terdeteksi dikirim untuk mengambil hasil pemeriksaan.</p>
-        </div>
-        <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-widest text-cyan-700">Transparansi</p>
-          <h2 className="mt-2 font-semibold text-zinc-900">Alat bantu independen</h2>
-          <p className="mt-2 text-sm leading-7 text-zinc-600">Pesisir tidak berafiliasi dengan INSW atau instansi pemerintah dan bukan pengganti keputusan kepabeanan profesional.</p>
-        </div>
-      </section>
-
-      {/* Pricing */}
-      <section id="harga" className="rounded-3xl border border-zinc-200 bg-white px-7 py-9 shadow-sm sm:px-10">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="text-xs font-semibold uppercase tracking-widest text-cyan-700">Harga transparan</p>
-          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-900">Mulai gratis, naikkan saat pekerjaan bertambah.</h2>
-          <p className="mt-3 text-sm leading-7 text-zinc-600">Satu HS code unik dihitung sebagai satu pemeriksaan. Kode duplikat dalam satu file diproses satu kali.</p>
-        </div>
-        <div className="mx-auto mt-7 grid max-w-3xl gap-4 sm:grid-cols-2">
-          <div className="rounded-2xl border border-zinc-200 p-6">
-            <p className="font-semibold text-zinc-900">Gratis</p><p className="mt-2 text-3xl font-semibold text-zinc-900">Rp0</p>
-            <p className="mt-4 text-sm leading-7 text-zinc-600">10 pemeriksaan HS code per hari, input tunggal atau Excel, dan ekspor hasil.</p>
-          </div>
-          <div className="rounded-2xl border border-cyan-300 bg-cyan-50/60 p-6">
-            <p className="font-semibold text-cyan-900">Pro</p><p className="mt-2 text-3xl font-semibold text-cyan-950">Rp26.000<span className="text-sm font-normal">/bulan</span></p>
-            <p className="mt-4 text-sm leading-7 text-cyan-900">Pemeriksaan tanpa batas harian. Aktivasi awal dilayani melalui WhatsApp.</p>
-            <p className="mt-3 rounded-xl border border-cyan-200 bg-white/70 px-3 py-2 text-xs leading-5 text-cyan-900">Early Access: pembayaran dan aktivasi masih dikonfirmasi manual. Tidak ada perpanjangan otomatis.</p>
-            <a href={EARLY_ACCESS_LINK} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex rounded-xl bg-cyan-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-cyan-800">Tanya Pro via WhatsApp</a>
+          <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
+            <span className="flex items-center gap-2"><ShieldCheckIcon className="size-4" />File diproses di browser</span>
+            <span className="flex items-center gap-2"><CheckCircle2Icon className="size-4" />10 cek gratis per hari</span>
           </div>
         </div>
-      </section>
 
-      {/* Product Mockup */}
-      <section className="space-y-6">
-        <div className="text-center">
-          <p className="text-xs font-medium uppercase tracking-widest text-cyan-600">Contoh hasil demonstrasi</p>
-          <h3 className="mt-2 text-lg font-semibold text-zinc-900 sm:text-xl">
-            Hasil cek LARTAS langsung di browser
-          </h3>
-        </div>
-        <div className="mx-auto max-w-5xl">
-          <AnimatedCekLartasDemo />
-        </div>
-        <p className="mx-auto max-w-2xl text-center text-xs leading-6 text-zinc-500">Data pada contoh disederhanakan untuk demonstrasi dan bukan data pelanggan. Tampilan aktual mengikuti respons yang tersedia saat pemeriksaan.</p>
-        <div className="mx-auto flex max-w-3xl flex-wrap justify-center gap-2" aria-label="Data yang tersedia pada hasil">
-          {["Status LARTAS", "Border", "Post-border", "Dokumen pabean", "Detail regulasi", "Ekspor Excel"].map((item) => (
-            <span key={item} className="rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-600">{item}</span>
-          ))}
-        </div>
-      </section>
-
-      {/* Why */}
-      <section id="cara-kerja" className="rounded-3xl border border-zinc-200 bg-white px-7 py-8 shadow-sm sm:px-9">
-        <p className="text-xs font-medium uppercase tracking-widest text-cyan-600">Kenapa Pesisir?</p>
-        <h3 className="mt-2 text-lg font-semibold text-zinc-900 sm:text-xl">
-          Dari invoice ke data LARTAS — tanpa buka INSW manual.
-        </h3>
-
-        <div className="mt-7 grid grid-cols-1 gap-4 sm:grid-cols-3">
-          {whyReasons.map((item) => (
-            <div key={item.pain} className="rounded-2xl border border-zinc-100 bg-zinc-50 p-5">
-              <p className="text-sm font-semibold text-zinc-800">{item.pain}</p>
-              <p className="mt-2 text-sm leading-7 text-zinc-500">{item.solve}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* How it works */}
-      <section className="space-y-6">
-        <div className="text-center">
-          <p className="text-xs font-medium uppercase tracking-widest text-cyan-600">Cara Pakai</p>
-          <h3 className="mt-2 text-lg font-semibold text-zinc-900 sm:text-xl">Tiga langkah, selesai.</h3>
-        </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          {[
-            { step: "1", title: "Upload Excel", desc: "Siapkan file .xls atau .xlsx berisi HS code 8 digit dari invoice kamu." },
-            { step: "2", title: "Periksa LARTAS", desc: "Pesisir memeriksa setiap HS code ke INSW — status dan persyaratan LARTAS langsung muncul." },
-            { step: "3", title: "Export Hasil", desc: "Download hasil sebagai Excel. Siap dilampirkan ke laporan atau dikirim ke tim." },
-          ].map((item) => (
-            <div key={item.step} className="relative overflow-hidden rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
-              <div className="pointer-events-none absolute -right-4 -top-4 flex h-16 w-16 items-center justify-center rounded-full bg-cyan-50 text-2xl font-bold text-cyan-200">
-                {item.step}
+        <Card className="shadow-xl shadow-primary/5">
+          <CardHeader>
+            <CardTitle>Ringkasan pekerjaan</CardTitle>
+            <CardDescription>Prioritas yang perlu Anda lihat hari ini.</CardDescription>
+            <CardAction><Badge variant="outline">Hari ini</Badge></CardAction>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-5">
+            <div className="grid grid-cols-3 gap-3">
+              <div className="rounded-lg bg-secondary p-3">
+                <p className="text-xs text-muted-foreground">HS code</p>
+                <p className="mt-1 text-2xl font-semibold tabular-nums">24</p>
               </div>
-              <p className="text-sm font-semibold text-zinc-900">{item.title}</p>
-              <p className="mt-2 text-sm leading-7 text-zinc-500">{item.desc}</p>
+              <div className="rounded-lg bg-secondary p-3">
+                <p className="text-xs text-muted-foreground">Shipment</p>
+                <p className="mt-1 text-2xl font-semibold tabular-nums">8</p>
+              </div>
+              <div className="rounded-lg bg-secondary p-3">
+                <p className="text-xs text-muted-foreground">Perlu aksi</p>
+                <p className="mt-1 text-2xl font-semibold tabular-nums">2</p>
+              </div>
             </div>
-          ))}
-        </div>
+            <div className="flex flex-col">
+              {workflowItems.map((item, index) => (
+                <div key={item.label}>
+                  {index > 0 ? <Separator /> : null}
+                  <div className="flex items-center gap-3 py-4">
+                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground">
+                      {index === 0 ? <FileSearchIcon className="size-4" /> : index === 1 ? <Clock3Icon className="size-4" /> : <FileSpreadsheetIcon className="size-4" />}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">{item.label}</p>
+                      <p className="truncate text-xs text-muted-foreground">{item.detail}</p>
+                    </div>
+                    <Badge variant={item.variant}>{item.status}</Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+          <CardFooter className="justify-between gap-3">
+            <span className="text-xs text-muted-foreground">Contoh tampilan workspace</span>
+            <Link href="/shipments" className={buttonVariants({ size: "sm", variant: "ghost" })}>Lihat detail</Link>
+          </CardFooter>
+        </Card>
+      </section>
 
+      <section aria-labelledby="tools-title">
+        <div className="max-w-2xl">
+          <Badge variant="outline">Alat kerja utama</Badge>
+          <h2 id="tools-title" className="mt-4 font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
+            Mulai dari pekerjaan yang perlu diselesaikan.
+          </h2>
+          <p className="mt-3 text-muted-foreground">Setiap alat berdiri sendiri, dengan alur yang pendek dan hasil yang mudah dibaca.</p>
+        </div>
+        <div className="mt-8 grid gap-4 md:grid-cols-3">
+          {workspaceFeatures.map((feature) => {
+            const Icon = feature.icon;
+            return (
+              <Card key={feature.href}>
+                <CardHeader>
+                  <div className="mb-3 flex size-10 items-center justify-center rounded-lg bg-accent text-accent-foreground">
+                    <Icon className="size-5" />
+                  </div>
+                  <CardTitle>{feature.title}</CardTitle>
+                  <CardDescription>{feature.description}</CardDescription>
+                </CardHeader>
+                <CardFooter>
+                  <Link href={feature.href} className={buttonVariants({ variant: "ghost" })}>
+                    {feature.action}
+                    <ArrowRightIcon data-icon="inline-end" />
+                  </Link>
+                </CardFooter>
+              </Card>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-start" aria-labelledby="steps-title">
+        <div className="max-w-md">
+          <Badge variant="outline">Alur sederhana</Badge>
+          <h2 id="steps-title" className="mt-4 font-heading text-3xl font-semibold tracking-tight">Dari data kerja ke hasil yang siap ditindaklanjuti.</h2>
+          <p className="mt-3 text-muted-foreground">Tidak ada dashboard yang ramai. Hanya input penting, proses yang terlihat, dan hasil yang bisa dibawa ke pekerjaan berikutnya.</p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-3">
+          {[
+            { step: "01", title: "Masukkan data", description: "Upload Excel atau isi detail barang dan shipment.", icon: UploadIcon },
+            { step: "02", title: "Periksa hasil", description: "Lihat status, catatan, dan data yang masih perlu perhatian.", icon: FileSearchIcon },
+            { step: "03", title: "Lanjutkan kerja", description: "Ekspor hasil atau tindak lanjuti shipment dari satu tempat.", icon: DownloadIcon },
+          ].map((item) => {
+            const Icon = item.icon;
+            return (
+              <Card key={item.step} size="sm">
+                <CardHeader>
+                  <CardAction><Badge variant="secondary">{item.step}</Badge></CardAction>
+                  <Icon className="mb-3 size-5 text-primary" />
+                  <CardTitle>{item.title}</CardTitle>
+                  <CardDescription>{item.description}</CardDescription>
+                </CardHeader>
+              </Card>
+            );
+          })}
+        </div>
+      </section>
+
+      <section aria-labelledby="pricing-title">
         <div className="text-center">
-          <Link
-            href="/cek-lartas"
-            className="inline-flex rounded-xl bg-gradient-to-r from-sky-900 to-cyan-700 px-6 py-3 text-sm font-medium text-white transition hover:from-sky-800 hover:to-cyan-600"
-          >
-            Mulai Cek Sekarang
+          <Badge variant="outline">Harga sederhana</Badge>
+          <h2 id="pricing-title" className="mt-4 font-heading text-3xl font-semibold tracking-tight">Mulai gratis, tingkatkan saat volume kerja bertambah.</h2>
+          <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">Satu HS code unik dihitung sebagai satu pemeriksaan. Kode duplikat diproses satu kali.</p>
+        </div>
+        <div className="mx-auto mt-8 grid max-w-3xl gap-4 md:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Gratis</CardTitle>
+              <CardDescription>Untuk mencoba alur kerja Pesisir.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-semibold">Rp0</p>
+              <ul className="mt-5 flex flex-col gap-3 text-sm text-muted-foreground">
+                <li className="flex gap-2"><CheckCircle2Icon className="mt-0.5 size-4 shrink-0 text-primary" />10 pemeriksaan HS code per hari</li>
+                <li className="flex gap-2"><CheckCircle2Icon className="mt-0.5 size-4 shrink-0 text-primary" />Input tunggal dan Excel</li>
+                <li className="flex gap-2"><CheckCircle2Icon className="mt-0.5 size-4 shrink-0 text-primary" />Ekspor hasil pemeriksaan</li>
+              </ul>
+            </CardContent>
+            <CardFooter><Link href="/cek-lartas" className={cn(buttonVariants({ variant: "outline" }), "w-full")}>Mulai gratis</Link></CardFooter>
+          </Card>
+          <Card className="ring-primary/30">
+            <CardHeader>
+              <CardTitle>Pro</CardTitle>
+              <CardDescription>Untuk volume pemeriksaan rutin.</CardDescription>
+              <CardAction><Badge>Early Access</Badge></CardAction>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-semibold">Rp26.000<span className="text-sm font-normal text-muted-foreground"> / bulan</span></p>
+              <ul className="mt-5 flex flex-col gap-3 text-sm text-muted-foreground">
+                <li className="flex gap-2"><CheckCircle2Icon className="mt-0.5 size-4 shrink-0 text-primary" />Tanpa batas pemeriksaan harian</li>
+                <li className="flex gap-2"><CheckCircle2Icon className="mt-0.5 size-4 shrink-0 text-primary" />Tidak diperpanjang otomatis</li>
+                <li className="flex gap-2"><CheckCircle2Icon className="mt-0.5 size-4 shrink-0 text-primary" />Aktivasi manual via WhatsApp</li>
+              </ul>
+            </CardContent>
+            <CardFooter>
+              <a href={EARLY_ACCESS_LINK} target="_blank" rel="noopener noreferrer" className={cn(buttonVariants(), "w-full")}>
+                <MessageCircleIcon data-icon="inline-start" />Tanya paket Pro
+              </a>
+            </CardFooter>
+          </Card>
+        </div>
+      </section>
+
+      <section className="mx-auto grid w-full max-w-5xl gap-8 lg:grid-cols-[0.65fr_1.35fr]" aria-labelledby="faq-title">
+        <div>
+          <Badge variant="outline">FAQ</Badge>
+          <h2 id="faq-title" className="mt-4 font-heading text-3xl font-semibold tracking-tight">Pertanyaan sebelum mulai.</h2>
+        </div>
+        <Card>
+          <CardContent><FaqList items={faqs} /></CardContent>
+        </Card>
+      </section>
+
+      <section className="rounded-2xl bg-primary px-6 py-12 text-center text-primary-foreground sm:px-10">
+        <h2 className="font-heading text-3xl font-semibold tracking-tight">Mulai dari satu pekerjaan hari ini.</h2>
+        <p className="mx-auto mt-3 max-w-xl text-sm text-primary-foreground/75 sm:text-base">Coba cek LARTAS tanpa biaya. Tidak perlu menyiapkan akun untuk mulai memeriksa.</p>
+        <div className="mt-7 flex justify-center">
+          <Link href="/cek-lartas" className={buttonVariants({ variant: "secondary", size: "lg" })}>
+            Mulai cek LARTAS
+            <ArrowRightIcon data-icon="inline-end" />
           </Link>
         </div>
       </section>
-
-      {/* FAQ */}
-      <section className="rounded-3xl border border-zinc-200 bg-white px-7 py-8 shadow-sm sm:px-9">
-        <h3 className="text-3xl text-center font-bold text-zinc-900">FAQ</h3>
-        <div className="mt-4">
-          <FaqList items={faqs} />
-        </div>
-      </section>
-
-      <p className="mx-auto max-w-4xl text-center text-xs leading-6 text-zinc-500">
-        Hasil Pesisir bersifat informatif berdasarkan respons yang tersedia saat pemeriksaan. Selalu verifikasi klasifikasi HS dan persyaratan regulasi untuk keputusan yang berdampak pada proses kepabeanan.
-      </p>
-
     </div>
   );
 }

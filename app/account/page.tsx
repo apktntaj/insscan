@@ -1,6 +1,16 @@
 import type { Metadata } from "next";
 import { signOut } from "@/app/features/auth/actions/auth.actions";
 import { getAccountSummary } from "@/app/features/auth/data-access/account";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export const metadata: Metadata = {
   title: "Akun",
@@ -14,47 +24,43 @@ export default async function AccountPage() {
   const account = await getAccountSummary();
 
   return (
-    <section className="mx-auto max-w-3xl space-y-6">
+    <section className="mx-auto flex max-w-3xl flex-col gap-6">
       <div>
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-sky-700">
-          Akun
-        </p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-zinc-900">
+        <Badge variant="secondary">Akun</Badge>
+        <h1 className="mt-3 font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
           {account.displayName ?? "Pengguna Pesisir"}
         </h1>
-        <p className="mt-2 text-sm text-zinc-500">{account.email}</p>
+        <p className="mt-2 text-sm text-muted-foreground">{account.email}</p>
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2">
-        <article className="rounded-2xl border border-sky-200 bg-gradient-to-br from-sky-50 to-cyan-50 p-6">
-          <p className="text-sm font-medium text-sky-800">Saldo kredit</p>
-          <p className="mt-3 text-4xl font-bold tracking-tight text-sky-950">
+        <Card className="bg-secondary text-secondary-foreground">
+          <CardHeader>
+            <CardTitle>Saldo kredit</CardTitle>
+            <CardDescription>Siap digunakan saat pembelian kredit tersedia.</CardDescription>
+          </CardHeader>
+          <CardContent><p className="text-4xl font-semibold tracking-tight tabular-nums">
             {creditFormatter.format(account.creditBalance)}
-          </p>
-          <p className="mt-2 text-xs leading-5 text-sky-700">
-            Harga dan pembelian kredit masih dalam tahap Early Access.
-          </p>
-        </article>
+          </p></CardContent>
+        </Card>
 
-        <article className="rounded-2xl border border-zinc-200 bg-white p-6">
-          <p className="text-sm font-medium text-zinc-800">Model pemakaian</p>
-          <p className="mt-3 text-sm leading-6 text-zinc-500">
+        <Card>
+          <CardHeader><CardTitle>Model pemakaian</CardTitle></CardHeader>
+          <CardContent><p className="text-sm leading-6 text-muted-foreground">
             Kredit nantinya dipotong berdasarkan jumlah HS Code yang berhasil diperiksa. Belum ada pemotongan selama tahap ini.
-          </p>
-        </article>
+          </p></CardContent>
+        </Card>
       </div>
 
-      <div className="rounded-2xl border border-zinc-200 bg-white p-6">
-        <h2 className="font-semibold text-zinc-900">Sesi akun</h2>
-        <p className="mt-2 text-sm text-zinc-500">
-          Keluar dari akun pada perangkat ini.
-        </p>
-        <form action={signOut} className="mt-4">
-          <button type="submit" className="rounded-xl border border-zinc-300 px-4 py-2 text-sm font-semibold text-zinc-700 hover:bg-zinc-50">
-            Keluar
-          </button>
-        </form>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Sesi akun</CardTitle>
+          <CardDescription>Keluar dari akun pada perangkat ini.</CardDescription>
+        </CardHeader>
+        <CardFooter>
+          <form action={signOut}><Button type="submit" variant="outline">Keluar</Button></form>
+        </CardFooter>
+      </Card>
     </section>
   );
 }
