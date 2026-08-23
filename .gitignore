@@ -19,6 +19,9 @@
 # ── Build output ──────────────────────────────────────────────────────────────
 /build
 /dist
+/.cache/
+/.turbo/
+.eslintcache
 
 # ── Testing & Coverage ────────────────────────────────────────────────────────
 /coverage
@@ -33,6 +36,9 @@ next-env.d.ts
 .DS_Store
 Thumbs.db
 *.pem
+*.swp
+*.swo
+*~
 .vscode/settings.json
 .vscode/launch.json
 .idea/
