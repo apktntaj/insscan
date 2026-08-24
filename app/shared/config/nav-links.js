@@ -19,9 +19,9 @@ export const navLinks = [
     label: "Latihan",
     href: "/exercise",
   },
-  // {
-  //   id: 4,
-  //   label: "Feedback",
-  //   href: "/feedback",
-  // },
+  {
+    id: 4,
+    label: "Dukung Pesisir",
+    href: "/feedback",
+  },
 ];

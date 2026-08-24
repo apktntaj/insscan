@@ -20,7 +20,7 @@ export const metadata = createPageMetadata({
  * Menampilkan tiga section independen:
  * 1. Roadmap Board — status fitur yang sedang dan akan dikerjakan
  * 2. Suggestion Form — link WhatsApp untuk mengirim saran
- * 3. Support Section — QRIS donasi dan ajakan kolaborasi
+ * 3. Support Section — ajakan donasi sukarela dan kolaborasi
  */
 export default function FeedbackPage() {
   return (

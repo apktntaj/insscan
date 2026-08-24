@@ -6,7 +6,6 @@ import Alert from "@/app/shared/components/Alert";
 import Button from "@/app/shared/components/Button";
 import Input from "@/app/shared/components/Input";
 import LartasResultTable from "@/app/features/cek-lartas/presentation/components/LartasResultTable";
-import PaywallBanner from "@/app/features/cek-lartas/presentation/components/cek-lartas/PaywallBanner";
 import {
   Card,
   CardContent,
@@ -63,10 +62,6 @@ export default function FileInputPanel() {
     handleFileChange,
     handleFetch,
     handleExportResult,
-    remaining,
-    isLimitReached,
-    isPro,
-    activateKey,
   } = useCekLartasFile();
 
   const alertVariant = resolveAlertVariant(status);
@@ -77,20 +72,14 @@ export default function FileInputPanel() {
     : "Tarik Data";
   
   const buttonAction = hasResult ? handleExportResult : handleFetch;
-  const buttonDisabled = isLoading || (!fileData && !hasResult) || (!hasResult && isLimitReached);
+  const buttonDisabled = isLoading || (!fileData && !hasResult);
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Paywall banner — tampil saat limit tercapai */}
-      {isLimitReached && !hasResult ? <PaywallBanner onActivate={activateKey} /> : null}
-
       <Card>
         <CardHeader>
           <CardTitle>Upload invoice Excel</CardTitle>
           <CardDescription>Format .xls atau .xlsx, dapat memuat beberapa sheet.</CardDescription>
-          {!isPro && !isLimitReached ? (
-            <p className="text-xs text-muted-foreground">Sisa kuota: {remaining} pemeriksaan</p>
-          ) : null}
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">

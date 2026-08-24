@@ -2,16 +2,15 @@ import LegalPage, { Section } from "@/app/shared/components/LegalPage";
 import { createPageMetadata } from "@/app/shared/config/site-metadata";
 
 export const metadata = createPageMetadata({
-  title: "Kebijakan Pembatalan dan Refund",
-  description: "Kebijakan pembelian Pesisir Pro selama Early Access.",
+  title: "Kebijakan Donasi",
+  description: "Penjelasan donasi sukarela untuk mendukung Pesisir.",
   path: "/refund-policy",
 });
 export default function RefundPolicyPage() {
-  return <LegalPage eyebrow="Pesisir Pro" title="Pembatalan dan Refund" intro="Kebijakan pembelian Pesisir Pro selama Early Access.">
-    <Section title="Tidak ada perpanjangan otomatis"><p>Paket berlaku untuk masa aktif yang dikonfirmasi saat pembelian. Pengguna harus menyetujui dan melakukan pembayaran baru untuk memperpanjangnya.</p></Section>
-    <Section title="Pembatalan"><p>Pengguna dapat berhenti kapan saja tanpa biaya pembatalan. Akses tetap aktif hingga akhir periode yang dibayar, kecuali refund penuh disetujui.</p></Section>
-    <Section title="Permintaan refund"><p>Refund dapat diminta melalui Dukungan WhatsApp paling lambat 7 hari kalender setelah pembayaran apabila akses belum diaktifkan, terjadi pembayaran ganda, atau gangguan dari Pesisir membuat fitur utama tidak dapat digunakan secara material.</p></Section>
-    <Section title="Pengecualian"><p>Refund dapat ditolak apabila layanan telah digunakan secara substansial, masalah berasal dari input atau perangkat pengguna, atau akses dihentikan karena penyalahgunaan. Permintaan tetap ditinjau secara wajar berdasarkan bukti transaksi dan riwayat penggunaan yang tersedia.</p></Section>
-    <Section title="Proses"><p>Sertakan nama, tanggal, nominal, dan referensi pembayaran. Jika disetujui, refund dikirim ke sumber atau rekening yang disepakati; waktu penerimaan bergantung pada penyedia pembayaran.</p></Section>
+  return <LegalPage eyebrow="Pesisir" title="Kebijakan Donasi" intro="Penjelasan donasi sukarela untuk mendukung Pesisir.">
+    <Section title="Sifat donasi"><p>Donasi bersifat sukarela dan bukan pembelian produk, paket, atau langganan. Seluruh fitur yang tersedia tetap dapat digunakan tanpa biaya.</p></Section>
+    <Section title="Tidak ada kewajiban berulang"><p>Pesisir tidak menjalankan donasi berulang otomatis. Setiap dukungan diberikan atas keputusan pengguna sendiri.</p></Section>
+    <Section title="Konfirmasi dan pertanyaan"><p>Untuk mengonfirmasi donasi atau menanyakan dukungan, hubungi kami melalui WhatsApp dengan menyertakan tanggal, nominal, dan referensi transaksi bila tersedia.</p></Section>
+    <Section title="Salah transfer atau duplikasi"><p>Jika terjadi salah transfer atau donasi ganda, hubungi kami secepatnya. Permintaan akan ditinjau secara wajar berdasarkan bukti transaksi dan ketentuan penyedia pembayaran.</p></Section>
   </LegalPage>;
 }

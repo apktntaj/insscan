@@ -4,7 +4,6 @@ import { useState, useCallback } from "react";
 import { parseHsCodeApiResponse } from "@/app/features/cek-lartas/adapters/presenters/cek-lartas.presenter";
 import { isValidHsCode } from "@core/cek-lartas/domain";
 import { downloadAsExcel } from "@/app/shared/infrastructure/excel/excel.service";
-import { useQueryLimit } from "@/app/features/cek-lartas/presentation/hooks/useQueryLimit";
 
 // ─── Internal Helpers ─────────────────────────────────────────────────────────
 
@@ -130,7 +129,6 @@ export function useCekLartasSingle() {
   const [singleResult, setSingleResult] = useState(null);
   const [singleStatus, setSingleStatus] = useState("");
   const [isSingleLoading, setIsSingleLoading] = useState(false);
-  const { remaining, isLimitReached, isPro, consume, activateKey } = useQueryLimit();
 
   /**
    * Validasi input, fetch ke /api/hs-code, parse respons, update state.
@@ -142,17 +140,6 @@ export function useCekLartasSingle() {
 
     if (!isValidHsCode(normalized)) {
       setSingleStatus("HS code harus 8 digit angka.");
-      return;
-    }
-
-    if (isLimitReached) {
-      setSingleStatus("Batas query harian tercapai.");
-      return;
-    }
-
-    const allowed = consume(1);
-    if (!allowed) {
-      setSingleStatus("Batas query harian tercapai.");
       return;
     }
 
@@ -178,7 +165,7 @@ export function useCekLartasSingle() {
     } finally {
       setIsSingleLoading(false);
     }
-  }, [singleInput, isLimitReached, consume]);
+  }, [singleInput]);
 
   /**
    * Salin HS code dari singleResult ke clipboard.
@@ -220,9 +207,5 @@ export function useCekLartasSingle() {
     handleFetch,
     handleCopy,
     handleExportSingle,
-    remaining,
-    isLimitReached,
-    isPro,
-    activateKey,
   };
 }

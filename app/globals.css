@@ -96,4 +96,42 @@
   .workspace-container {
     @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
   }
+
+  .donation-banner {
+    @apply h-9 overflow-hidden;
+  }
+
+  .donation-banner-track {
+    @apply flex h-full w-max items-center gap-12 whitespace-nowrap text-xs font-medium hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-foreground focus-visible:ring-inset;
+    animation: donation-banner-scroll 28s linear infinite;
+  }
+
+  .donation-banner-message {
+    @apply flex items-center gap-2;
+  }
+
+  .donation-banner-message svg {
+    @apply size-3.5 shrink-0;
+  }
+
+  .donation-banner:hover .donation-banner-track,
+  .donation-banner:focus-within .donation-banner-track {
+    animation-play-state: paused;
+  }
+}
+
+@keyframes donation-banner-scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .donation-banner-track {
+    animation: none;
+  }
 }

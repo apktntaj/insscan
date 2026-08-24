@@ -3,7 +3,6 @@
 import { useCekLartasSingle } from "@/app/features/cek-lartas/presentation/hooks/useCekLartasSingle";
 import SingleResultCard from "@/app/features/cek-lartas/presentation/components/cek-lartas/SingleResultCard";
 import Alert from "@/app/shared/components/Alert";
-import PaywallBanner from "@/app/features/cek-lartas/presentation/components/cek-lartas/PaywallBanner";
 import { SearchIcon } from "lucide-react";
 import {
   Card,
@@ -48,19 +47,12 @@ export default function SingleInputPanel() {
     handleFetch,
     handleCopy,
     handleExportSingle,
-    remaining,
-    isLimitReached,
-    isPro,
-    activateKey,
   } = useCekLartasSingle();
 
   const alertVariant = resolveAlertVariant(singleStatus);
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Paywall banner — tampil saat limit tercapai */}
-      {isLimitReached ? <PaywallBanner onActivate={activateKey} /> : null}
-
       <Card>
         <CardHeader>
           <CardTitle>Periksa satu HS code</CardTitle>
@@ -77,13 +69,13 @@ export default function SingleInputPanel() {
               onKeyDown={(e) => { if (e.key === "Enter") handleFetch(); }}
               placeholder="84713090"
               aria-label="HS code 8 digit"
-              disabled={isSingleLoading || isLimitReached}
+              disabled={isSingleLoading}
             />
             <InputGroupAddon align="inline-end">
               <InputGroupButton
                 size="icon-sm"
                 onClick={handleFetch}
-                disabled={isSingleLoading || isLimitReached}
+                disabled={isSingleLoading}
                 aria-label="Cari HS code"
                 title="Cari"
               >
@@ -92,13 +84,7 @@ export default function SingleInputPanel() {
             </InputGroupAddon>
           </InputGroup>
 
-          <p className="text-xs leading-6 text-muted-foreground sm:text-sm">
-            {isSingleLoading
-              ? "Sedang mencari..."
-              : !isPro && !isLimitReached
-              ? `Sisa kuota hari ini: ${remaining} query`
-              : ""}
-          </p>
+          {isSingleLoading ? <p className="text-xs leading-6 text-muted-foreground sm:text-sm">Sedang mencari...</p> : null}
           {singleStatus ? <Alert message={singleStatus} variant={alertVariant} /> : null}
         </CardContent>
       </Card>

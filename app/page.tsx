@@ -7,12 +7,12 @@ import {
   DownloadIcon,
   FileSearchIcon,
   FileSpreadsheetIcon,
-  MessageCircleIcon,
+  HeartHandshakeIcon,
   ShieldCheckIcon,
   UploadIcon,
 } from "lucide-react";
 import FaqList, { type FaqItemData } from "@/app/features/marketing/components/FaqList";
-import { WHATSAPP_NUMBER } from "@/app/features/feedback/config/feedback-config";
+import { DONATION_LINK } from "@/app/features/feedback/config/feedback-config";
 import { homeSocialMetadata } from "@/app/shared/config/site-metadata";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -36,10 +36,6 @@ import {
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = homeSocialMetadata;
-
-const EARLY_ACCESS_LINK = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-  "Halo, saya ingin bertanya tentang Pesisir Pro Early Access.",
-)}`;
 
 interface WorkspaceFeature {
   title: string;
@@ -84,8 +80,8 @@ const faqs: FaqItemData[] = [
     a: "Tidak. Pesisir adalah alat bantu operasional. Klasifikasi dan persyaratan penting tetap perlu diverifikasi melalui portal, regulasi, dan pihak berwenang yang relevan.",
   },
   {
-    q: "Apa perbedaan paket Gratis dan Pro?",
-    a: "Paket Gratis mencakup 10 pemeriksaan HS code per hari. Pro menghapus batas harian selama masa aktif. Aktivasi Early Access masih dikonfirmasi manual melalui WhatsApp.",
+    q: "Apakah Pesisir benar-benar gratis?",
+    a: "Ya. Semua fitur yang tersedia dapat digunakan tanpa paket berbayar atau batas pemeriksaan harian. Bila Pesisir membantu pekerjaan Anda, Anda dapat mendukung pengembangannya melalui donasi sukarela.",
   },
 ];
 
@@ -112,7 +108,7 @@ export default function Home() {
           </div>
           <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
             <span className="flex items-center gap-2"><ShieldCheckIcon className="size-4" />File diproses di browser</span>
-            <span className="flex items-center gap-2"><CheckCircle2Icon className="size-4" />10 cek gratis per hari</span>
+            <span className="flex items-center gap-2"><CheckCircle2Icon className="size-4" />Gratis tanpa kuota harian</span>
           </div>
         </div>
 
@@ -202,45 +198,29 @@ export default function Home() {
         </div>
       </section>
 
-      <section aria-labelledby="pricing-title">
+      <section aria-labelledby="support-title">
         <div className="text-center">
-          <Badge variant="outline">Harga sederhana</Badge>
-          <h2 id="pricing-title" className="mt-4 font-heading text-3xl font-semibold tracking-tight">Mulai gratis, tingkatkan saat volume kerja bertambah.</h2>
-          <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">Satu HS code unik dihitung sebagai satu pemeriksaan. Kode duplikat diproses satu kali.</p>
+          <Badge variant="outline">Gratis untuk digunakan</Badge>
+          <h2 id="support-title" className="mt-4 font-heading text-3xl font-semibold tracking-tight">Akses seluruh fitur tanpa biaya.</h2>
+          <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">Pesisir dibuat agar pemeriksaan LARTAS lebih mudah diakses. Tidak ada paket Pro, langganan, atau batas pemeriksaan harian.</p>
         </div>
-        <div className="mx-auto mt-8 grid max-w-3xl gap-4 md:grid-cols-2">
+        <div className="mx-auto mt-8 max-w-xl">
           <Card>
             <CardHeader>
-              <CardTitle>Gratis</CardTitle>
-              <CardDescription>Untuk mencoba alur kerja Pesisir.</CardDescription>
+              <CardTitle>Didukung oleh komunitas</CardTitle>
+              <CardDescription>Gunakan Pesisir gratis; donasi hanya jika Anda ingin membantu keberlanjutan pengembangannya.</CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-semibold">Rp0</p>
               <ul className="mt-5 flex flex-col gap-3 text-sm text-muted-foreground">
-                <li className="flex gap-2"><CheckCircle2Icon className="mt-0.5 size-4 shrink-0 text-primary" />10 pemeriksaan HS code per hari</li>
+                <li className="flex gap-2"><CheckCircle2Icon className="mt-0.5 size-4 shrink-0 text-primary" />Pemeriksaan HS code tanpa kuota harian</li>
                 <li className="flex gap-2"><CheckCircle2Icon className="mt-0.5 size-4 shrink-0 text-primary" />Input tunggal dan Excel</li>
                 <li className="flex gap-2"><CheckCircle2Icon className="mt-0.5 size-4 shrink-0 text-primary" />Ekspor hasil pemeriksaan</li>
               </ul>
             </CardContent>
-            <CardFooter><Link href="/cek-lartas" className={cn(buttonVariants({ variant: "outline" }), "w-full")}>Mulai gratis</Link></CardFooter>
-          </Card>
-          <Card className="ring-primary/30">
-            <CardHeader>
-              <CardTitle>Pro</CardTitle>
-              <CardDescription>Untuk volume pemeriksaan rutin.</CardDescription>
-              <CardAction><Badge>Early Access</Badge></CardAction>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-semibold">Rp26.000<span className="text-sm font-normal text-muted-foreground"> / bulan</span></p>
-              <ul className="mt-5 flex flex-col gap-3 text-sm text-muted-foreground">
-                <li className="flex gap-2"><CheckCircle2Icon className="mt-0.5 size-4 shrink-0 text-primary" />Tanpa batas pemeriksaan harian</li>
-                <li className="flex gap-2"><CheckCircle2Icon className="mt-0.5 size-4 shrink-0 text-primary" />Tidak diperpanjang otomatis</li>
-                <li className="flex gap-2"><CheckCircle2Icon className="mt-0.5 size-4 shrink-0 text-primary" />Aktivasi manual via WhatsApp</li>
-              </ul>
-            </CardContent>
             <CardFooter>
-              <a href={EARLY_ACCESS_LINK} target="_blank" rel="noopener noreferrer" className={cn(buttonVariants(), "w-full")}>
-                <MessageCircleIcon data-icon="inline-start" />Tanya paket Pro
+              <a href={DONATION_LINK} target="_blank" rel="noopener noreferrer" className={cn(buttonVariants({ variant: "outline" }), "w-full")}>
+                <HeartHandshakeIcon data-icon="inline-start" />Dukung dengan donasi
               </a>
             </CardFooter>
           </Card>

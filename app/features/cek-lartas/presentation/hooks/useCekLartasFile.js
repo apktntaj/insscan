@@ -9,12 +9,10 @@ import {
   isExcelFile,
   downloadAsExcel,
 } from "@/app/shared/infrastructure/excel/excel.service";
-import { useQueryLimit } from "@/app/features/cek-lartas/presentation/hooks/useQueryLimit";
 
 // ─── Module-level Constants ───────────────────────────────────────────────────
 
 const BASE_CHUNK_SIZE = resolveChunkSize(process.env.NEXT_PUBLIC_HS_CHUNK_SIZE);
-const MIN_CHUNK_SIZE = BASE_CHUNK_SIZE;
 const MAX_CHUNK_ATTEMPTS = 3;
 const CHUNK_RETRY_DELAY_MS = 0;
 
@@ -335,7 +333,6 @@ export function useCekLartasFile() {
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(createInitialProgressState());
   const [viewMode, setViewMode] = useState("lartas");
-  const { remaining, isLimitReached, isPro, consume, activateKey } = useQueryLimit();
 
   /**
    * Membaca file Excel dari event input, memperbarui fileData.
@@ -411,30 +408,10 @@ export function useCekLartasFile() {
     const hsCodes = extractHsCodes(fileData);
     const uniqueHsCodes = [...new Set(hsCodes)];
 
-    // Cek limit sebelum mulai — batasi ke sisa kuota
-    if (isLimitReached) {
-      setStatus("Batas pemeriksaan harian tercapai. Upgrade ke Pro untuk akses tanpa batas harian.");
-      return;
-    }
-
-    const allowedCount = Math.min(uniqueHsCodes.length, remaining);
-    const allowed = consume(allowedCount);
-    if (!allowed) {
-      setStatus("Batas pemeriksaan harian tercapai. Upgrade ke Pro untuk akses tanpa batas harian.");
-      return;
-    }
-
-    const limitedHsCodes = uniqueHsCodes.slice(0, allowedCount);
-    if (allowedCount < uniqueHsCodes.length) {
-      setStatus(`Kuota terbatas — hanya ${allowedCount} dari ${uniqueHsCodes.length} HS code yang diproses.`);
-    }
-
     setIsLoading(true);
-    if (allowedCount === uniqueHsCodes.length) {
-      setStatus("Menyiapkan proses fetch serial...");
-    }
+    setStatus("Menyiapkan proses fetch serial...");
 
-    const payload = limitedHsCodes.map((hs) => ({ hs_code: hs }));
+    const payload = uniqueHsCodes.map((hs) => ({ hs_code: hs }));
     const total = payload.length;
 
     if (total === 0) {
@@ -633,7 +610,7 @@ export function useCekLartasFile() {
       );
       setIsLoading(false);
     }
-  }, [fileData, isLimitReached, remaining, consume]);
+  }, [fileData]);
 
   /**
    * Mengunduh resultData sebagai file Excel dalam format matriks LARTAS.
@@ -729,10 +706,6 @@ export function useCekLartasFile() {
     handleFileChange,
     handleFetch,
     handleExportResult,
-    remaining,
-    isLimitReached,
-    isPro,
-    activateKey,
   };
 }
 

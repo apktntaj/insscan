@@ -42,6 +42,9 @@
 /** @type {string} Nomor WhatsApp tanpa "+" atau spasi */
 export const WHATSAPP_NUMBER = "6281510093866";
 
+/** Link donasi sukarela untuk mendukung pengembangan Pesisir. */
+export const DONATION_LINK = "https://saweria.co/alamasyarie";
+
 /** @type {string} Path foto developer relatif dari folder public/ */
 export const DEVELOPER_PHOTO_PATH = "/me-at-33.jpg";
 
@@ -55,12 +58,12 @@ export const roadmapItems = [
   {
     id: "shipments",
     name: "Shipment tracking",
-    status: "live",
+    status: "in-progress",
   },
   {
     id: "bl-scanner",
     name: "Auto-fill form once B/L uploaded ",
-    status: "live",
+    status: "in-progress",
   },
   {
     id: "quiz",
@@ -85,6 +88,6 @@ export const roadmapItems = [
   {
     id: "hs-code-finder",
     name: "HS code finder",
-    status: "live",
+    status: "in-progress",
   },
 ];
