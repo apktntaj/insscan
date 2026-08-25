@@ -8,6 +8,7 @@ import { navLinks } from "@/app/shared/config/nav-links";
 import Link from "next/link";
 import { SITE_URL } from "@/app/shared/config/site-metadata";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import InstallPwaButton from "@/app/shared/components/InstallPwaButton";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -32,13 +33,25 @@ export const metadata: Metadata = {
   authors: [{ name: "Semesta Raya Software" }],
   creator: "Semesta Raya Software",
   icons: {
-    icon: "logo-container.svg",
+    icon: "/pwa-icon-192.png",
+    apple: [
+      {
+        url: "/apple-touch-icon.png",
+        sizes: "180x180",
+        type: "image/png",
+      },
+    ],
+  },
+  appleWebApp: {
+    capable: true,
+    title: "Pesisir",
+    statusBarStyle: "black-translucent",
   },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="id" className="font-sans">
+    <html lang="id" className="font-sans" suppressHydrationWarning>
       <body className="flex min-h-screen flex-col">
         <TooltipProvider>
           <DonationBanner />
@@ -61,6 +74,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               </nav>
             </aside>
           </footer>
+          <InstallPwaButton />
           <Analytics />
         </TooltipProvider>
       </body>

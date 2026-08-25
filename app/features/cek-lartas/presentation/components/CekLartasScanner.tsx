@@ -13,9 +13,9 @@ export default function CekLartasScanner() {
 
   return (
     <div className="flex flex-col gap-5 overflow-x-clip">
-      <div className="flex flex-col gap-3 rounded-xl border bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="text-sm font-medium">Metode pemeriksaan</p>
+      <div className="flex flex-col items-center gap-3 px-4 py-5 text-center">
+        <div className="max-w-xl">
+          <p className="text-sm font-medium">Mode pemeriksaan</p>
           <p className="mt-1 text-xs text-muted-foreground">
             Gunakan Excel untuk pekerjaan batch atau periksa satu HS code.
           </p>
@@ -28,14 +28,23 @@ export default function CekLartasScanner() {
           }}
           variant="outline"
           aria-label="Pilih metode pemeriksaan"
+          className="justify-center"
         >
-          <ToggleGroupItem value="file" aria-label="Upload Excel">
+          <ToggleGroupItem
+            value="file"
+            aria-label="Upload Excel"
+            className="data-[pressed]:border-primary data-[pressed]:bg-primary data-[pressed]:text-primary-foreground data-[pressed]:shadow-sm data-[pressed]:hover:bg-primary/90"
+          >
             <FileSpreadsheetIcon />
-            Upload Excel
+            Bulk
           </ToggleGroupItem>
-          <ToggleGroupItem value="single" aria-label="Satu HS Code">
+          <ToggleGroupItem
+            value="single"
+            aria-label="Satu HS Code"
+            className="data-[pressed]:border-primary data-[pressed]:bg-primary data-[pressed]:text-primary-foreground data-[pressed]:shadow-sm data-[pressed]:hover:bg-primary/90"
+          >
             <HashIcon />
-            Satu HS Code
+            Single
           </ToggleGroupItem>
         </ToggleGroup>
       </div>

@@ -57,7 +57,7 @@ export default function SingleInputPanel() {
         <CardHeader>
           <CardTitle>Periksa satu HS code</CardTitle>
           <CardDescription>
-            Masukkan 8 digit tanpa titik, misalnya 84713090.
+            Masukkan 8 digit HS Code, misal 8471.30.90
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">

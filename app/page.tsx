@@ -8,6 +8,7 @@ import {
   FileSearchIcon,
   FileSpreadsheetIcon,
   HeartHandshakeIcon,
+  ScanSearchIcon,
   ShieldCheckIcon,
   UploadIcon,
 } from "lucide-react";
@@ -25,14 +26,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = homeSocialMetadata;
@@ -87,56 +80,32 @@ const faqs: FaqItemData[] = [
 
 export default function Home() {
   return (
-    <div className="flex flex-col gap-20 pb-8 sm:gap-24">
-      <section className="grid min-h-[calc(100vh-8rem)] items-center gap-12 py-10 lg:grid-cols-[1.05fr_0.95fr] lg:py-16">
-        <div className="max-w-2xl">
-          <Badge variant="secondary">Workspace operasional PPJK</Badge>
-          <h1 className="mt-6 font-heading text-4xl leading-tight font-semibold tracking-tight text-balance sm:text-5xl lg:text-6xl">
-            Pemeriksaan LARTAS yang lebih ringkas dan jelas.
+    <div className="flex flex-col gap-24 pb-10 sm:gap-32">
+      <section className="relative flex min-h-[calc(100vh-10rem)] items-center justify-center overflow-hidden py-16 text-center sm:py-24">
+        <div className="absolute inset-x-0 top-1/2 -z-10 h-96 -translate-y-1/2 bg-[radial-gradient(ellipse_at_center,color-mix(in_oklab,var(--accent)_75%,transparent),transparent_68%)]" />
+        <div className="max-w-3xl">
+          <Badge variant="secondary">Alat operasional kepabeanan</Badge>
+          <h1 className="mt-6 font-heading text-4xl leading-[1.05] font-semibold tracking-tight text-balance sm:text-6xl lg:text-7xl">
+            Cek LARTAS, <span className="text-primary">lebih cepat.</span><br />
+            Lebih siap ditindaklanjuti.
           </h1>
-          <p className="mt-6 max-w-xl text-base leading-7 text-muted-foreground sm:text-lg">
-            Periksa satu HS code atau seluruh invoice dari satu tempat, lalu lanjutkan pekerjaan dengan hasil yang mudah dibaca.
+          <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
+            Pesisir membantu staf PPJK dan freight forwarder memeriksa HS code serta invoice Excel tanpa alur yang berbelit.
           </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
             <Link href="/cek-lartas" className={buttonVariants({ size: "lg" })}>
-              Cek LARTAS sekarang
+              Mulai cek LARTAS
               <ArrowRightIcon data-icon="inline-end" />
             </Link>
             <Link href="#tools-title" className={buttonVariants({ size: "lg", variant: "outline" })}>
-              Pilih cara pemeriksaan
+              Lihat cara kerja
             </Link>
           </div>
-          <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
+          <div className="mt-7 flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
             <span className="flex items-center gap-2"><ShieldCheckIcon className="size-4" />File diproses di browser</span>
             <span className="flex items-center gap-2"><CheckCircle2Icon className="size-4" />Gratis tanpa kuota harian</span>
           </div>
         </div>
-
-        <Card className="shadow-xl shadow-primary/5">
-          <CardHeader>
-            <CardTitle>Mulai pemeriksaan pertama Anda</CardTitle>
-            <CardDescription>Hasil pemeriksaan LARTAS akan tersedia setelah Anda memasukkan HS code atau mengunggah invoice.</CardDescription>
-            <CardAction><Badge variant="secondary">LARTAS</Badge></CardAction>
-          </CardHeader>
-          <CardContent>
-            <Empty>
-              <EmptyHeader>
-                <EmptyMedia variant="icon"><FileSearchIcon /></EmptyMedia>
-                <EmptyTitle>Belum ada pemeriksaan</EmptyTitle>
-                <EmptyDescription>Mulai dengan satu HS code atau file Excel. File Anda diproses di browser.</EmptyDescription>
-              </EmptyHeader>
-              <EmptyContent>
-                <Link href="/cek-lartas" className={buttonVariants({ size: "sm" })}>
-                  Cek LARTAS sekarang
-                  <ArrowRightIcon data-icon="inline-end" />
-                </Link>
-              </EmptyContent>
-            </Empty>
-          </CardContent>
-          <CardFooter className="justify-between gap-3">
-            <span className="text-xs text-muted-foreground">Tidak perlu akun untuk mulai memeriksa.</span>
-          </CardFooter>
-        </Card>
       </section>
 
       <section aria-labelledby="tools-title">
@@ -171,6 +140,29 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="mx-auto w-full max-w-4xl" aria-label="Ringkasan pemeriksaan LARTAS">
+        <Card className="overflow-hidden border-primary/15 shadow-2xl shadow-primary/10">
+          <CardHeader className="border-b bg-muted/45">
+            <CardTitle className="flex items-center gap-2"><ScanSearchIcon className="size-5 text-primary" />Pemeriksaan yang tidak menghambat pekerjaan</CardTitle>
+            <CardDescription>Mulai dari satu HS code atau data pada invoice Anda.</CardDescription>
+            <CardAction><Badge variant="secondary">Siap digunakan</Badge></CardAction>
+          </CardHeader>
+          <CardContent className="grid gap-5 py-7 sm:grid-cols-3">
+            {[
+              ["01", "Masukkan HS code", "Satu kode atau banyak kode dari Excel."],
+              ["02", "Baca persyaratan", "Lihat status dan catatan yang perlu dicek."],
+              ["03", "Simpan hasil", "Ekspor ringkasan untuk diteruskan ke tim."],
+            ].map(([step, title, description]) => (
+              <div key={step} className="flex flex-col gap-2 rounded-xl border bg-card p-4 text-left">
+                <span className="text-xs font-semibold tracking-[0.2em] text-primary">{step}</span>
+                <p className="font-medium">{title}</p>
+                <p className="text-sm leading-6 text-muted-foreground">{description}</p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </section>
+
       <section className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-start" aria-labelledby="steps-title">
         <div className="max-w-md">
           <Badge variant="outline">Alur sederhana</Badge>
@@ -198,14 +190,14 @@ export default function Home() {
         </div>
       </section>
 
-      <section aria-labelledby="support-title">
+      <section className="rounded-3xl border bg-card/75 px-5 py-12 sm:px-10" aria-labelledby="support-title">
         <div className="text-center">
           <Badge variant="outline">Gratis untuk digunakan</Badge>
           <h2 id="support-title" className="mt-4 font-heading text-3xl font-semibold tracking-tight">Akses seluruh fitur tanpa biaya.</h2>
           <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">Pesisir dibuat agar pemeriksaan LARTAS lebih mudah diakses. Tidak ada paket Pro, langganan, atau batas pemeriksaan harian.</p>
         </div>
         <div className="mx-auto mt-8 max-w-xl">
-          <Card>
+          <Card className="border-primary/20 shadow-lg shadow-primary/5">
             <CardHeader>
               <CardTitle>Didukung oleh komunitas</CardTitle>
               <CardDescription>Gunakan Pesisir gratis; donasi hanya jika Anda ingin membantu keberlanjutan pengembangannya.</CardDescription>

@@ -17,10 +17,10 @@ function ScoreBadge({ correct, total }) {
   const pct = Math.round((correct / total) * 100);
   const color =
     pct >= 80
-      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+      ? "border-primary/30 bg-primary/10 text-primary"
       : pct >= 60
-      ? "bg-amber-50 text-amber-700 border-amber-200"
-      : "bg-red-50 text-red-700 border-red-200";
+      ? "border-border bg-secondary text-secondary-foreground"
+      : "border-destructive/30 bg-destructive/10 text-destructive";
 
   return (
     <div className={`inline-flex items-center gap-2 rounded-2xl border px-5 py-2 text-lg font-bold ${color}`}>
@@ -93,17 +93,17 @@ function QuestionCard({ question, index, total, seed, onAnswer }) {
    */
   function getStyle(shuffledIdx) {
     if (selected === null) {
-      return "border-zinc-200 bg-white text-zinc-700 hover:border-cyan-300 hover:bg-cyan-50/30 cursor-pointer";
+      return "cursor-pointer border-border bg-card text-foreground hover:border-primary/50 hover:bg-accent/50";
     }
     const isCorrectChoice =
       String(shuffledChoices[shuffledIdx].originalIndex) === question.jawaban;
     if (isCorrectChoice) {
-      return "border-emerald-400 bg-emerald-50 text-emerald-800 font-semibold";
+      return "border-primary/50 bg-primary/10 text-foreground font-semibold";
     }
     if (selected === shuffledIdx) {
-      return "border-red-400 bg-red-50 text-red-700";
+      return "border-destructive/50 bg-destructive/10 text-destructive";
     }
-    return "border-zinc-200 bg-white text-zinc-400 opacity-60";
+    return "border-border bg-muted text-muted-foreground opacity-60";
   }
 
   const isCorrect =
@@ -118,21 +118,21 @@ function QuestionCard({ question, index, total, seed, onAnswer }) {
   );
 
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white px-6 py-6 shadow-sm sm:px-8">
+    <div className="rounded-2xl border border-border bg-card px-6 py-6 shadow-sm sm:px-8">
       {/* Header soal */}
       <div className="mb-5 flex items-start justify-between gap-3">
         <div className="flex items-center gap-2">
-          <span className="rounded-lg bg-cyan-100 px-2.5 py-1 text-xs font-semibold text-cyan-700">
+          <span className="rounded-lg bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
             {index + 1} / {total}
           </span>
-          <span className="rounded-lg bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-500">
+          <span className="rounded-lg bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
             {question.tentang}
           </span>
         </div>
       </div>
 
       {/* Pertanyaan */}
-      <p className="mb-6 text-sm font-medium leading-7 text-zinc-800 sm:text-base">
+      <p className="mb-6 text-sm font-medium leading-7 text-foreground sm:text-base">
         {question.pertanyaan}
       </p>
 
@@ -160,7 +160,7 @@ function QuestionCard({ question, index, total, seed, onAnswer }) {
       {selected !== null && (
         <div
           className={`mt-5 rounded-xl px-4 py-3 text-sm font-medium ${
-            isCorrect ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"
+            isCorrect ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"
           }`}
         >
           {isCorrect ? (
@@ -195,12 +195,12 @@ function ResultPanel({ correct, total, onRestart }) {
       : { label: "Perlu Belajar Lagi", desc: "Coba baca ulang materi dan ulangi latihan." };
 
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white px-6 py-10 text-center shadow-sm sm:px-8">
-      <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-cyan-600">
+    <div className="rounded-2xl border border-border bg-card px-6 py-10 text-center shadow-sm sm:px-8">
+      <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-primary">
         Hasil Latihan
       </p>
-      <h2 className="mb-3 text-2xl font-bold text-zinc-900 sm:text-3xl">{grade.label}</h2>
-      <p className="mb-6 text-sm text-zinc-500">{grade.desc}</p>
+      <h2 className="mb-3 text-2xl font-bold text-foreground sm:text-3xl">{grade.label}</h2>
+      <p className="mb-6 text-sm text-muted-foreground">{grade.desc}</p>
 
       <div className="mb-8 flex justify-center">
         <ScoreBadge correct={correct} total={total} />
@@ -208,20 +208,20 @@ function ResultPanel({ correct, total, onRestart }) {
 
       {/* Progress bar */}
       <div className="mx-auto mb-8 max-w-xs">
-        <div className="h-3 w-full overflow-hidden rounded-full bg-zinc-100">
+        <div className="h-3 w-full overflow-hidden rounded-full bg-muted">
           <div
             className={`h-full rounded-full transition-all duration-700 ${
-              pct >= 80 ? "bg-emerald-500" : pct >= 60 ? "bg-amber-400" : "bg-red-400"
+              pct >= 80 ? "bg-primary" : pct >= 60 ? "bg-secondary-foreground" : "bg-destructive"
             }`}
             style={{ width: `${pct}%` }}
           />
         </div>
-        <p className="mt-2 text-xs text-zinc-400">{pct}% jawaban benar</p>
+        <p className="mt-2 text-xs text-muted-foreground">{pct}% jawaban benar</p>
       </div>
 
       <button
         onClick={onRestart}
-        className="rounded-xl bg-zinc-900 px-6 py-3 text-sm font-medium text-white transition hover:bg-zinc-700"
+        className="rounded-xl bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition hover:bg-primary/80"
       >
         Coba Lagi
       </button>
@@ -273,25 +273,25 @@ export default function ExercisePage({ initialQuestions, initialShuffleSeed }) {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       {/* Header */}
-      <div className="rounded-2xl border border-zinc-200 bg-white px-6 py-5 shadow-sm sm:px-8">
-        <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-cyan-600">
+      <div className="rounded-2xl border border-border bg-card px-6 py-5 shadow-sm sm:px-8">
+        <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-primary">
           Latihan Soal
         </p>
-        <h1 className="text-xl font-bold text-zinc-900 sm:text-2xl">Uji Pemahaman Kepabeanan</h1>
-        <p className="mt-2 text-sm text-zinc-500">
+        <h1 className="text-xl font-bold text-foreground sm:text-2xl">Uji Pemahaman Kepabeanan</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
           {QUIZ_SIZE} soal dipilih secara acak dari bank soal. Pilih jawaban yang paling tepat.
         </p>
         {!finished && (
           <div className="mt-4">
-            <div className="flex items-center justify-between text-xs text-zinc-400">
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span>
                 Soal {currentIndex + 1} dari {quizQuestions.length}
               </span>
               <span>{correctCount} benar</span>
             </div>
-            <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-zinc-100">
+            <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-muted">
               <div
-                className="h-full rounded-full bg-cyan-400 transition-all duration-300"
+                className="h-full rounded-full bg-primary transition-all duration-300"
                 style={{
                   width: `${((currentIndex + (answered ? 1 : 0)) / quizQuestions.length) * 100}%`,
                 }}
@@ -320,7 +320,7 @@ export default function ExercisePage({ initialQuestions, initialShuffleSeed }) {
             <div className="flex justify-end">
               <button
                 onClick={handleNext}
-                className="flex items-center gap-2 rounded-xl bg-zinc-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-zinc-700"
+                className="flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-medium text-primary-foreground transition hover:bg-primary/80"
               >
                 {currentIndex + 1 >= quizQuestions.length ? "Lihat Hasil" : "Soal Berikutnya"}
                 <svg

@@ -15,6 +15,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import ThemeToggle from "./ThemeToggle";
 
 export interface NavigationLink {
   id?: number;
@@ -63,9 +64,11 @@ export default function Navbar({
             {link.label}
           </Link>
         ))}
+        <ThemeToggle />
       </div>
 
-      <div className="lg:hidden">
+      <div className="flex items-center gap-2 lg:hidden">
+        <ThemeToggle />
         <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
           <SheetTrigger render={<Button variant="outline" size="icon" />}>
             <MenuIcon />
