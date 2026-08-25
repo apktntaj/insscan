@@ -1,7 +1,7 @@
 import { HeartHandshakeIcon } from "lucide-react";
 import { DONATION_LINK } from "@/app/features/feedback/config/feedback-config";
 
-const donationMessage = "Pesisir gratis untuk digunakan. Jika karya ini membantu pekerjaan Anda, dukung pengembangannya melalui Saweria.";
+const donationMessage = "Jika karya ini membantu pekerjaan Anda, dukungan melalui Saweria sangat berarti.";
 
 export default function DonationBanner() {
   return (

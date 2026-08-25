@@ -6,7 +6,7 @@
 export const navLinks = [
   {
     id: 1,
-    label: "Cek LARTAS",
+    label: "Cek Lartas",
     href: "/cek-lartas",
   },
   // {
@@ -21,7 +21,7 @@ export const navLinks = [
   },
   {
     id: 4,
-    label: "Dukung Pesisir",
+    label: "Dukung",
     href: "/feedback",
   },
 ];
