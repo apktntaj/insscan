@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { MenuIcon } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Sheet,
@@ -24,8 +24,6 @@ export interface NavigationLink {
 
 interface NavbarProps {
   links?: NavigationLink[];
-  authSlot?: ReactNode;
-  mobileAuthSlot?: ReactNode;
 }
 
 function isCurrentRoute(pathname: string, href: string): boolean {
@@ -34,8 +32,6 @@ function isCurrentRoute(pathname: string, href: string): boolean {
 
 export default function Navbar({
   links = [],
-  authSlot,
-  mobileAuthSlot,
 }: NavbarProps) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -67,7 +63,6 @@ export default function Navbar({
             {link.label}
           </Link>
         ))}
-        <div className="ml-2">{authSlot}</div>
       </div>
 
       <div className="lg:hidden">
@@ -98,7 +93,6 @@ export default function Navbar({
                 </Link>
               ))}
             </div>
-            <div className="mt-auto p-4">{mobileAuthSlot}</div>
           </SheetContent>
         </Sheet>
       </div>

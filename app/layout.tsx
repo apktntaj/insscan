@@ -7,7 +7,6 @@ import DonationBanner from "@/app/shared/components/DonationBanner";
 import { navLinks } from "@/app/shared/config/nav-links";
 import Link from "next/link";
 import { SITE_URL } from "@/app/shared/config/site-metadata";
-import AuthNav from "@/app/features/auth/components/AuthNav";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 export const metadata: Metadata = {
@@ -44,11 +43,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <TooltipProvider>
           <DonationBanner />
           <header className="fixed inset-x-0 top-9 z-40 border-b bg-background/90 backdrop-blur-xl">
-            <Navbar
-              links={navLinks}
-              authSlot={<AuthNav />}
-              mobileAuthSlot={<AuthNav mobile />}
-            />
+            <Navbar links={navLinks} />
           </header>
           <main className="flex-1 pt-25">
             <div className="workspace-container py-6 sm:py-8">{children}</div>
