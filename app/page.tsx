@@ -81,29 +81,24 @@ const faqs: FaqItemData[] = [
 export default function Home() {
   return (
     <div className="flex flex-col gap-24 pb-10 sm:gap-32">
-      <section className="relative flex min-h-[calc(100vh-10rem)] items-center justify-center overflow-hidden py-16 text-center sm:py-24">
-        <div className="absolute inset-x-0 top-1/2 -z-10 h-96 -translate-y-1/2 bg-[radial-gradient(ellipse_at_center,color-mix(in_oklab,var(--accent)_75%,transparent),transparent_68%)]" />
-        <div className="max-w-3xl">
-          <Badge variant="secondary">Alat operasional kepabeanan</Badge>
-          <h1 className="mt-6 font-heading text-4xl leading-[1.05] font-semibold tracking-tight text-balance sm:text-6xl lg:text-7xl">
-            Cek LARTAS, <span className="text-primary">lebih cepat.</span><br />
-            Lebih siap ditindaklanjuti.
+      <section className="relative flex min-h-[calc(100vh-10rem)] items-center justify-center overflow-hidden py-12 text-center sm:py-24">
+        <div className="max-w-3xl -translate-y-10 sm:-translate-y-16">
+          <h1 className="mt-6 font-heading text-2xl leading-[1.05] font-bold tracking-tight text-balance sm:text-6xl lg:text-7xl">
+            Perangkat Kerja <span className="text-primary">Modern</span> Untuk PPJK.<br />
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
-            Pesisir membantu staf PPJK dan freight forwarder memeriksa HS code serta invoice Excel tanpa alur yang berbelit.
+            Pesisir membantu staff PPJK dan freight forwarder dengan berbagai alat kerja untuk meningkatkan produktifitas dan menghindari kesalahan.
           </p>
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
             <Link href="/cek-lartas" className={buttonVariants({ size: "lg" })}>
-              Mulai cek LARTAS
+              Cek lartas item di Invoice
               <ArrowRightIcon data-icon="inline-end" />
             </Link>
             <Link href="#tools-title" className={buttonVariants({ size: "lg", variant: "outline" })}>
-              Lihat cara kerja
+              Lihat tool lainnya
             </Link>
           </div>
           <div className="mt-7 flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
-            <span className="flex items-center gap-2"><ShieldCheckIcon className="size-4" />File diproses di browser</span>
-            <span className="flex items-center gap-2"><CheckCircle2Icon className="size-4" />Gratis tanpa kuota harian</span>
           </div>
         </div>
       </section>

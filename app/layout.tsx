@@ -1,4 +1,5 @@
 import { Analytics } from "@vercel/analytics/react";
+import { Inter } from "next/font/google";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
@@ -9,6 +10,11 @@ import Link from "next/link";
 import { SITE_URL } from "@/app/shared/config/site-metadata";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import InstallPwaButton from "@/app/shared/components/InstallPwaButton";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -51,7 +57,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="id" className="font-sans" suppressHydrationWarning>
+    <html lang="id" className={`${inter.variable} font-sans`} suppressHydrationWarning>
       <body className="flex min-h-screen flex-col">
         <TooltipProvider>
           <DonationBanner />
