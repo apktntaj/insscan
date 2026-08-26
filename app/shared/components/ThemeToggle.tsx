@@ -13,7 +13,7 @@ function getInitialTheme(): Theme {
     return storedTheme;
   }
 
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  return "dark";
 }
 
 function subscribeToTheme() {
@@ -22,7 +22,7 @@ function subscribeToTheme() {
 
 export default function ThemeToggle() {
   const [selectedTheme, setSelectedTheme] = useState<Theme | null>(null);
-  const storedTheme = useSyncExternalStore(subscribeToTheme, getInitialTheme, () => "light");
+  const storedTheme = useSyncExternalStore(subscribeToTheme, getInitialTheme, () => "dark");
   const theme = selectedTheme ?? storedTheme;
 
   useEffect(() => {

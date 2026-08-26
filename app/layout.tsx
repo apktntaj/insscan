@@ -57,7 +57,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="id" className={`${inter.variable} font-sans`} suppressHydrationWarning>
+    <html lang="id" className={`${inter.variable} dark font-sans`} suppressHydrationWarning>
       <body className="flex min-h-screen flex-col">
         <TooltipProvider>
           <DonationBanner />
