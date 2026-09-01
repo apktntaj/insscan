@@ -157,7 +157,7 @@ const emptyOrNull = fc.constantFrom('', null, undefined);
 // Shipment aktif dengan semua field kosong
 const allEmptyActiveShipment = fc.record({
   id: fc.integer({ min: 1 }),
-  status: fc.constant('active'),
+  stage: fc.constant('pre_arrival'),
   eta: emptyOrNull,
   vesselName: emptyOrNull,
   portOfDischarge: emptyOrNull,
@@ -166,7 +166,7 @@ const allEmptyActiveShipment = fc.record({
 // Shipment terminated dengan semua field kosong
 const terminatedShipment = fc.record({
   id: fc.integer({ min: 1 }),
-  status: fc.constant('terminated'),
+  stage: fc.constant('completed'),
   eta: emptyOrNull,
   vesselName: emptyOrNull,
   portOfDischarge: emptyOrNull,
@@ -201,7 +201,7 @@ describe('Property 7: DataQualityAlertEngine — risk level sesuai kombinasi fie
   test('7b: hanya ETA kosong → MISSING_ETA_ONLY dengan riskLevel medium', () => {
     const shipmentArb = fc.record({
       id: fc.integer({ min: 1 }),
-      status: fc.constant('active'),
+      stage: fc.constant('pre_arrival'),
       eta: emptyOrNull,
       vesselName: nonEmptyString,
       portOfDischarge: nonEmptyString,
@@ -229,7 +229,7 @@ describe('Property 7: DataQualityAlertEngine — risk level sesuai kombinasi fie
   test('7c: ETA terisi, vesselName kosong → MISSING_VESSEL_OR_POD dengan riskLevel low', () => {
     const shipmentArb = fc.record({
       id: fc.integer({ min: 1 }),
-      status: fc.constant('active'),
+      stage: fc.constant('pre_arrival'),
       eta: nonEmptyString,
       vesselName: emptyOrNull,
       portOfDischarge: fc.oneof(nonEmptyString, emptyOrNull),
@@ -257,7 +257,7 @@ describe('Property 7: DataQualityAlertEngine — risk level sesuai kombinasi fie
   test('7d: ETA terisi, portOfDischarge kosong → MISSING_VESSEL_OR_POD dengan riskLevel low', () => {
     const shipmentArb = fc.record({
       id: fc.integer({ min: 1 }),
-      status: fc.constant('active'),
+      stage: fc.constant('pre_arrival'),
       eta: nonEmptyString,
       vesselName: fc.oneof(nonEmptyString, emptyOrNull),
       portOfDischarge: emptyOrNull,
@@ -284,7 +284,7 @@ describe('Property 7: DataQualityAlertEngine — risk level sesuai kombinasi fie
   test('7e: semua field terisi → tidak menghasilkan alert', () => {
     const shipmentArb = fc.record({
       id: fc.integer({ min: 1 }),
-      status: fc.constant('active'),
+      stage: fc.constant('pre_arrival'),
       eta: nonEmptyString,
       vesselName: nonEmptyString,
       portOfDischarge: nonEmptyString,

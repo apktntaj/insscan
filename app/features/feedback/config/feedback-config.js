@@ -42,8 +42,6 @@
 /** @type {string} Nomor WhatsApp tanpa "+" atau spasi */
 export const WHATSAPP_NUMBER = "6281510093866";
 
-/** Link donasi sukarela untuk mendukung pengembangan Pesisir. */
-export const DONATION_LINK = "https://saweria.co/alamasyarie";
 
 /** @type {string} Path foto developer relatif dari folder public/ */
 export const DEVELOPER_PHOTO_PATH = "/me-at-33.jpg";

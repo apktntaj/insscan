@@ -11,9 +11,10 @@ import {
   ScanSearchIcon,
   ShieldCheckIcon,
   UploadIcon,
+  ShipIcon,
 } from "lucide-react";
 import FaqList, { type FaqItemData } from "@/app/features/marketing/components/FaqList";
-import { DONATION_LINK } from "@/app/features/feedback/config/feedback-config";
+import { DONATION_LINK } from "@/app/shared/config/donation";
 import { homeSocialMetadata } from "@/app/shared/config/site-metadata";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -52,6 +53,13 @@ const workspaceFeatures: WorkspaceFeature[] = [
     href: "/cek-lartas",
     action: "Masukkan HS code",
     icon: FileSearchIcon,
+  },
+  {
+    title: "Kelola shipment impor",
+    description: "Pantau tahap, ETA, dan pekerjaan shipment impor secara lokal pada browser ini.",
+    href: "/shipments",
+    action: "Buka workspace shipment",
+    icon: ShipIcon,
   },
 ];
 

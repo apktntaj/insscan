@@ -5,8 +5,12 @@ export interface UseCaseError {
   fields?: string[];
 }
 
+type UseCaseSuccess<T> = [T] extends [void]
+  ? { ok: true; data?: undefined }
+  : { ok: true; data: T };
+
 export type UseCaseResult<T = void> =
-  | { ok: true; data?: T }
+  | UseCaseSuccess<T>
   | { ok: false; error: UseCaseError };
 
 export function errorMessage(error: unknown, fallback: string): string {

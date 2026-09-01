@@ -1,61 +1,45 @@
-/**
- * List Shipments Use Case
- * Application Business Rules
- *
- * @description Returns active shipments sorted by ETA ascending (nulls last),
- * with optional case-insensitive search across key fields
- */
-
-import type { Shipment } from "../domain/shipment";
+import { parseDateOnly, SHIPMENT_STAGE, type Shipment } from "../domain/shipment";
 import type { ShipmentRepository } from "../ports/shipment-repository";
 import { errorMessage, type UseCaseResult } from "./result";
 
-/**
- * Creates the List Shipments use case
- * @param {import('../ports/shipment-repository.port').ShipmentRepository} repository
- * @returns {{ execute: (query?: string) => Promise<{ok: boolean, data?: Object[], error?: Object}> }}
- */
+export type ShipmentView = "open" | "completed";
+
+const SEARCH_FIELDS: ReadonlyArray<keyof Pick<Shipment,
+  "shipmentNumber" | "blNumber" | "shipperName" | "consigneeName" | "alias" |
+  "vesselName" | "voyage" | "portOfLoading" | "portOfDischarge"
+>> = [
+  "shipmentNumber", "blNumber", "shipperName", "consigneeName", "alias",
+  "vesselName", "voyage", "portOfLoading", "portOfDischarge",
+];
+
 export function createListShipmentsUseCase(repository: ShipmentRepository) {
-  /**
-   * @param {string} [query] - Optional search string
-   * @returns {Promise<{ok: boolean, data?: Object[], error?: Object}>}
-   */
-  async function execute(query?: string): Promise<UseCaseResult<Shipment[]>> {
+  async function execute({ query, view }: { query?: string; view: ShipmentView }): Promise<UseCaseResult<Shipment[]>> {
     try {
-      let shipments = await repository.listActive();
-
-      // Filter by search query
-      if (query && query.trim().length > 0) {
-        const q = query.trim().toLowerCase();
-        shipments = shipments.filter((s) => {
-          return (
-            (s.blNumber || "").toLowerCase().includes(q) ||
-            (s.shipperName || "").toLowerCase().includes(q) ||
-            (s.consigneeName || "").toLowerCase().includes(q) ||
-            (s.alias || "").toLowerCase().includes(q)
-          );
-        });
+      let shipments = (await repository.listAll()).filter((shipment) =>
+        view === "completed"
+          ? shipment.stage === SHIPMENT_STAGE.COMPLETED
+          : shipment.stage !== SHIPMENT_STAGE.COMPLETED,
+      );
+      const normalizedQuery = query?.trim().toLocaleLowerCase();
+      if (normalizedQuery) {
+        shipments = shipments.filter((shipment) => SEARCH_FIELDS.some((field) =>
+          (shipment[field] ?? "").toLocaleLowerCase().includes(normalizedQuery),
+        ));
       }
-
-      // Sort by ETA ascending, nulls last
-      shipments = [...shipments].sort((a, b) => {
-        if (!a.eta && !b.eta) return 0;
-        if (!a.eta) return 1;
-        if (!b.eta) return -1;
-        return new Date(a.eta).getTime() - new Date(b.eta).getTime();
+      shipments.sort((a, b) => {
+        if (view === "completed") {
+          const aTime = a.completedAt ? Date.parse(a.completedAt) : Number.NEGATIVE_INFINITY;
+          const bTime = b.completedAt ? Date.parse(b.completedAt) : Number.NEGATIVE_INFINITY;
+          return bTime - aTime;
+        }
+        const aDate = parseDateOnly(a.eta)?.getTime() ?? Number.POSITIVE_INFINITY;
+        const bDate = parseDateOnly(b.eta)?.getTime() ?? Number.POSITIVE_INFINITY;
+        return aDate - bDate;
       });
-
       return { ok: true, data: shipments };
-    } catch (err) {
-      return {
-        ok: false,
-        error: {
-          code: "STORAGE_ERROR",
-          message: errorMessage(err, "Failed to list shipment records"),
-        },
-      };
+    } catch (error) {
+      return { ok: false, error: { code: "STORAGE_ERROR", message: errorMessage(error, "Failed to list shipment records") } };
     }
   }
-
   return { execute };
 }

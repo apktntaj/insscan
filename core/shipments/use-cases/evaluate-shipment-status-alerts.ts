@@ -12,7 +12,7 @@
  * - CUSTOM_DATE_OVERDUE (medium): customNotificationDate < today
  */
 
-import type { Shipment } from "../domain/shipment";
+import { parseDateOnly, type Shipment } from "../domain/shipment";
 import {
   makeAlert,
   makeAlertResult,
@@ -22,7 +22,7 @@ import {
 
 type StatusAlertShipment = Pick<
   Shipment,
-  "status" | "eta" | "createdAt" | "updatedAt" | "customNotificationDate"
+  "stage" | "eta" | "createdAt" | "updatedAt" | "customNotificationDate"
 > & { id: number };
 type StaleShipment = Pick<Shipment, "createdAt" | "updatedAt" | "eta">;
 
@@ -68,8 +68,10 @@ export function parseISODate(
   isoString: string | null | undefined,
 ): Date | null {
   if (!isoString) return null;
-  const d = new Date(isoString);
-  return isNaN(d.getTime()) ? null : d;
+  const dateOnly = parseDateOnly(isoString);
+  if (dateOnly) return dateOnly;
+  const timestamp = new Date(isoString);
+  return Number.isNaN(timestamp.getTime()) ? null : timestamp;
 }
 
 /**
@@ -215,8 +217,7 @@ export function evaluateShipmentStatusAlerts(
   const today = startOfDay(now);
 
   for (const shipment of shipments) {
-    // Skip non-active shipments (Requirement 9.7)
-    if (shipment.status !== 'active') continue;
+    if (shipment.stage === "completed") continue;
 
     const alertDefs: Array<Omit<Alert, "shipmentId">> = [];
 
@@ -231,7 +232,7 @@ export function evaluateShipmentStatusAlerts(
           ruleId: 'ETA_OVERDUE',
           riskLevel: 'high',
           message: 'ETA sudah terlewat — perbarui ETA atau periksa status kedatangan kapal',
-          suggestedAction: 'Edit shipment dan perbarui ETA, atau terminasi jika sudah selesai',
+          suggestedAction: 'Edit shipment dan perbarui ETA, atau tandai selesai bila proses sudah berakhir',
           engine: 'shipment-status',
         });
       } else if (isArrivingSoon(etaNorm, today)) {
@@ -253,7 +254,7 @@ export function evaluateShipmentStatusAlerts(
         ruleId: 'STALE_ENTRY',
         riskLevel: 'low',
         message: 'Shipment belum diperbarui selama lebih dari 30 hari — verifikasi apakah data masih relevan',
-        suggestedAction: 'Perbarui data shipment atau terminasi jika sudah tidak relevan',
+        suggestedAction: 'Perbarui data shipment atau tandai selesai bila proses sudah berakhir',
         engine: 'shipment-status',
       });
     }

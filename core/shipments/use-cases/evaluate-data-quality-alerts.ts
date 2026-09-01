@@ -32,7 +32,7 @@ type AlertFactoryResult<T> =
 
 type AlertableShipment = Pick<
   Shipment,
-  "status" | "eta" | "vesselName" | "portOfDischarge"
+  "stage" | "eta" | "vesselName" | "portOfDischarge"
 > & { id: number };
 
 // ---------------------------------------------------------------------------
@@ -243,8 +243,7 @@ export function evaluateDataQualityAlerts(
   const results: AlertResult[] = [];
 
   for (const shipment of shipments) {
-    // Skip non-active shipments (Requirement 9.7)
-    if (shipment.status !== 'active') continue;
+    if (shipment.stage === "completed") continue;
 
     const hasEta = shipment.eta != null && shipment.eta !== '';
     const hasVessel = shipment.vesselName != null && shipment.vesselName !== '';

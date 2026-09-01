@@ -2,18 +2,17 @@ import ShipmentManager from "@/app/features/shipments/presentation/components/Sh
 import { createPageMetadata } from "@/app/shared/config/site-metadata";
 
 export const metadata = createPageMetadata({
-  title: "Shipments",
+  title: "Shipment impor laut",
   description:
-    "Kelola data pengiriman dalam satu dashboard. Catat nomor B/L, shipper, dan ETA. Data tersimpan di browser kamu sendiri — tidak melewati server manapun.",
+    "Workspace pribadi untuk alur shipment impor laut PPJK, tahap operasional, backup lokal, dan pengingat ETA. Data hanya tersimpan pada browser/perangkat ini dan tidak tersinkron antarperangkat.",
   path: "/shipments",
   keywords: [
-    "shipment tracking",
-    "bill of lading",
-    "BL tracking",
-    "freight forwarder",
+    "shipment impor laut",
     "PPJK",
-    "manajemen pengiriman",
+    "bill of lading",
+    "backup shipment lokal",
     "ETA kapal",
+    "manajemen pengiriman",
   ],
 });
 

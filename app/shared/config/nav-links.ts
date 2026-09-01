@@ -3,17 +3,23 @@
  * Presentation Layer - Config
  */
 
-export const navLinks = [
+export interface NavLink {
+  id: number;
+  label: string;
+  href: string;
+}
+
+export const navLinks: NavLink[] = [
   {
     id: 1,
     label: "Cek Lartas",
     href: "/cek-lartas",
   },
-  // {
-  //   id: 2,
-  //   label: "Materi",
-  //   href: "/learn",
-  // },
+  {
+    id: 2,
+    label: "Shipment",
+    href: "/shipments",
+  },
   {
     id: 3,
     label: "Latihan",

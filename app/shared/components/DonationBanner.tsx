@@ -1,5 +1,5 @@
 import { HeartHandshakeIcon } from "lucide-react";
-import { DONATION_LINK } from "@/app/features/feedback/config/feedback-config";
+import { DONATION_LINK } from "@/app/shared/config/donation";
 
 const donationMessage = "Jika karya ini membantu pekerjaan Anda, dukungan melalui Saweria sangat berarti.";
 

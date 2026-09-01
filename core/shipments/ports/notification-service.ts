@@ -1,26 +1,16 @@
 import type { Shipment } from "../domain/shipment";
 
-/** Browser-independent notification output port. */
+export type NotificationPermissionState = "default" | "granted" | "denied" | "unsupported";
+export type ShipmentReminderReason = "eta_tomorrow" | "custom_due";
+
 export interface NotificationService {
+  getPermission(): NotificationPermissionState;
   requestPermission(): Promise<boolean>;
-  scheduleForShipment(shipment: Shipment, reason?: string): void;
-  startPolling(): void;
-  stopPolling(): void;
+  notify(shipment: Shipment, reason: ShipmentReminderReason): boolean;
 }
 
-export function validateNotificationService(
-  service: Partial<NotificationService> | null | undefined,
-): asserts service is NotificationService {
-  const required: ReadonlyArray<keyof NotificationService> = [
-    "requestPermission",
-    "scheduleForShipment",
-    "startPolling",
-    "stopPolling",
-  ];
-
-  for (const method of required) {
-    if (typeof service?.[method] !== "function") {
-      throw new Error(`NotificationServicePort must implement "${method}" method`);
-    }
+export function validateNotificationService(service: Partial<NotificationService> | null | undefined): asserts service is NotificationService {
+  for (const method of ["getPermission", "requestPermission", "notify"] as const) {
+    if (typeof service?.[method] !== "function") throw new Error(`NotificationService must implement "${method}" method`);
   }
 }

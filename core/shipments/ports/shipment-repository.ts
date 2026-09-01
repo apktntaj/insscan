@@ -1,31 +1,39 @@
 import type { Shipment } from "../domain/shipment";
 
-/** Persistence output port; IndexedDB and future databases implement this. */
+export interface ShipmentConflict {
+  shipmentNumber: string;
+  blNumber: string;
+}
+
+export class ShipmentSequenceExhaustedError extends Error {
+  constructor(prefix: string) {
+    super(`Shipment sequence for ${prefix} has reached 999`);
+    this.name = "ShipmentSequenceExhaustedError";
+  }
+}
+
+/** Persistence output port. Number allocation and imports are atomic operations. */
 export interface ShipmentRepository {
-  create(shipment: Shipment): Promise<Shipment>;
+  createNext(prefix: string, build: (serial: number) => Shipment): Promise<Shipment>;
   update(id: number, updates: Partial<Shipment>): Promise<Shipment>;
-  terminate(id: number): Promise<void>;
   findById(id: number): Promise<Shipment | null>;
-  listActive(query?: string): Promise<Shipment[]>;
-  countActive(): Promise<number>;
   listAll(): Promise<Shipment[]>;
-  deleteAll(): Promise<void>;
+  importMany(records: readonly Omit<Shipment, "id">[]): Promise<{
+    imported: Shipment[];
+    conflicts: ShipmentConflict[];
+  }>;
 }
 
 export function validateShipmentRepository(
   repository: Partial<ShipmentRepository> | null | undefined,
 ): asserts repository is ShipmentRepository {
   const required: ReadonlyArray<keyof ShipmentRepository> = [
-    "create",
+    "createNext",
     "update",
-    "terminate",
     "findById",
-    "listActive",
-    "countActive",
     "listAll",
-    "deleteAll",
+    "importMany",
   ];
-
   for (const method of required) {
     if (typeof repository?.[method] !== "function") {
       throw new Error(`ShipmentRepository must implement "${method}" method`);

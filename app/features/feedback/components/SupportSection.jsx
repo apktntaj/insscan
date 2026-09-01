@@ -7,7 +7,7 @@
 
 import Image from "next/image";
 import { HeartHandshakeIcon } from "lucide-react";
-import { DONATION_LINK } from "@/app/features/feedback/config/feedback-config";
+import { DONATION_LINK } from "@/app/shared/config/donation";
 import { buttonVariants } from "@/components/ui/button";
 
 /**
