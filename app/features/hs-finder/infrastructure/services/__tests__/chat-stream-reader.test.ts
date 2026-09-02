@@ -35,7 +35,7 @@ function makeCallbacks(overrides: Partial<ChatStreamCallbacks> = {}): {
     onStep: (label, detail) => calls.onStep.push([label, detail]),
     onClarification: (reason, questions) => calls.onClarification.push([reason, questions]),
     onResult: (recommendations, coverageMap) => calls.onResult.push([recommendations, coverageMap]),
-    onError: (message) => calls.onError.push([message]),
+    onError: (message, errorCode) => calls.onError.push([message, errorCode]),
     ...overrides,
   };
   return { callbacks, calls };
@@ -109,13 +109,20 @@ describe("readChatStream", () => {
   test("memanggil onError untuk event error", async () => {
     const { callbacks, calls } = makeCallbacks();
     const response = makeStreamResponse([
-      JSON.stringify({ event: "error", errorMessage: "Deskripsi terlalu singkat." }),
+      JSON.stringify({
+        event: "error",
+        errorMessage: "Koneksi AI terputus. Silakan coba lagi.",
+        errorCode: "GEMINI_TIMEOUT",
+      }),
     ]);
 
     await readChatStream(response, callbacks);
 
     expect(calls.onError).toHaveLength(1);
-    expect(calls.onError[0][0]).toBe("Deskripsi terlalu singkat.");
+    expect(calls.onError[0]).toEqual([
+      "Koneksi AI terputus. Silakan coba lagi.",
+      "GEMINI_TIMEOUT",
+    ]);
   });
 
   test("memanggil onError jika response tidak punya body", async () => {

@@ -25,7 +25,10 @@ function createUserMessage(id: string, text: string): UserMessage {
   return { id, role: "user", text };
 }
 
-function createAssistantMessage(id: string): AssistantMessage {
+function createAssistantMessage(
+  id: string,
+  retryRequest: Record<string, unknown>,
+): AssistantMessage {
   return {
     id,
     role: "assistant",
@@ -35,9 +38,16 @@ function createAssistantMessage(id: string): AssistantMessage {
     clarificationReason: null,
     questions: [],
     coverageMap: null,
+    retryRequest,
+    errorCode: null,
     status: "thinking",
   };
 }
+
+type SendMessageOptions = {
+  retryRequest?: Record<string, unknown>;
+  replaceLastAssistant?: boolean;
+};
 
 /**
  * Update AssistantMessage terakhir dalam daftar pesan.
@@ -106,12 +116,12 @@ export default function HsFinderPage() {
   // ─────────────────────────────────────────────
 
   const sendMessage = useCallback(
-    async (text: string) => {
+    async (text: string, options: SendMessageOptions = {}) => {
       if (busy) return;
 
       // Susun context klarifikasi jika ini jawaban dari pertanyaan asisten
-      let requestBody: Record<string, unknown> = { message: text };
-      if (isWaitingClarification && lastMessage?.role === "assistant") {
+      let requestBody = options.retryRequest ?? { message: text };
+      if (!options.retryRequest && isWaitingClarification && lastMessage?.role === "assistant") {
         const clarMsg = lastMessage as AssistantMessage;
         // Ambil teks pesan user sebelum pesan asisten yang bertanya
         const prevUserMsg = [...messages]
@@ -142,11 +152,13 @@ export default function HsFinderPage() {
       const userMsgId = `u-${Date.now()}`;
       const asstMsgId = `a-${Date.now() + 1}`;
 
-      setMessages((prev) => [
-        ...prev,
-        createUserMessage(userMsgId, text),
-        createAssistantMessage(asstMsgId),
-      ]);
+      setMessages((prev) => options.replaceLastAssistant
+        ? updateLastAssistant(prev, (message) => createAssistantMessage(message.id, requestBody))
+        : [
+            ...prev,
+            createUserMessage(userMsgId, text),
+            createAssistantMessage(asstMsgId, requestBody),
+          ]);
       setBusy(true);
 
       try {
@@ -192,12 +204,13 @@ export default function HsFinderPage() {
             );
           },
 
-          onError(errorMessage: string) {
+          onError(errorMessage: string, errorCode: string | null) {
             setMessages((prev) =>
               updateLastAssistant(prev, (msg) => ({
                 ...msg,
                 thinking: msg.thinking.map((s) => ({ ...s, done: true })),
                 text: errorMessage,
+                errorCode,
                 status: "error",
               })),
             );
@@ -210,6 +223,7 @@ export default function HsFinderPage() {
             ...m,
             thinking: m.thinking.map((s) => ({ ...s, done: true })),
             text: msg,
+            errorCode: null,
             status: "error",
           })),
         );
@@ -223,6 +237,17 @@ export default function HsFinderPage() {
   function reset() {
     setMessages([]);
     setBusy(false);
+  }
+
+  function retry(message: AssistantMessage) {
+    const retryRequest = message.retryRequest;
+    const text = retryRequest?.message;
+    if (!retryRequest || typeof text !== "string") return;
+
+    void sendMessage(text, {
+      retryRequest,
+      replaceLastAssistant: true,
+    });
   }
 
   const lastDone =
@@ -245,7 +270,7 @@ export default function HsFinderPage() {
       )}
 
       {/* Thread percakapan */}
-      <ConversationThread messages={messages} />
+      <ConversationThread messages={messages} onRetry={retry} />
 
       {/* Tombol reset setelah percakapan selesai */}
       {lastDone && (

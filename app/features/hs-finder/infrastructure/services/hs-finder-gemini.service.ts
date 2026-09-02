@@ -403,7 +403,7 @@ export function createHsFinderGeminiService(geminiApiKey: string | undefined): G
       );
       return parseProductFactsResponse(result.response.text().trim());
     } catch (err) {
-      return _mapError(err);
+      return mapGeminiError(err);
     }
   }
 
@@ -455,7 +455,7 @@ export function createHsFinderGeminiService(geminiApiKey: string | undefined): G
 
       return { ok: true, data: responseText };
     } catch (err) {
-      return _mapError(err);
+      return mapGeminiError(err);
     }
   }
 
@@ -512,7 +512,7 @@ Jangan sertakan penjelasan apapun — hanya array JSON.`;
 
       return { ok: true, data: parsed.data };
     } catch (err) {
-      return _mapError(err);
+      return mapGeminiError(err);
     }
   }
 
@@ -559,7 +559,7 @@ Jangan sertakan penjelasan apapun — hanya array JSON.`;
       const responseText = result.response.text().trim();
       return parseClassificationResponse(responseText);
     } catch (err) {
-      return _mapError(err);
+      return mapGeminiError(err);
     }
   }
 
@@ -576,8 +576,9 @@ Jangan sertakan penjelasan apapun — hanya array JSON.`;
  * @param {Error} err
  * @returns {{ ok: false, error: string }}
  */
-function _mapError(err: unknown): { ok: false; error: string } {
+export function mapGeminiError(err: unknown): { ok: false; error: string } {
   const error = err instanceof Error ? err : new Error(String(err));
+  const message = error.message.toLowerCase();
 
   console.error("[hs-finder-gemini] Gemini request failed:", {
     name: error.name,
@@ -587,12 +588,19 @@ function _mapError(err: unknown): { ok: false; error: string } {
     return { ok: false, error: "GEMINI_TIMEOUT" };
   }
   if (
-    error.message.includes("API key") ||
-    error.message.includes("401") ||
-    error.message.includes("403") ||
-    error.message.includes("unavailable") ||
-    error.message.includes("Service Unavailable") ||
-    error.message.includes("503")
+    message.includes("resource_exhausted") ||
+    message.includes("quota") ||
+    message.includes("429")
+  ) {
+    return { ok: false, error: "GEMINI_QUOTA_EXHAUSTED" };
+  }
+  if (
+    message.includes("api key") ||
+    message.includes("401") ||
+    message.includes("403") ||
+    message.includes("unavailable") ||
+    message.includes("service unavailable") ||
+    message.includes("503")
   ) {
     return { ok: false, error: "GEMINI_UNAVAILABLE" };
   }

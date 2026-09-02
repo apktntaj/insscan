@@ -1,12 +1,15 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { RefreshCwIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { ThinkingSteps } from "./ThinkingSteps";
 import { RecommendationList } from "./RecommendationList";
 import type { AssistantMessage } from "@/app/features/hs-finder/presentation/types";
 
 interface AssistantBubbleProps {
   message: AssistantMessage;
+  onRetry?: (message: AssistantMessage) => void;
   className?: string;
 }
 
@@ -19,9 +22,14 @@ interface AssistantBubbleProps {
  * 3. Pertanyaan     — saat status clarifying
  * 4. Rekomendasi    — saat status done
  */
-export function AssistantBubble({ message, className }: AssistantBubbleProps) {
+export function AssistantBubble({ message, onRetry, className }: AssistantBubbleProps) {
   const { thinking, text, status, recommendations, questions, coverageMap } = message;
   const allThinkingDone = thinking.length > 0 && thinking.every((s) => s.done);
+  const canRetry =
+    status === "error" &&
+    (message.errorCode === null ||
+      message.errorCode === "GEMINI_TIMEOUT" ||
+      message.errorCode === "GEMINI_UNAVAILABLE");
 
   return (
     <div className={cn("flex flex-col gap-3", className)}>
@@ -47,6 +55,15 @@ export function AssistantBubble({ message, className }: AssistantBubbleProps) {
           >
             {text}
           </p>
+        )}
+
+        {canRetry && onRetry && (
+          <div>
+            <Button variant="outline" size="sm" onClick={() => onRetry(message)}>
+              <RefreshCwIcon data-icon="inline-start" />
+              Coba lagi
+            </Button>
+          </div>
         )}
 
         {/* Pertanyaan klarifikasi */}

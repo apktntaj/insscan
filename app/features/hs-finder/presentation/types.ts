@@ -55,6 +55,10 @@ export type AssistantMessage = {
   questions: string[];
   /** Status coverage bab yang dianalisis */
   coverageMap: CoverageMap | null;
+  /** Request yang dapat dikirim ulang tanpa mengubah konteks klarifikasi. */
+  retryRequest: Record<string, unknown> | null;
+  /** Kode error dari server; dipakai untuk menentukan apakah retry tersedia. */
+  errorCode: string | null;
   /** Status render saat ini */
   status: "thinking" | "clarifying" | "done" | "error";
 };

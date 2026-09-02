@@ -17,16 +17,21 @@ export const navLinks: NavLink[] = [
   },
   {
     id: 2,
+    label: "HS Finder",
+    href: "/hs-finder",
+  },
+  {
+    id: 3,
     label: "Shipment",
     href: "/shipments",
   },
   {
-    id: 3,
+    id: 4,
     label: "Latihan",
     href: "/exercise",
   },
   {
-    id: 4,
+    id: 5,
     label: "Dukung",
     href: "/feedback",
   },

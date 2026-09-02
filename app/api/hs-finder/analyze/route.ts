@@ -58,11 +58,14 @@ export async function POST(request: Request): Promise<Response> {
         });
 
         if (!result.ok) {
+          const errorMessage = result.error === "GEMINI_QUOTA_EXHAUSTED"
+            ? "Kuota AI gratis untuk hari ini telah habis. Silakan coba lagi besok."
+            : result.error === "GEMINI_TIMEOUT"
+              ? "Analisis detail barang memerlukan waktu terlalu lama. Silakan coba lagi."
+              : "Detail barang belum dapat dianalisis. Silakan coba lagi.";
           controller.enqueue(eventChunk("error", {
             errorCode: result.error,
-            errorMessage: result.error === "GEMINI_TIMEOUT"
-              ? "Analisis detail barang memerlukan waktu terlalu lama. Silakan coba lagi."
-              : "Detail barang belum dapat dianalisis. Silakan coba lagi.",
+            errorMessage,
           }));
           return;
         }

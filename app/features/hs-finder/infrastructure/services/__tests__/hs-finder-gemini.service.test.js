@@ -15,6 +15,7 @@ import {
   parseChapterListResponse,
   parseClassificationResponse,
   parseProductFactsResponse,
+  mapGeminiError,
   createHsFinderGeminiService,
 } from "@/app/features/hs-finder/infrastructure/services/hs-finder-gemini.service";
 
@@ -76,6 +77,26 @@ describe("product facts extraction helpers", () => {
     expect(parseProductFactsResponse("not-json")).toEqual({
       ok: false,
       error: "GEMINI_INVALID_RESPONSE",
+    });
+  });
+});
+
+describe("mapGeminiError", () => {
+  test.each([
+    "429 Too Many Requests",
+    "RESOURCE_EXHAUSTED: quota exceeded",
+    "You exceeded your current quota",
+  ])("maps Gemini quota errors to GEMINI_QUOTA_EXHAUSTED: %s", (message) => {
+    expect(mapGeminiError(new Error(message))).toEqual({
+      ok: false,
+      error: "GEMINI_QUOTA_EXHAUSTED",
+    });
+  });
+
+  test("keeps unavailable errors distinct from quota exhaustion", () => {
+    expect(mapGeminiError(new Error("503 Service Unavailable"))).toEqual({
+      ok: false,
+      error: "GEMINI_UNAVAILABLE",
     });
   });
 });

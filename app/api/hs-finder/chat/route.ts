@@ -67,8 +67,9 @@ function emitStep(
 function emitError(
   controller: ReadableStreamDefaultController<Uint8Array>,
   errorMessage: string,
+  errorCode?: string,
 ): void {
-  emitLine(controller, { event: "error", errorMessage });
+  emitLine(controller, { event: "error", errorMessage, errorCode });
 }
 
 /** Peta error code ke pesan Bahasa Indonesia yang dilihat pengguna. */
@@ -77,6 +78,8 @@ const ERROR_MESSAGES: Record<string, string> = {
     "Deskripsi barang tidak cukup jelas untuk mengidentifikasi bab HS yang relevan. Coba tambahkan detail material, fungsi, atau bentuk barang.",
   INSUFFICIENT_LEGAL_COVERAGE:
     "Basis pengetahuan hukum untuk bab kandidat belum lengkap. Klasifikasi dihentikan agar tidak menghasilkan kode yang tidak didukung.",
+  GEMINI_QUOTA_EXHAUSTED:
+    "Kuota AI gratis untuk hari ini telah habis. Silakan coba lagi besok.",
   GEMINI_UNAVAILABLE: "Ada masalah dengan sistem AI. Hubungi administrator.",
   GEMINI_TIMEOUT: "Koneksi AI terputus. Silakan coba lagi.",
   GEMINI_INVALID_RESPONSE: "Respons AI tidak valid. Silakan coba lagi.",
@@ -131,14 +134,14 @@ async function runPipeline(
   );
 
   if (!chaptersResult.ok) {
-    emitError(controller, errorMessage(chaptersResult.error));
+    emitError(controller, errorMessage(chaptersResult.error), chaptersResult.error);
     return;
   }
 
   const candidateChapters = chaptersResult.data;
 
   if (candidateChapters.length === 0) {
-    emitError(controller, errorMessage("NO_CANDIDATE_CHAPTERS"));
+    emitError(controller, errorMessage("NO_CANDIDATE_CHAPTERS"), "NO_CANDIDATE_CHAPTERS");
     return;
   }
 
@@ -176,7 +179,7 @@ async function runPipeline(
   );
 
   if (!classifyResult.ok) {
-    emitError(controller, errorMessage(classifyResult.error));
+    emitError(controller, errorMessage(classifyResult.error), classifyResult.error);
     return;
   }
 
@@ -322,7 +325,11 @@ export async function POST(req: Request): Promise<Response> {
         await runPipeline(controller, descriptionText, clarificationAnswers);
       } catch (err) {
         console.error("[hs-finder/chat] Unexpected error:", err);
-        emitError(controller, "Ada masalah dengan sistem AI. Hubungi administrator.");
+        emitError(
+          controller,
+          "Ada masalah dengan sistem AI. Hubungi administrator.",
+          "GEMINI_UNAVAILABLE",
+        );
       } finally {
         controller.close();
       }

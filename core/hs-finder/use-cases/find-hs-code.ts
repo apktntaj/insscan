@@ -46,6 +46,8 @@ const ERROR_MESSAGES = {
     "Deskripsi barang tidak cukup jelas untuk mengidentifikasi bab HS yang relevan. Coba tambahkan detail material, fungsi, atau bentuk barang.",
   INSUFFICIENT_LEGAL_COVERAGE:
     "Basis pengetahuan hukum untuk bab kandidat belum lengkap atau masih berupa draf. Klasifikasi dihentikan agar tidak menghasilkan kode yang tidak didukung.",
+  GEMINI_QUOTA_EXHAUSTED:
+    "Kuota AI gratis untuk hari ini telah habis. Silakan coba lagi besok.",
   GEMINI_UNAVAILABLE: "Ada masalah dengan sistem AI. Hubungi administrator.",
   GEMINI_TIMEOUT: "Koneksi AI terputus. Silakan coba lagi.",
   GEMINI_INVALID_RESPONSE: "Respons AI tidak valid. Silakan coba lagi.",

@@ -13,7 +13,7 @@ export type ChatStreamCallbacks = {
   onStep: (label: string, detail: string) => void;
   onClarification: (reason: string, questions: string[]) => void;
   onResult: (recommendations: Recommendation[], coverageMap: CoverageMap | null) => void;
-  onError: (message: string) => void;
+  onError: (message: string, errorCode: string | null) => void;
 };
 
 function dispatchEvent(
@@ -74,7 +74,8 @@ function dispatchEvent(
         typeof parsed.errorMessage === "string"
           ? parsed.errorMessage
           : "Ada masalah dengan sistem AI.";
-      callbacks.onError(msg);
+      const errorCode = typeof parsed.errorCode === "string" ? parsed.errorCode : null;
+      callbacks.onError(msg, errorCode);
       break;
     }
   }
@@ -93,7 +94,7 @@ function dispatchEvent(
  *   onStep: (label, detail) => console.log(label, detail),
  *   onResult: (recs, _map) => setRecommendations(recs),
  *   onClarification: (reason, questions) => showClarification(reason, questions),
- *   onError: (msg) => setError(msg),
+ *   onError: (msg, _errorCode) => setError(msg),
  * });
  */
 export async function readChatStream(
@@ -101,7 +102,7 @@ export async function readChatStream(
   callbacks: ChatStreamCallbacks,
 ): Promise<void> {
   if (!response.body) {
-    callbacks.onError("Respons server tidak memiliki stream.");
+    callbacks.onError("Respons server tidak memiliki stream.", null);
     return;
   }
 
