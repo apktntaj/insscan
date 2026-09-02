@@ -4,9 +4,21 @@
  * Keeping this import static guarantees that Next.js includes the knowledge in
  * the Vercel deployment bundle; no runtime filesystem discovery is required.
  */
-import sectionRecords from "@/app/features/hs-finder/infrastructure/knowledge/hs-2022-sections.data";
+import sectionRecords, {
+  type HsSection,
+} from "@/app/features/hs-finder/infrastructure/knowledge/hs-2022-sections.data";
+export type { HsSection };
 
-const sections = Object.freeze(
+export interface HsSectionChapter {
+  section: HsSection;
+  reserved: boolean;
+}
+
+export interface HsSectionSearchResult {
+  section: HsSection;
+  score: number;
+}
+const sections: readonly HsSection[] = Object.freeze(
   sectionRecords.map((section) =>
     Object.freeze({
       ...section,
@@ -21,8 +33,10 @@ const sections = Object.freeze(
   )
 );
 
-const sectionsByNumber = new Map(sections.map((section) => [section.number, section]));
-const sectionsByChapter = new Map();
+const sectionsByNumber = new Map<string, HsSection>(
+  sections.map((section) => [section.number, section]),
+);
+const sectionsByChapter = new Map<string, HsSectionChapter>();
 
 for (const section of sections) {
   for (const chapter of section.chapters) {
@@ -31,7 +45,7 @@ for (const section of sections) {
     }
     sectionsByChapter.set(chapter, { section, reserved: false });
   }
-  for (const chapter of section.reservedChapters) {
+  for (const chapter of section.reservedChapters ?? []) {
     if (sectionsByChapter.has(chapter)) {
       throw new Error(`Duplicate HS chapter mapping: ${chapter}`);
     }
@@ -39,20 +53,22 @@ for (const section of sections) {
   }
 }
 
-export function listHs2022Sections() {
+export function listHs2022Sections(): readonly HsSection[] {
   return sections;
 }
 
-export function getHs2022Section(sectionNumber) {
+export function getHs2022Section(sectionNumber: string): HsSection | null {
   return sectionsByNumber.get(sectionNumber) ?? null;
 }
 
-export function getHs2022SectionForChapter(chapterNumber) {
+export function getHs2022SectionForChapter(
+  chapterNumber: string,
+): HsSectionChapter | null {
   const normalized = String(chapterNumber).padStart(2, "0");
   return sectionsByChapter.get(normalized) ?? null;
 }
 
-function normalizeSearchText(value) {
+function normalizeSearchText(value: string): string {
   return String(value)
     .toLocaleLowerCase("id-ID")
     .normalize("NFKD")
@@ -61,7 +77,10 @@ function normalizeSearchText(value) {
 }
 
 /** Navigation-only search. Scores candidates; it does not classify goods. */
-export function searchHs2022Sections(query, limit = 5) {
+export function searchHs2022Sections(
+  query: string,
+  limit = 5,
+): HsSectionSearchResult[] {
   const tokens = [...new Set(normalizeSearchText(query).split(" ").filter(Boolean))];
   if (tokens.length === 0) return [];
 

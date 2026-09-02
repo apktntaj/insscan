@@ -1,3 +1,43 @@
+export interface HsSubsection {
+  id: string;
+  number: string;
+  text: string;
+  source: HsSectionSource | null;
+  status: "validated";
+}
+
+interface HsSectionSource {
+  authority: string;
+  regulation: string;
+  attachment: string;
+  documentUrl: string;
+  effectiveFrom: string;
+  pdfPage: number;
+  reference: string;
+}
+
+export interface HsSection {
+  id: string;
+  number: string;
+  ordinal: number;
+  title: string;
+  chapters: readonly string[];
+  reservedChapters?: readonly string[];
+  legalNotes: readonly HsSubsection[];
+  navigation: {
+    keywords: readonly string[];
+    redirects: readonly string[];
+  };
+  status: "validated" | "draft";
+  noteCoverage: "complete" | "not_started";
+  source: HsSectionSource | null;
+}
+
+interface ReviewedSection {
+  pdfPage: number;
+  legalNotes: readonly Omit<HsSubsection, "source" | "status">[];
+  keywords: readonly string[];
+}
 const sectionSource = Object.freeze({
   authority: "Kementerian Keuangan Republik Indonesia",
   regulation: "26/PMK.010/2022",
@@ -6,7 +46,7 @@ const sectionSource = Object.freeze({
   effectiveFrom: "2022-04-01",
 });
 
-const reviewedSections = {
+const reviewedSections: Readonly<Record<string, ReviewedSection>> = {
   I: {
     pdfPage: 10,
     legalNotes: [
@@ -49,7 +89,7 @@ const reviewedSections = {
   V: { pdfPage: 40, legalNotes: [], keywords: ["produk mineral", "garam", "belerang", "tanah", "batu", "bijih", "bahan bakar mineral"] },
 };
 
-export default [
+export const sections: readonly HsSection[] = [
   {id:"HS2022-SECTION-I",number:"I",ordinal:1,title:"Live animals; animal products",chapters:["01","02","03","04","05"]},
   {id:"HS2022-SECTION-II",number:"II",ordinal:2,title:"Vegetable products",chapters:["06","07","08","09","10","11","12","13","14"]},
   {id:"HS2022-SECTION-III",number:"III",ordinal:3,title:"Animal, vegetable or microbial fats and oils and their cleavage products; prepared edible fats; animal or vegetable waxes",chapters:["15"]},
@@ -71,14 +111,14 @@ export default [
   {id:"HS2022-SECTION-XIX",number:"XIX",ordinal:19,title:"Arms and ammunition; parts and accessories thereof",chapters:["93"]},
   {id:"HS2022-SECTION-XX",number:"XX",ordinal:20,title:"Miscellaneous manufactured articles",chapters:["94","95","96"]},
   {id:"HS2022-SECTION-XXI",number:"XXI",ordinal:21,title:"Works of art, collectors' pieces and antiques",chapters:["97"]},
-].map((section) => {
-  const reviewed = reviewedSections[section.number];
+].map((section): HsSection => {
+  const reviewed: ReviewedSection | undefined = reviewedSections[section.number];
   const source = reviewed
     ? { ...sectionSource, pdfPage: reviewed.pdfPage, reference: `Bagian ${section.number}` }
     : null;
 
   return {
-    legalNotes: (reviewed?.legalNotes ?? []).map((note) => ({
+    legalNotes: (reviewed?.legalNotes ?? []).map((note): HsSubsection => ({
       ...note,
       source,
       status: "validated",
@@ -90,3 +130,5 @@ export default [
     ...section,
   };
 });
+
+export default sections;

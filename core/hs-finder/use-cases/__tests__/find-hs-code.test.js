@@ -2,10 +2,15 @@ import { createFindHsCodeUseCase } from "../find-hs-code";
 
 const itemDescription = { text: "laptop portabel", source: "text" };
 
-test("fails closed before classification when legal knowledge is incomplete", async () => {
+test("proceeds to classification even when legal knowledge is incomplete (best-effort mode)", async () => {
+  const classification = {
+    status: "recommendations",
+    recommendations: [{ hsCode: "847130", description: "Laptop", confidence: "medium", rationale: "best effort", quotedRule: null }],
+    coverageMap: { chapters: { "84": "draft" }, hasUnvalidated: true },
+  };
   const hsFinderGeminiService = {
     identifyCandidateChapters: jest.fn().mockResolvedValue({ ok: true, data: ["84"] }),
-    classifyWithNotes: jest.fn(),
+    classifyWithNotes: jest.fn().mockResolvedValue({ ok: true, data: classification }),
   };
   const classificationKnowledge = {
     loadHs6Context: jest.fn().mockResolvedValue({
@@ -19,9 +24,9 @@ test("fails closed before classification when legal knowledge is incomplete", as
   const useCase = createFindHsCodeUseCase({ hsFinderGeminiService, classificationKnowledge });
   const result = await useCase.execute({ itemDescription });
 
-  expect(result.ok).toBe(false);
-  expect(result.errorCode).toBe("INSUFFICIENT_LEGAL_COVERAGE");
-  expect(hsFinderGeminiService.classifyWithNotes).not.toHaveBeenCalled();
+  // Best-effort: tetap lanjut klasifikasi, classifyWithNotes dipanggil
+  expect(result.ok).toBe(true);
+  expect(hsFinderGeminiService.classifyWithNotes).toHaveBeenCalled();
 });
 
 test("returns explicit HS6 and BTKI8 boundaries for complete knowledge", async () => {

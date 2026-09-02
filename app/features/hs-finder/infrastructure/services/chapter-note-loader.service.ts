@@ -13,6 +13,15 @@ import "server-only";
 import fs from "fs/promises";
 import path from "path";
 import { makeCoverageMap } from "@core/hs-finder/domain/hs-finder";
+import type { ChapterNote, CoverageMap } from "@core/hs-finder/domain/hs-finder";
+import type {
+  ChapterNoteLoader,
+  LoadChaptersResult,
+} from "@core/hs-finder/ports/chapter-note-loader";
+
+type ChapterFileResult =
+  | { ok: true; data: ChapterNote }
+  | { ok: false; error: string };
 
 // ─────────────────────────────────────────────
 // Constants
@@ -40,7 +49,7 @@ const DRAFT_MARKER_PATTERN = /<!--\s*DRAFT\b/i;
  *
  * @type {Map<string, { ok: true, data: import('@core/hs-finder/domain/hs-finder').ChapterNote } | { ok: false, error: string }>}
  */
-const _cache = new Map();
+const _cache = new Map<string, ChapterFileResult>();
 
 // ─────────────────────────────────────────────
 // readChapterFile (helper)
@@ -65,19 +74,21 @@ const _cache = new Map();
  * await readChapterFile("99")
  * // => { ok: false, error: "File tidak ditemukan: chapter-99.md" }
  */
-export async function readChapterFile(chapterNumber) {
-  if (_cache.has(chapterNumber)) {
-    return _cache.get(chapterNumber);
-  }
+export async function readChapterFile(chapterNumber: string): Promise<ChapterFileResult> {
+  const cached = _cache.get(chapterNumber);
+  if (cached) return cached;
 
   const filename = `chapter-${chapterNumber}.md`;
   const filepath = path.join(CHAPTERS_DIR, filename);
 
-  let content;
+  let content: string;
   try {
     content = await fs.readFile(filepath, "utf-8");
-  } catch (err) {
-    const result = { ok: false, error: `File tidak ditemukan: ${filename}` };
+  } catch {
+    const result: ChapterFileResult = {
+      ok: false,
+      error: `File tidak ditemukan: ${filename}`,
+    };
     _cache.set(chapterNumber, result);
     return result;
   }
@@ -85,15 +96,14 @@ export async function readChapterFile(chapterNumber) {
   const headingMatch = content.match(HEADING_PATTERN);
   const title = headingMatch ? headingMatch[1].trim() : `Bab ${chapterNumber}`;
 
-  /** @type {import('@core/hs-finder/domain/hs-finder').ChapterNote} */
-  const note = {
+  const note: ChapterNote = {
     chapterNumber,
     title,
     content,
     status: DRAFT_MARKER_PATTERN.test(content) ? "draft" : "validated",
   };
 
-  const result = { ok: true, data: note };
+  const result: ChapterFileResult = { ok: true, data: note };
   _cache.set(chapterNumber, result);
   return result;
 }
@@ -123,13 +133,15 @@ export async function readChapterFile(chapterNumber) {
  * await service.loadChapters([])
  * // => { notes: [], coverageMap: { chapters: {}, hasUnvalidated: false } }
  */
-async function loadChapters(chapterNumbers) {
+async function loadChapters(
+  chapterNumbers: readonly string[],
+): Promise<LoadChaptersResult> {
   const results = await Promise.all(
-    chapterNumbers.map((num) => readChapterFile(num))
+    chapterNumbers.map((num: string) => readChapterFile(num))
   );
 
-  const notes = [];
-  const loadedChapterNumbers = [];
+  const notes: ChapterNote[] = [];
+  const loadedChapterNumbers: string[] = [];
 
   for (let i = 0; i < chapterNumbers.length; i++) {
     const result = results[i];
@@ -176,8 +188,8 @@ async function loadChapters(chapterNumbers) {
  * await service.listAvailableChapters()
  * // => []
  */
-async function listAvailableChapters() {
-  let filenames;
+async function listAvailableChapters(): Promise<string[]> {
+  let filenames: string[];
   try {
     filenames = await fs.readdir(CHAPTERS_DIR);
   } catch {
@@ -185,12 +197,11 @@ async function listAvailableChapters() {
   }
 
   const chapterNumbers = filenames
-    .map((name) => {
+    .map((name: string) => {
       const match = name.match(CHAPTER_FILE_PATTERN);
       return match ? match[1] : null;
     })
-    .filter(Boolean);
-
+    .filter((chapter): chapter is string => chapter !== null);
   chapterNumbers.sort();
 
   return chapterNumbers;
@@ -218,6 +229,6 @@ async function listAvailableChapters() {
  * // notes.length === 1 (only "84" exists)
  * // coverageMap.chapters["99"] === "unvalidated"
  */
-export function createChapterNoteLoaderService() {
+export function createChapterNoteLoaderService(): ChapterNoteLoader {
   return { loadChapters, listAvailableChapters };
 }

@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import HsFinderPage from "@/app/features/hs-finder/presentation/components/HsFinderPage";
 
 export default function Page() {
-  redirect("/cek-lartas");
+  return <HsFinderPage />;
 }

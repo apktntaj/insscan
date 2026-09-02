@@ -12,12 +12,50 @@
  */
 
 import { makeItemDescription } from "@core/hs-finder/domain/hs-finder";
+import type { ItemDescription, ItemSource } from "@core/hs-finder/domain/hs-finder";
+import type { ClarificationAnswer } from "@core/hs-finder/use-cases/find-hs-code";
+
+type ErrorResponse = {
+  ok: false;
+  errorCode: string;
+  errorMessage: string;
+};
+type FindRequestBody = {
+  text?: string;
+  source?: ItemSource;
+  clarificationAnswers?: readonly ClarificationAnswer[];
+};
+type FindHsCodeUseCase = {
+  execute(input: {
+    itemDescription: ItemDescription;
+    clarificationAnswers: ClarificationAnswer[];
+  }): Promise<{
+    ok: boolean;
+    data?: unknown;
+    errorCode?: string;
+    errorMessage?: string;
+  }>;
+};
+type PhotoIdentificationService = {
+  identifyFromPhoto(
+    imageBase64: string,
+    mimeType: string,
+  ): Promise<{ ok: true; data: string } | { ok: false; error?: string }>;
+};
+type PhotoRequestBody = {
+  imageBase64?: string;
+  mimeType?: string;
+};
+type HsFinderControllerDependencies = {
+  findHsCodeUseCase: FindHsCodeUseCase;
+  hsFinderGeminiService: PhotoIdentificationService;
+};
+
 
 // ─────────────────────────────────────────────
 // Constants — photo validation
 // ─────────────────────────────────────────────
 
-/** Supported MIME types for photo upload (Req 2.1) */
 const SUPPORTED_PHOTO_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 /**
@@ -33,7 +71,7 @@ const MAX_PHOTO_BASE64_LENGTH = Math.ceil(5 * 1024 * 1024 * (4 / 3));
 // Error Registry (user-facing messages)
 // ─────────────────────────────────────────────
 
-const ERROR_MESSAGES = {
+const ERROR_MESSAGES: Record<string, string> = {
   INPUT_TOO_SHORT: "Deskripsi barang terlalu singkat.",
   INPUT_TOO_LONG: "Deskripsi terlalu panjang (maksimum 2.000 karakter).",
   PHOTO_TOO_LARGE: "Foto terlalu besar (maksimum 5MB).",
@@ -65,7 +103,7 @@ const ERROR_MESSAGES = {
  * getErrorMessage("UNKNOWN_CODE")
  * // => "Ada masalah dengan sistem AI. Hubungi administrator."
  */
-function getErrorMessage(errorCode) {
+function getErrorMessage(errorCode: string): string {
   return ERROR_MESSAGES[errorCode] ?? ERROR_MESSAGES.GEMINI_UNAVAILABLE;
 }
 
@@ -79,7 +117,7 @@ function getErrorMessage(errorCode) {
  * makeErrorResponse("PHOTO_TOO_LARGE")
  * // => { ok: false, errorCode: "PHOTO_TOO_LARGE", errorMessage: "Foto terlalu besar (maksimum 5MB)." }
  */
-function makeErrorResponse(errorCode) {
+function makeErrorResponse(errorCode: string): ErrorResponse {
   return { ok: false, errorCode, errorMessage: getErrorMessage(errorCode) };
 }
 
@@ -107,7 +145,10 @@ function makeErrorResponse(errorCode) {
  * const res = await controller.handleIdentifyPhoto({ imageBase64: "...", mimeType: "image/jpeg" });
  * // => { ok: true, data: { itemDescription: "Laptop 14 inci dengan casing aluminium..." } }
  */
-export function createHsFinderController({ findHsCodeUseCase, hsFinderGeminiService }) {
+export function createHsFinderController({
+  findHsCodeUseCase,
+  hsFinderGeminiService,
+}: HsFinderControllerDependencies) {
   // ─────────────────────────────────────────────
   // handleFindHsCode
   // ─────────────────────────────────────────────
@@ -130,7 +171,9 @@ export function createHsFinderController({ findHsCodeUseCase, hsFinderGeminiServ
    * await controller.handleFindHsCode({ text: "ok", source: "text" })
    * // => { ok: false, errorCode: "INPUT_TOO_SHORT", errorMessage: "Deskripsi barang terlalu singkat." }
    */
-  async function handleFindHsCode(requestBody) {
+  async function handleFindHsCode(
+    requestBody: FindRequestBody | null | undefined,
+  ): Promise<{ ok: true; data: unknown } | ErrorResponse> {
     const { text, source } = requestBody ?? {};
 
     // Guard: text must be a string
@@ -139,20 +182,20 @@ export function createHsFinderController({ findHsCodeUseCase, hsFinderGeminiServ
     }
 
     // Guard: source must be valid
-    const validSources = new Set(["text", "photo"]);
-    const normalizedSource = validSources.has(source) ? source : "text";
+    const validSources = new Set<ItemSource>(["text", "photo"]);
+    const normalizedSource: ItemSource = validSources.has(source ?? "text")
+      ? source ?? "text"
+      : "text";
 
     // Validate + normalise via entity factory (Req 1.2 – 1.5)
     const itemDescResult = makeItemDescription(text, normalizedSource);
-
-    if (!itemDescResult.ok) {
+    if (!itemDescResult.ok || !itemDescResult.data) {
       // Map entity error message to the nearest error code
-      const errorCode = itemDescResult.error.includes("terlalu singkat")
+      const errorCode = itemDescResult.error?.includes("terlalu singkat")
         ? "INPUT_TOO_SHORT"
         : "INPUT_TOO_LONG";
       return makeErrorResponse(errorCode);
     }
-
     const itemDescription = itemDescResult.data;
 
     const clarificationAnswers = Array.isArray(requestBody?.clarificationAnswers)
@@ -172,10 +215,11 @@ export function createHsFinderController({ findHsCodeUseCase, hsFinderGeminiServ
 
     if (!useCaseResult.ok) {
       // Use case already provides errorCode and errorMessage
+      const errorCode = useCaseResult.errorCode ?? "GEMINI_UNAVAILABLE";
       return {
         ok: false,
-        errorCode: useCaseResult.errorCode,
-        errorMessage: useCaseResult.errorMessage ?? getErrorMessage(useCaseResult.errorCode),
+        errorCode,
+        errorMessage: useCaseResult.errorMessage ?? getErrorMessage(errorCode),
       };
     }
 
@@ -205,7 +249,9 @@ export function createHsFinderController({ findHsCodeUseCase, hsFinderGeminiServ
    * await controller.handleIdentifyPhoto({ imageBase64: "<base64>", mimeType: "image/gif" })
    * // => { ok: false, errorCode: "PHOTO_UNSUPPORTED_FORMAT", errorMessage: "Format foto tidak didukung. Gunakan JPEG, PNG, atau WEBP." }
    */
-  async function handleIdentifyPhoto(requestBody) {
+  async function handleIdentifyPhoto(
+    requestBody: PhotoRequestBody | null | undefined,
+  ): Promise<{ ok: true; data: { itemDescription: string } } | ErrorResponse> {
     const { imageBase64, mimeType } = requestBody ?? {};
 
     // Guard: fields must be strings

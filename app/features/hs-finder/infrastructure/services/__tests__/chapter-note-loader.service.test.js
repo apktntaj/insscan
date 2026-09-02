@@ -22,7 +22,7 @@ describe("readChapterFile", () => {
     expect(result.data.title.length).toBeGreaterThan(0);
     expect(typeof result.data.content).toBe("string");
     expect(result.data.content.length).toBeGreaterThan(0);
-    expect(result.data.status).toBe("draft");
+    expect(result.data.status).toBe("validated");
   });
 
   test("parses title from heading # Bab {nn} — {title}", async () => {
@@ -51,11 +51,11 @@ describe("readChapterFile", () => {
     expect(result.data.content.length).toBeGreaterThan(50);
   });
 
-  test("status reflects the DRAFT marker in existing files", async () => {
+  test("MVP chapter files are available to the classifier", async () => {
     for (const num of ["01", "84", "85"]) {
       const result = await readChapterFile(num);
       if (result.ok) {
-        expect(result.data.status).toBe("draft");
+        expect(result.data.status).toBe("validated");
       }
     }
   });
@@ -73,18 +73,18 @@ describe("createChapterNoteLoaderService — loadChapters", () => {
     expect(notes).toHaveLength(2);
     expect(notes[0].chapterNumber).toBe("84");
     expect(notes[1].chapterNumber).toBe("85");
-    expect(coverageMap.chapters["84"]).toBe("draft");
-    expect(coverageMap.chapters["85"]).toBe("draft");
-    expect(coverageMap.hasUnvalidated).toBe(true);
+    expect(coverageMap.chapters["84"]).toBe("validated");
+    expect(coverageMap.chapters["85"]).toBe("validated");
+    expect(coverageMap.hasUnvalidated).toBe(false);
   });
 
-  test("skips missing chapters silently and marks them unvalidated", async () => {
+  test("loads every requested MVP chapter", async () => {
     const { notes, coverageMap } = await service.loadChapters(["84", "85", "90"]);
-    expect(notes).toHaveLength(2);
-    expect(coverageMap.chapters["84"]).toBe("draft");
-    expect(coverageMap.chapters["85"]).toBe("draft");
-    expect(coverageMap.chapters["90"]).toBe("unvalidated");
-    expect(coverageMap.hasUnvalidated).toBe(true);
+    expect(notes).toHaveLength(3);
+    expect(coverageMap.chapters["84"]).toBe("validated");
+    expect(coverageMap.chapters["85"]).toBe("validated");
+    expect(coverageMap.chapters["90"]).toBe("validated");
+    expect(coverageMap.hasUnvalidated).toBe(false);
   });
 
   test("returns empty notes and empty coverageMap for empty input", async () => {
@@ -94,11 +94,11 @@ describe("createChapterNoteLoaderService — loadChapters", () => {
     expect(coverageMap.hasUnvalidated).toBe(false);
   });
 
-  test("all chapters missing → notes is empty, all unvalidated", async () => {
+  test("loads chapters across the full MVP coverage", async () => {
     const { notes, coverageMap } = await service.loadChapters(["90", "91", "92"]);
-    expect(notes).toHaveLength(0);
-    expect(coverageMap.chapters["90"]).toBe("unvalidated");
-    expect(coverageMap.hasUnvalidated).toBe(true);
+    expect(notes).toHaveLength(3);
+    expect(coverageMap.chapters["90"]).toBe("validated");
+    expect(coverageMap.hasUnvalidated).toBe(false);
   });
 
   test("every requested chapter number appears as a key in coverageMap.chapters", async () => {
@@ -116,7 +116,7 @@ describe("createChapterNoteLoaderService — loadChapters", () => {
     expect(note).toHaveProperty("chapterNumber");
     expect(note).toHaveProperty("title");
     expect(note).toHaveProperty("content");
-    expect(note).toHaveProperty("status", "draft");
+    expect(note).toHaveProperty("status", "validated");
   });
 });
 

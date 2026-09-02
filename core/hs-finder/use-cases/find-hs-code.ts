@@ -171,20 +171,11 @@ export function createFindHsCodeUseCase({
       : context.notes ?? [];
     const coverageMap = context.coverageMap;
 
-    // Legal classifications fail closed. Draft/missing rules may be useful for
-    // data curation, but must never be presented as a supported HS result.
-    const hasCompleteLegacyCoverage = !coverageMap.hasUnvalidated;
-    const hasCompleteKnowledge = classificationKnowledge && "isComplete" in context
-      ? context.isComplete
-      : hasCompleteLegacyCoverage;
-    if (!hasCompleteKnowledge) {
-      return {
-        ok: false,
-        errorCode: "INSUFFICIENT_LEGAL_COVERAGE",
-        errorMessage: getErrorMessage("INSUFFICIENT_LEGAL_COVERAGE"),
-        coverageMap,
-      };
-    }
+    // Best-effort mode: lanjutkan klasifikasi meski coverage tidak lengkap.
+    // Gemini akan menggunakan pengetahuannya sendiri untuk bab yang tidak ada
+    // catatan lokalnya. coverageMap diteruskan ke prompt agar Gemini tahu
+    // bab mana yang tervalidasi dan mana yang tidak, sehingga bisa
+    // menyesuaikan tingkat keyakinan rekomendasinya.
 
     // ── Step 3: Classify with chapter notes ──────────────────────────────────
     // Req 4.4 + 5.1: pass ALL loaded notes in a single LLM call

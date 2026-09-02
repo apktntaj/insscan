@@ -6,6 +6,35 @@
  * ready for rendering in the UI.
  */
 
+import type {
+  ClassificationResult,
+  CoverageMap,
+  CoverageStatus,
+} from "@core/hs-finder/domain/hs-finder";
+
+export interface ReasoningStepViewModel {
+  stepNumber: number;
+  title: string;
+  content: string;
+  quotedRule: string | null;
+  chapterRef: string | null;
+  coverageLabel: string | null;
+  coverage: CoverageStatus | null;
+}
+
+export interface CoverageMapViewModel {
+  chapters: Record<string, CoverageStatus>;
+  hasUnvalidated: boolean;
+}
+
+export interface ClassificationResultViewModel {
+  hsCode: string;
+  hsCodeFormatted: string;
+  description: string;
+  reasoningPath: readonly ReasoningStepViewModel[];
+  coverageMap: CoverageMapViewModel;
+  hasUnvalidated: boolean;
+}
 // ─────────────────────────────────────────────
 // @typedef definitions
 // ─────────────────────────────────────────────
@@ -55,7 +84,7 @@
  * formatHsCode("010121")
  * // => "0101.21"
  */
-function formatHsCode(hsCode) {
+function formatHsCode(hsCode: string): string {
   return `${hsCode.slice(0, 4)}.${hsCode.slice(4, 6)}`;
 }
 
@@ -78,7 +107,7 @@ function formatHsCode(hsCode) {
  * toCoverageLabel(null)
  * // => null
  */
-function toCoverageLabel(coverage) {
+function toCoverageLabel(coverage: CoverageStatus | null): string | null {
   if (coverage === "validated") return "Tervalidasi";
   if (coverage === "unvalidated") return "Belum Tervalidasi";
   return null;
@@ -126,8 +155,10 @@ function toCoverageLabel(coverage) {
  * })
  * // => { hsCode: "550920", hsCodeFormatted: "5509.20", ..., hasUnvalidated: true }
  */
-export function presentClassificationResult(result) {
-  const reasoningPath = result.reasoningPath.map((step) => ({
+export function presentClassificationResult(
+  result: ClassificationResult,
+): ClassificationResultViewModel {
+  const reasoningPath: ReasoningStepViewModel[] = result.reasoningPath.map((step) => ({
     stepNumber: step.stepNumber,
     title: step.title,
     content: step.content,
@@ -145,7 +176,7 @@ export function presentClassificationResult(result) {
     coverageMap: {
       chapters: { ...result.coverageMap.chapters },
       hasUnvalidated: result.coverageMap.hasUnvalidated,
-    },
+    } satisfies CoverageMapViewModel,
     hasUnvalidated: result.coverageMap.hasUnvalidated,
   };
 }

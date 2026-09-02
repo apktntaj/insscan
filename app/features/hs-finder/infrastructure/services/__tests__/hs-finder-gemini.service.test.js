@@ -129,7 +129,7 @@ describe("buildClassificationPrompt", () => {
     const prompt = buildClassificationPrompt("laptop", [], VALID_COVERAGE_MAP);
     expect(prompt).toContain("bab berbeda (2 digit) atau heading berbeda (4 digit)");
     expect(prompt).toContain("Maksimum 2 pertanyaan");
-    expect(prompt).toContain("langsung tampilkan rekomendasi");
+    expect(prompt).toContain("Jangan bertanya jika ketidakpastian hanya memengaruhi subheading");
   });
 
   test("includes chapter note content when notes are provided", () => {
@@ -145,14 +145,18 @@ describe("buildClassificationPrompt", () => {
 
   test("includes BELUM TERVALIDASI label for unvalidated chapter notes", () => {
     const unvalidatedNote = { ...VALID_CHAPTER_NOTE, status: "unvalidated" };
-    const prompt = buildClassificationPrompt("laptop", [unvalidatedNote], VALID_COVERAGE_MAP);
-    expect(prompt).toContain("BELUM TERVALIDASI");
+    // Unvalidated notes tidak dimasukkan ke notesSection (hanya validated yang masuk)
+    // tapi coverageMap menyebutkan bab yang tidak tersedia
+    const unvalidatedCoverage = { chapters: { "84": "unvalidated" }, hasUnvalidated: true };
+    const prompt = buildClassificationPrompt("laptop", [unvalidatedNote], unvalidatedCoverage);
+    // Prompt harus menyebutkan bab yang tidak punya catatan lokal
+    expect(prompt).toContain("tidak tersedia di knowledge base lokal");
   });
 
   test("includes fallback message when no chapter notes are provided", () => {
     const prompt = buildClassificationPrompt("laptop", [], VALID_COVERAGE_MAP);
-    expect(prompt).toContain("Tidak ada catatan bab tervalidasi");
-    expect(prompt).toContain("Jangan menghasilkan klasifikasi");
+    expect(prompt).toContain("Tidak ada catatan bab lokal");
+    expect(prompt).toContain("Gunakan pengetahuan HS kamu");
   });
 
   test("embeds the coverageMap as JSON in the output format section", () => {

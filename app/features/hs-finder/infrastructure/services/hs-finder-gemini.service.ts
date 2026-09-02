@@ -15,6 +15,23 @@ import {
   makeClassificationDecision,
   makeClassificationResult,
 } from "@core/hs-finder/domain/hs-finder";
+import type { ProductFactsInput, ProductFactsGateway } from "@core/hs-finder/use-cases/analyze-product-facts";
+import type {
+  ClarificationAnswer,
+  HsFinderGeminiService,
+} from "@core/hs-finder/use-cases/find-hs-code";
+import type { ChapterNote, CoverageMap } from "@core/hs-finder/domain/hs-finder";
+
+type ServiceResult<T> = { ok: true; data: T } | { ok: false; error: string };
+type ProductFactsService = Pick<ProductFactsGateway, "extractProductFacts">;
+type GeminiService = HsFinderGeminiService & ProductFactsService & {
+  identifyFromPhoto(imageBase64: string, mimeType: string): Promise<ServiceResult<string>>;
+};
+type ProductFactsPromptInput = ProductFactsInput;
+type ClassificationOptions = {
+  clarificationAnswers?: readonly ClarificationAnswer[];
+};
+type UnknownRecord = Record<string, unknown>;
 
 // ─────────────────────────────────────────────
 // Constants
@@ -34,13 +51,13 @@ const MIN_PHOTO_DESCRIPTION_LENGTH = 5;
  * Gemini 2.5 may need longer for the final classification prompt because it
  * includes chapter notes and a structured reasoning response.
  */
-async function withTimeout(promise, timeoutMs) {
-  let timeoutId;
+async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+  let timeoutId: NodeJS.Timeout | undefined;
 
   try {
     return await Promise.race([
       promise,
-      new Promise((_, reject) => {
+      new Promise<T>((_, reject) => {
         timeoutId = setTimeout(() => reject(new Error("TIMEOUT")), timeoutMs);
       }),
     ]);
@@ -79,7 +96,11 @@ Tulis deskripsi dalam 2–4 kalimat saja. Jangan gunakan format JSON atau bullet
 Jika kamu tidak dapat mengidentifikasi barang dari foto ini, jawab tepat dengan kata: TIDAK_DAPAT_DIIDENTIFIKASI`;
 }
 
-export function buildProductFactsPrompt({ description, previousFacts = null, answers = [] }) {
+export function buildProductFactsPrompt({
+  description,
+  previousFacts = null,
+  answers = [],
+}: ProductFactsPromptInput): string {
   const priorContext = previousFacts
     ? `\nFAKTA DARI PUTARAN SEBELUMNYA:\n${JSON.stringify(previousFacts)}\n`
     : "";
@@ -140,17 +161,28 @@ FORMAT JSON:
  * // => "Kamu adalah ahli klasifikasi HS code..." (includes unvalidated disclaimer)
  */
 export function buildClassificationPrompt(
-  itemDescription,
-  chapterNotes,
-  coverageMap,
-  { clarificationAnswers = [] } = {}
-) {
-  const notesSection = chapterNotes.length > 0
-    ? chapterNotes.map((note) => {
-        const statusLabel = note.status === "validated" ? "TERVALIDASI" : "BELUM TERVALIDASI";
-        return `--- BAB ${note.chapterNumber} [${statusLabel}] ---\n${note.content}\n`;
-      }).join("\n")
-    : "(Tidak ada catatan bab tervalidasi. Jangan menghasilkan klasifikasi.)";
+  itemDescription: string,
+  chapterNotes: readonly ChapterNote[],
+  coverageMap: CoverageMap,
+  { clarificationAnswers = [] }: ClassificationOptions = {},
+): string {
+  // Pisahkan catatan yang tervalidasi dari yang tidak
+  const validatedNotes = chapterNotes.filter((n: ChapterNote) => n.status === "validated");
+  const unvalidatedChapters = Object.entries(coverageMap.chapters)
+    .filter(([, status]) => status === "unvalidated")
+    .map(([ch]) => ch);
+
+  const notesSection = validatedNotes.length > 0
+    ? validatedNotes
+        .map((note: ChapterNote) => `--- BAB ${note.chapterNumber} [TERVALIDASI] ---\n${note.content}\n`)
+        .join("\n")
+    : "(Tidak ada catatan bab lokal. Gunakan pengetahuan HS kamu.)";
+
+  const unvalidatedNote = unvalidatedChapters.length > 0
+    ? `\nCATATAN: Bab ${unvalidatedChapters.join(", ")} tidak tersedia di knowledge base lokal. ` +
+      `Gunakan pengetahuan HS kamu untuk bab ini, dan tandai rekomendasi yang bersandar pada bab tersebut dengan confidence "medium" atau "low".\n`
+    : "";
+
   const answersSection = clarificationAnswers.length
     ? `\nJAWABAN KLARIFIKASI PENGGUNA:\n${JSON.stringify(clarificationAnswers)}\n`
     : "";
@@ -158,20 +190,37 @@ export function buildClassificationPrompt(
     ? "Pengguna sudah menjawab klarifikasi. Jangan ajukan pertanyaan lagi; berikan rekomendasi terbaik dari informasi yang tersedia."
     : "Jika perbedaannya tidak material menurut kriteria di atas, jangan bertanya dan langsung berikan rekomendasi.";
 
-  return `Kamu adalah ahli klasifikasi HS code. Nilai barang berdasarkan HANYA deskripsi dan catatan hukum yang tersedia.
+  return `Kamu adalah ahli klasifikasi HS code berdasarkan BTKI (Buku Tarif Kepabeanan Indonesia).
 
-BARANG:
+## METODOLOGI KLASIFIKASI (KUMHS)
+
+Terapkan urutan berikut secara ketat:
+1. Identifikasi barang secara faktual: bahan, komposisi, fungsi, bentuk, cara kerja, kondisi, penggunaan.
+2. Terapkan KUMHS — aturan interpretasi yang memandu penentuan pos dan subpos.
+3. Periksa Catatan Bagian (Section Notes) yang relevan — berlaku lintas-Bab dalam satu Bagian.
+4. Periksa Catatan Bab (Chapter Notes) yang relevan — definisi, inklusi, pengecualian.
+5. Baca uraian heading/pos kandidat dan bandingkan dengan fakta barang, bukan kata kunci.
+6. Periksa Catatan Subpos (Subheading Notes) sebelum memilih subpos.
+7. Tentukan subheading HS6.
+
+Penting:
+- Klasifikasi tidak boleh hanya berdasarkan nama dagang atau label pemasaran.
+- Catatan Bagian dan Catatan Bab bersifat legal — pengecualian di sana mengalahkan kecocokan nama.
+- Jika barang tampak cocok dengan heading tapi dikecualikan oleh Catatan Bab, heading itu harus dikeluarkan dari kandidat.
+- Catatan Subpos menentukan pilihan antara dua subpos berdasarkan kriteria teknis, bukan asumsi.
+
+## BARANG
 ${itemDescription}
-${answersSection}
-CATATAN BAB:
+${answersSection}${unvalidatedNote}
+## CATATAN BAB LOKAL
 ${notesSection}
 
-ATURAN KEPUTUSAN:
-1. Utamakan memberikan 2–3 rekomendasi HS6 yang paling mungkin, diurutkan dari yang terkuat. Berikan satu saja bila hanya satu kode yang dapat dipertanggungjawabkan.
-2. Ajukan klarifikasi HANYA jika informasi yang hilang dapat memindahkan hasil secara material ke bab berbeda (2 digit) atau heading berbeda (4 digit), terutama karena catatan bagian/bab, pengecualian, status bagian/aksesori, komposisi, tingkat pengolahan, atau fungsi utama.
-3. Jangan bertanya bila ketidakpastian hanya memengaruhi peringkat kandidat yang berdekatan atau subheading dalam heading yang sama. Dalam kondisi itu langsung tampilkan rekomendasi.
-4. Maksimum 2 pertanyaan, singkat, dan setiap pertanyaan harus membedakan cabang klasifikasi yang berjauhan.
-5. Setiap rekomendasi harus didukung alasan dan kutipan nyata dari catatan yang diberikan. Jangan mengarang aturan.
+## ATURAN KEPUTUSAN
+1. Berikan 2–3 rekomendasi HS6 diurutkan dari yang terkuat. Satu saja jika hanya satu yang dapat dipertanggungjawabkan.
+2. Ajukan klarifikasi HANYA jika informasi yang hilang dapat memindahkan hasil secara material ke bab berbeda (2 digit) atau heading berbeda (4 digit) — karena pengecualian catatan bagian/bab, status bagian/aksesori, komposisi, tingkat pengolahan, atau fungsi utama.
+3. Jangan bertanya jika ketidakpastian hanya memengaruhi subheading dalam heading yang sama.
+4. Maksimum 2 pertanyaan, singkat, masing-masing membedakan cabang klasifikasi yang berbeda.
+5. quotedRule harus kutipan nyata dari catatan yang tersedia atau pengetahuan HS yang dapat diverifikasi. Jangan mengarang aturan.
 6. ${clarificationRule}
 
 Jika klarifikasi benar-benar diperlukan, keluarkan:
@@ -193,8 +242,8 @@ Jika klarifikasi tidak diperlukan, keluarkan:
       "hsCode": "6 digit angka tanpa titik",
       "description": "deskripsi subheading dalam Bahasa Indonesia",
       "confidence": "high|medium|low",
-      "rationale": "alasan ringkas pemilihan",
-      "quotedRule": "kutipan nyata dari catatan bab",
+      "rationale": "alasan ringkas berdasarkan KUMHS dan catatan yang berlaku",
+      "quotedRule": "kutipan nyata dari catatan bab atau aturan HS yang relevan",
       "chapterRef": "nomor bab 2 digit"
     }
   ],
@@ -222,7 +271,7 @@ Output hanya JSON murni tanpa markdown.`;
  * stripCodeFences("[\"84\"]")
  * // => "[\"84\"]"
  */
-function stripCodeFences(text) {
+function stripCodeFences(text: string): string {
   return text
     .replace(/^```(?:json)?\s*/i, "")
     .replace(/\s*```\s*$/i, "")
@@ -245,7 +294,7 @@ function stripCodeFences(text) {
  * parseChapterListResponse('["01","02","03","04","05","06","07"]')
  * // => { ok: true, data: ["01","02","03","04","05"] }
  */
-export function parseChapterListResponse(responseText) {
+export function parseChapterListResponse(responseText: string): ServiceResult<string[]> {
   try {
     const cleaned = stripCodeFences(responseText);
     const parsed = JSON.parse(cleaned);
@@ -279,7 +328,9 @@ export function parseChapterListResponse(responseText) {
  * parseClassificationResponse("tidak valid json")
  * // => { ok: false, error: "GEMINI_INVALID_RESPONSE" }
  */
-export function parseClassificationResponse(responseText) {
+export function parseClassificationResponse(
+  responseText: string,
+): ServiceResult<UnknownRecord> {
   try {
     const cleaned = stripCodeFences(responseText);
     const raw = JSON.parse(cleaned);
@@ -289,13 +340,13 @@ export function parseClassificationResponse(responseText) {
     if (!result.ok) {
       return { ok: false, error: "GEMINI_INVALID_RESPONSE" };
     }
-    return result;
+    return { ok: true, data: raw };
   } catch {
     return { ok: false, error: "GEMINI_INVALID_RESPONSE" };
   }
 }
 
-export function parseProductFactsResponse(responseText) {
+export function parseProductFactsResponse(responseText: string): ServiceResult<UnknownRecord> {
   try {
     const parsed = JSON.parse(stripCodeFences(responseText));
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
@@ -328,7 +379,7 @@ export function parseProductFactsResponse(responseText) {
  * const service = createHsFinderGeminiService("invalid-key");
  * // service methods still exist but will return GEMINI_UNAVAILABLE errors at call time
  */
-export function createHsFinderGeminiService(geminiApiKey) {
+export function createHsFinderGeminiService(geminiApiKey: string | undefined): GeminiService {
   if (!geminiApiKey || typeof geminiApiKey !== "string" || geminiApiKey.length <= 10) {
     return {
       identifyFromPhoto: async () => ({ ok: false, error: "GEMINI_UNAVAILABLE" }),
@@ -341,7 +392,9 @@ export function createHsFinderGeminiService(geminiApiKey) {
   const genAI = new GoogleGenerativeAI(geminiApiKey);
   const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
 
-  async function extractProductFacts(input) {
+  async function extractProductFacts(
+    input: ProductFactsInput,
+  ): Promise<ServiceResult<UnknownRecord>> {
     const prompt = buildProductFactsPrompt(input);
     try {
       const result = await withTimeout(
@@ -375,7 +428,10 @@ export function createHsFinderGeminiService(geminiApiKey) {
    * await service.identifyFromPhoto(blurryBase64, "image/jpeg")
    * // => { ok: false, error: "PHOTO_UNIDENTIFIABLE" }
    */
-  async function identifyFromPhoto(imageBase64, mimeType) {
+  async function identifyFromPhoto(
+    imageBase64: string,
+    mimeType: string,
+  ): Promise<ServiceResult<string>> {
     const prompt = buildPhotoIdentificationPrompt();
 
     try {
@@ -423,7 +479,9 @@ export function createHsFinderGeminiService(geminiApiKey) {
    * await service.identifyCandidateChapters("xyz???")
    * // => { ok: false, error: "NO_CANDIDATE_CHAPTERS" }
    */
-  async function identifyCandidateChapters(itemDescription) {
+  async function identifyCandidateChapters(
+    itemDescription: string,
+  ): Promise<ServiceResult<string[]>> {
     const prompt = `Kamu adalah ahli klasifikasi HS code. Berdasarkan deskripsi barang di bawah ini, identifikasi maksimum 5 nomor bab HS yang paling mungkin relevan.
 
 Sertakan semua bab yang masih masuk akal apabila informasi tentang fungsi utama, bahan, tingkat pengolahan, atau status bagian/aksesori dapat memindahkan klasifikasi ke bab yang berbeda. Jangan tambahkan bab yang hanya bersifat spekulatif.
@@ -484,7 +542,12 @@ Jangan sertakan penjelasan apapun — hanya array JSON.`;
    * await service.classifyWithNotes("kain poliester", [], { chapters: { "55": "unvalidated" }, hasUnvalidated: true })
    * // => { ok: true, data: { hsCode: "550920", ... } } or { ok: false, error: "GEMINI_INVALID_RESPONSE" }
    */
-  async function classifyWithNotes(itemDescription, chapterNotes, coverageMap, options = {}) {
+  async function classifyWithNotes(
+    itemDescription: string,
+    chapterNotes: readonly ChapterNote[],
+    coverageMap: CoverageMap,
+    options: ClassificationOptions = {},
+  ): Promise<ServiceResult<UnknownRecord>> {
     const prompt = buildClassificationPrompt(itemDescription, chapterNotes, coverageMap, options);
 
     try {
@@ -513,22 +576,23 @@ Jangan sertakan penjelasan apapun — hanya array JSON.`;
  * @param {Error} err
  * @returns {{ ok: false, error: string }}
  */
-function _mapError(err) {
+function _mapError(err: unknown): { ok: false; error: string } {
+  const error = err instanceof Error ? err : new Error(String(err));
+
   console.error("[hs-finder-gemini] Gemini request failed:", {
-    name: err?.name,
-    status: err?.status,
-    message: err?.message,
+    name: error.name,
+    message: error.message,
   });
-  if (err.message === "TIMEOUT" || err.name === "AbortError") {
+  if (error.message === "TIMEOUT" || error.name === "AbortError") {
     return { ok: false, error: "GEMINI_TIMEOUT" };
   }
   if (
-    err.message?.includes("API key") ||
-    err.message?.includes("401") ||
-    err.message?.includes("403") ||
-    err.message?.includes("unavailable") ||
-    err.message?.includes("Service Unavailable") ||
-    err.message?.includes("503")
+    error.message.includes("API key") ||
+    error.message.includes("401") ||
+    error.message.includes("403") ||
+    error.message.includes("unavailable") ||
+    error.message.includes("Service Unavailable") ||
+    error.message.includes("503")
   ) {
     return { ok: false, error: "GEMINI_UNAVAILABLE" };
   }
